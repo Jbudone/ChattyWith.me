@@ -1,0 +1,101 @@
+/* CSS Document */
+
+body {
+	background:#000 !important;	
+}
+
+section {
+	background:#000 !important;	
+	border-color: #111 !important;
+}
+
+a.chan {
+	color:#FFC;
+}
+
+.channelinfo {
+	background:#100 !important;	
+}
+
+.channislide {
+	background-color:#000 !important;	
+}
+
+.chanbutton {
+	background: #C00 !important;
+	/*color: #111 !important;	*/
+}
+
+.channelinfo .unread {
+	color:#FCC !important;	
+}
+
+.chanbutton.open {
+	background: #711 !important;
+	color:#FF0 !important;	
+}
+
+.topic {
+	background: #200 !important;
+	color: white !important;	
+	border-color: #333 !important;
+}
+
+.console {
+	background: #111 !important;	
+}
+
+span.message {
+	color:#FFF !important;	
+	text-shadow:1px 1px 3px red !important;
+}
+
+span.event {
+	color:#9FF !important;	
+}
+
+span.action {
+	color:#E00 !important;	
+}
+
+span.message.personal {
+	color:#F66 !important;	
+}
+
+span.action.personal {
+	color:#700 !important;
+}
+
+span.whisper {
+	color:#FBB !important;	
+}
+
+.console [name="loadOlder"] {
+	background-color:#300 !important;	
+	box-shadow: 0 0 5px 3px #322 !important;
+}
+
+
+
+.rightpanel {
+	background: black !important;	
+}
+
+.rightpanel .mentions {
+	border-color:#000 !important;	
+}
+
+.rightpanel .users {
+	background: #222 !important;
+	border-color:#333 !important;	
+}
+
+.rightpanel .users .user {
+	color:#F00 !important;	
+}
+
+.rightpanel .actions {
+	border-color:#333 !important;	
+	background:#000 !important;	
+	color:#F55 !important;
+}

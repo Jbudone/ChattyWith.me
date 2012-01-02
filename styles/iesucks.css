@@ -1,0 +1,87 @@
+/* CSS Document */
+
+body {
+	background-color:#361904;	
+	text-align:center;
+	margin-top:100px;
+	margin-bottom:50px;
+}
+
+.header {
+	font-family:Georgia, "Times New Roman", Times, serif;
+	font-size:150px;
+	color:#FFF;	
+	margin:0px auto;
+}
+
+.subheader {
+	font-family:"Courier New", Courier, monospace;
+	font-size:24px;
+	color:#999;	
+}
+
+
+.details1 {
+	font-family:"MS Serif", "New York", serif;
+	font-size:36px;
+	color:#AB0743;
+	margin:0px auto;
+	
+	width:750px;
+	word-wrap:break-word;
+	display:block;
+}	
+
+
+.details2 {
+	font-family:"Palatino Linotype", "Book Antiqua", Palatino, serif;
+	font-size:36px;
+	color:#CA0743;
+	margin:0px auto;
+	
+	width:700px;
+	word-wrap:break-word;
+	display:block;
+}	
+
+.arrows {
+	position:relative;
+	z-index:-1;
+	margin:0px auto;
+}
+
+
+
+div.list {
+	display:block;
+	margin:0px auto;	
+}
+
+ul {
+	display:inline-table;
+	list-style:none;
+	margin:0px auto 0px -100px;
+}
+
+li {
+	float:left;	
+	margin-left:50px;
+}
+
+li a {
+	text-decoration:none;
+	color:#CF9;	
+	font:Tahoma, Geneva, sans-serif;
+	font-size:24px;
+}
+
+li a:hover {
+	color:#CFC;	
+}
+
+li img {
+	margin-top:10px;
+	max-width:100px;
+	max-height:100px;	
+	border:none;
+}
