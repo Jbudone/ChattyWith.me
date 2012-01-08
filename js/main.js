@@ -108,11 +108,11 @@ var notify=false; // True if there are notifications appending and the user has 
 $(document).ready(function() {
 	
 	
-	
 	if( navigator.userAgent.match(/Android/i) ||
 		 navigator.userAgent.match(/webOS/i) ||
 		 navigator.userAgent.match(/iPhone/i) ||
-		 navigator.userAgent.match(/iPod/i)){
+		 navigator.userAgent.match(/iPod/i) ||
+		 window.location.pathname.match(/mobile/i)){
 		 // some code
 		 	if (window.location.pathname!='/mobile.php')
 				window.location='/mobile.php';
@@ -163,7 +163,7 @@ $(document).ready(function() {
 	// Initialize the Terminal-Server
 	//////////////////////////
 	Terminal.openWin(0,serverChanTitle,{},true);
-	Terminal.console=$('div.console span');
+	Terminal.console=(!mobileEnabled?$('div.console span'):$('.console'));
 	if (retrieval_mode==kRETRIEVAL_NOCOMET) {
 		Terminal.printMsg("Message Retrieval Mode: ^8No^15-^8Comet");
 		Terminal.update();
@@ -178,6 +178,42 @@ $(document).ready(function() {
 	////  Details
 	////////////////////////
 	Terminal.printMsg("Connected to ChattyWith.me (^2173.236.171.216^1)");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
+	Terminal.printMsg("Tap tap tap...");
 	
 	
 	
@@ -186,6 +222,7 @@ $(document).ready(function() {
 	// 		Check current Status (in case our Session is still set)
 	////////////////////////////
 	CommandStation._request('status', { }, function(data) {
+console.log("CALLBACK FOR MAIN.JS STATUS REQUEST");
 		if (data && data.nick) {
 			Terminal.userid=data.userid;
 			Terminal.usernick=data.nick;
@@ -225,37 +262,4 @@ $(document).ready(function() {
 		Terminal.printMsg("Mobile Mode ^5Enabled^1..");
 		mobileSetup();
 	}
-	
-
-	$(function() {
-		var availableTags = [
-			"ActionScript",
-			"AppleScript",
-			"Asp",
-			"BASIC",
-			"C",
-			"C++",
-			"Clojure",
-			"COBOL",
-			"ColdFusion",
-			"Erlang",
-			"Fortran",
-			"Groovy",
-			"Haskell",
-			"Java",
-			"JavaScript",
-			"Lisp",
-			"Perl",
-			"PHP",
-			"Python",
-			"Ruby",
-			"Scala",
-			"Scheme"
-		];
-		
-		Terminal.prompt.autocomplete({
-			source: availableTags,
-			position: { my : "left bottom", at: "left top" } 
-		}).autocomplete('enable');
-	});
 }); 

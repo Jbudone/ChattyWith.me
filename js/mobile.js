@@ -1,136 +1,114 @@
-// JavaScript Document
+/*
+TODO:
+	* Determine Portrait/Landscape mode, and load stylesheet for that particular mode + auto fit to size
+*/
 
+
+var MOBI_VIEW_PORTRAIT=0x00;
+var MOBI_VIEW_LANDSCAPE=0x01;
 
 function mobileSetup() {
-	
-	// Setup the view
-	mobFitsizeH();
-	mobFitsizeW();
-	setupSidebarTrigger();
-	
-	
-	// Bind the scroller
-	setTimeout(function(){
-		$(document).bind("touchmove",function(event){event.preventDefault();});
-		$('body').bind("touchmove",function(event){event.preventDefault();});
-		$('html').bind("touchmove",function(event){event.preventDefault();});
-		$('div[data-role="page"]').bind("touchmove",function(event){event.preventDefault();});
-		$(window).bind("touchmove",function(event){event.preventDefault();});
-		$('section').bind("touchmove",function(event){event.preventDefault();});
-		
-		$(':not(.console)').each(function(){
-			$(this).bind('touchmove',function(event){event.preventDefault();});
-		});
-		
-		Terminal.printMsg("^8iScroller ^1Loaded");
-		
-	},0);
-	
-	$('.console').bind("tap",function(event){ window.scrollTo(0,1); });
-	
-	
-	
-	// Orientation-Changes
+	// Event Triggers
 	$(document).bind("orientationchange",function(){
-		var spinMessages=["weee we're spinning!!","and we go round and round..","round and round..","we keep on spinning","I'm getting dizzy!",
-		"weee!!","you spin me right round baby right round..","ouch! don't spin me so fast >=[","twist it, spin it, turn it, pass it","I think we just took a wrong turn!",
-		"that was one heck of a sharp turn","like a record baby, round, round, round round.."];
-		Terminal.spitback(spinMessages[Math.floor(Math.random()*spinMessages.length)]);
-		mobFitsizeH();
-		mobFitsizeW();
-	});
-	
-	$('#console').css({ position: 'absolute' });
-	fix_prompt();
-}
-
-
-
-function mobFitsizeH() {
-	
-	var winHeight=$(window).height()+56; // NOTE: +56 for the address bar at the top
-
-	
-	var headHeight=$('.console').position().top;
-	var promptHeight=$('.prompt').outerHeight();
-	var consoleHeight=winHeight-(headHeight+promptHeight);
-	var minActionHeight=200;
-	
-	
-	$('html').css({height:winHeight, overflow:'hidden'});
-	$('body').css({height:winHeight, overflow:'hidden'});
-	$('.console').css({height:consoleHeight});
-	$('.prompt').css({top:($('.console').position().top+consoleHeight+2),'z-index':999});//.hide().show();
-	//$('.prompt input[type="text"]').hide().show();
-	$('section').css({height:winHeight});
-	$('div[data-role="page"]').css({height:winHeight});
-	
-	var usersHeight=winHeight-headHeight;
-	var actionsHeight=(usersHeight*0.8)-$('.prompt').height();
-	if (actionsHeight<minActionHeight) {
-		usersHeight*=0.3;
-		usersHeight+=actionsHeight;
-		actionsHeight=0;
-		$('.rightpanel .actions').css({ display: 'none' });
-		$('.rightpanel .users').css({height:usersHeight});
-	} else {
-		$('.rightpanel .actions').css({ display: '' });
-		$('.rightpanel .users').css({height:usersHeight*0.30});
-	}
-	$('.rightpanel .actions').css({height:actionsHeight});
-	window.scrollTo(0,1);
-	setTimeout(rescroll,250); 
-}
-
-function mobFitsizeW() {
-	var winWidth=$(window).width(); // NOTE: The browser seems to change its width AFTER 1 ms of the page loading	
-	
-	$('section').css({width:winWidth});
-	$('.prompt input[type="text"]').css({width:winWidth-25,'margin-left':5});
-}
-
-
-function setupSidebarTrigger() {
-	$('.displaysidebar a').click(function(){
-		var show=!parseInt($(this).attr('shown'));
-		$(this).attr('shown',show?1:0);
-		animateSidebar();
+		mobi_loadViewMode(mobi_getViewMode());
+		mobi_fitView();
+		mobi_adjustChan_valign();
+	}).trigger("orientationchange").bind("tap",function(){
+		//window.scrollTo(0,1);
+		$('header').removeClass('out').removeClass('reverse').removeClass('fixed-overlay');
+		mobi_fitView();
+		mobi_adjustChan_valign();
 		
-		return false;
+		$(function(){
+			//Terminal.print("Tap Tap");
+		});
+	}).bind("click",function(){
+		$(document).trigger("tap");
 	});
+	
+	$.getJSON('system/requests.json.php',{request:'status'},function(data){ console.log("ABCDE WOO"); });
+	
+	/*
+		Event Triggers
+			swipeLeft/swipeRight(change channel left/right)
+	*/
+	
+	// Finish touches on widgets
+	
+	// Load autocomplete
+	
+	// Inject code into Terminal
+	
+	// Modify windows (emoticons, colours)
+	
+	// Setup other pages (settings, users, chanlist)
 }
 
-function animateSidebar() {
-	var sidebar=$('.rightpanel');
-	var speed=35;
-	var timer=15;
-	
-	var maxWidth=240;
-	var width=sidebar.width();
-	if ($('.displaysidebar a').attr('shown')==0) {
-		// Hide	
-		if (width>0) {
-			width-=speed;
-			width=width+'px !important';
-			sidebar.css({width:width,'margin-left':'-'+width});
-			setTimeout(animateSidebar,timer);
-		}
-	} else {
-		// Show	
-		if (width<maxWidth) {
-			width+=speed;
-			width=width+'px !important';
-			sidebar.css({width:width,'margin-left':'-'+width});
-			setTimeout(animateSidebar,timer);
-		}
-	}
-}
-	
-function rescroll() { 
-	if (!$('.prompt input[type="text"]').is(':focus'))
-		window.scrollTo(0,1); 
+function mobi_adjustChan_valign() {
+	//var top=$('section').height()-$('channel.open').height();
+	//$('channel.open').css({top:top});
 }
 
-function fix_prompt() {
-	$('.prompt').hide().show();
+function mobi_fitView() {
+	// TRY: $.mobile.getScreenHeight()
+	
+	//height=$('body').height-($('header').height()+$('footer').height());
+	//$('.console').css({'min-height':height});
+	
+	
+	$.mobile.addResolutionBreakpoints($(document).width());	
 }
+
+
+function mobi_loadViewMode(mode) {
+	file=(mode==MOBI_VIEW_PORTRAIT?'mobiPortrait.css':'mobiLandscape.css');
+	$('head link[name="mobiviewmode"]').remove();
+	$('<link/>').attr('name','mobiviewmode').attr('href','styles/'+file).attr('type','text/css').attr('rel','stylesheet').appendTo('head');
+}
+
+// mobi_getViewMode
+//	Returns 'portrait' for portrait, and 'landscape' for landscape mode
+function mobi_getViewMode() {
+	if (document.width>document.height)
+		return MOBI_VIEW_LANDSCAPE;
+	else
+		return MOBI_VIEW_PORTRAIT;
+}
+
+
+
+
+	
+
+	/*$(function() {
+		var availableTags = [
+			"ActionScript",
+			"AppleScript",
+			"Asp",
+			"BASIC",
+			"C",
+			"C++",
+			"Clojure",
+			"COBOL",
+			"ColdFusion",
+			"Erlang",
+			"Fortran",
+			"Groovy",
+			"Haskell",
+			"Java",
+			"JavaScript",
+			"Lisp",
+			"Perl",
+			"PHP",
+			"Python",
+			"Ruby",
+			"Scala",
+			"Scheme"
+		];
+		
+		Terminal.prompt.autocomplete({
+			source: availableTags,
+			position: { my : "left bottom", at: "left top" } 
+		}).autocomplete('enable');
+	});*/
+	

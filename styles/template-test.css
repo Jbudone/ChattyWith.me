@@ -4,12 +4,6 @@ body {
 	overflow:hidden;	
 }
 
-section {
-	position:relative;
-	width:85% !important;
-	left:7%;
-}	
-
 .actions {
 	height:120px !important;	
 }
@@ -20,10 +14,6 @@ section {
 
 .logo {
 	top:-58px !important;	
-}
-
-.console {
-	margin:0px 3px 0px -2px !important;	
 }
 
 .channislide {

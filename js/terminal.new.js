@@ -1,3 +1,10 @@
+/*
+TERMINAL
+
+	Terminal is the COMMON_GROUND between desktop and mobile browsers
+
+*/
+
 // JavaScript Document
 
 
@@ -30,6 +37,13 @@
 
 
 /************************************ ADMIN MANAGEMENT AREA BELOW *****************************************/
+
+	// CALLBACKS
+	//	Point function callback to each of these
+	var onReceive=doNothing;	// function(message);
+
+
+
 
 
 
@@ -144,6 +158,15 @@ var Terminal={
 		
 	
 	
+	// doNothing
+	//	A blank function pointer, a default for null callbacks
+	doNothing: function() {
+		
+	},
+	
+	
+	// command
+	//	Sanitize and Send a command to the CommandStation
 	command: function(cmd) {
 		
 		cmd=cmd.replace(/^\s+|\s+$/g, '') ; // (trim)
@@ -151,8 +174,6 @@ var Terminal={
 			return;
 		if (Terminal.curChanID!='chanlist')
 			savedCmd=cmd;
-		//cmd=cmd.replace(/\\/g,'\\\\'); // \
-		//cmd=cmd.replace(/\'/g,'\\\''); // '
 		if (cmd[0]=='/') {
 			// Command	
 			if (Terminal.curChanID!='chanlist') {
@@ -363,6 +384,7 @@ var Terminal={
 	//	html: The element to print to server window, in
 	//		html format
 	print: function(html) {
+		//var msg=new Message(
 		Terminal.channels[0].append(html);
 	},
 	
@@ -676,7 +698,6 @@ var Terminal={
 	//	@users: list of users in the chatroom
 	//	@swapto: true to swapWin to this newly created window
 	openWin: function(chanid,title,users,swapto) {
-console.log("Opening: "+title);
 		if (Terminal.channels[chanid])
 			return false; // Channel Window already exists!
 		
@@ -694,7 +715,7 @@ console.log("Opening: "+title);
 			return false; 
 		}).appendTo(chan.button);
 		if (mobileEnabled) {
-			chan.console=$('<channel/>').attr('chanid',chanid).attr('id','chan'+chanid).appendTo($('#console-hidden'));
+			chan.console=$('<ul/>').attr('chanid',chanid).attr('id','chan'+chanid).appendTo($('#console-hidden'));
 		}
 		else {
 			chan.console=$('<channel/>').attr('chanid',chanid).attr('id','chan'+chanid).appendTo($('.console')).mousedown(function(event){
@@ -702,8 +723,6 @@ console.log("Opening: "+title);
 					Terminal.chanmenu.open(event,$(this).attr('chanid'));	
 				}
 			});
-		//if (mobileEnabled)
-		//	chan.console.remove().appendTo($('#console-hidden'));
 		}
 		if (chanid!=0 && chanid!='chanlist') {
 			var loadOlder=$('<a></a>').attr('href','#').attr('name','loadOlder').addClass('enabled').text("Load Older Messages").click(function(){
@@ -727,7 +746,6 @@ console.log("Opening: "+title);
 		
 		if (swapto)
 			Terminal.swapWin(chanid);
-console.log("Opened");
 	},
 	
 	
@@ -756,8 +774,7 @@ console.log("Opened");
 		}
 		else {
 			Terminal.channels[chanid].console.focus();
-			if (Terminal.channels[oldChanid].msgInformer)
-				Terminal.channels[oldChanid].msgInformer.turnOff();
+			Terminal.channels[oldChanid].msgInformer.turnOff();
 		}
 		
 	},
@@ -1072,10 +1089,49 @@ Channel.prototype.open=function(){
 	this.loadTopic();
 	setMenuClearing();
 	if (mobileEnabled) {
-		var that=this;
-		$(function(){
-			$(that.console).remove().appendTo($('.console'));
-		});
+		$(this.console).remove().appendTo($('#subconsole'));
+		consoleScroller=new iScroll('console');
+		
+		
+			// Setup Arrow-Messager Triggering
+			consoleScroller.options.onScrollMove=function(){
+				var chanid=$('.console .open').attr('chanid');
+				if (getScrollFromBottom()<=0) {
+					Terminal.channels[chanid].msgInformer.turnOff();
+				} else {
+					var top=-consoleScroller.y+$('.console').height();
+					Terminal.channels[chanid].msgInformer.reposition(top);
+				}
+			};
+			consoleScroller.options.onTouchEnd=function(){
+				if (getScrollFromBottom()<=0) {
+					var chanid=$('.console .open').attr('chanid');
+					Terminal.channels[chanid].msgInformer.turnOff();
+				} else {
+					var chanid=$('.console .open').attr('chanid');
+					var autoScroll=function(){
+						var top=-consoleScroller.y+$('.console').height();
+						Terminal.channels[chanid].msgInformer.reposition(top);
+					};
+					setTimeout(autoScroll,100);
+					setTimeout(autoScroll,200);
+					setTimeout(autoScroll,300);
+					setTimeout(autoScroll,400);
+					setTimeout(autoScroll,500);
+				}
+			};
+			
+			var chanid=$('.console .open').attr('chanid');
+			var top=-consoleScroller.y+$('.console').height();
+			var that=this;
+			setTimeout(function(){ that.msgInformer.reposition(top); },0);
+			
+			// Auto-scroll to the bottom when all messages are received (a bug disallows us to do this properly, so a hack is necessary here)
+			setTimeout(function(){
+				that.refresh(true);
+				that.msgInformer.turnOff();
+			},1000);
+		
 	}// else {
 	if (!this.msgInformer) {
 		this.msgInformer=new ArrowMessager();
@@ -1162,8 +1218,7 @@ Channel.prototype.backToStart=function(){
 	$(this.loadOlder).addClass('disabled');
 };
 Channel.prototype.refresh=function(autoScroll){
-	mobi_adjustChan_valign();
-	/*if (mobileEnabled) {
+	if (mobileEnabled) {
 		setTimeout(function(){
 		var lastEl=$('#subconsole ul :last(li)');
 		var height=$('#subconsole').offset().top-lastEl.offset().top-(lastEl.height()+30);
@@ -1174,7 +1229,7 @@ Channel.prototype.refresh=function(autoScroll){
 			consoleScroller.scrollTo(0,-($('#subconsole').height()-$('.console').height()),1);
 			this.msgInformer.turnOff();
 		},0);
-	}*/
+	}
 };
 
 
@@ -1551,8 +1606,21 @@ var emoteWin=function(prompt) {
 	this.close=function(){ this.lWin.hide(); };
 	this.isopen=function(){
 
+
 		return this.lWin.css('display')!='none';
 	};
 	
+}
+
+var Message=function(msg,timestamp,chanid,nick,classes) {
+	var ADD_APPEND=0;
+	var ADD_PREPEND=1;
+	this.addType=Message.ADD_APPEND;
+	
+	this.msg=msg;
+	this.timestamp=null;
+	this.chanid=chanid;	// null=current, 0=srv
+	this.nick=nick;
+	this.classes=((typeof classes)==Object);	// Array of classes (placed in order of importance)
 }
 /* End of File -- terminal.js */

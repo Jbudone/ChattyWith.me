@@ -13,9 +13,9 @@
 
 
 function getScrollFromBottom() {
-	if (mobileEnabled)
-		return $('#subconsole').height()-$('.console').height()+consoleScroller.y	
-	else
+	//if (mobileEnabled)
+	//	return $('#subconsole').height()-$('.console').height()+consoleScroller.y	
+	//else
 		return ($('.console .open').height()>$('.console').height())?$('.console .open').height()-$('.console').height()-$('.console').scrollTop():0;	
 }
 

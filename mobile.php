@@ -20,7 +20,6 @@
             
 		<script type="text/javascript" src="js/jquery-1.6.2.min.js"></script>
         <script type="text/javascript" src="http://code.jquery.com/mobile/1.0b3/jquery.mobile-1.0b3.min.js"></script>
-        <script type="text/javascript" src="js/iscroll.js"></script>
         <script type="text/javascript" src="js/utilities.js"></script>
         <script type="text/javascript" src="js/terminal.js"></script>
         <script type="text/javascript" src="js/commandstation.js"></script>
@@ -45,98 +44,34 @@
         <script type="text/javascript" src="js/mobile.js"></script>
 	</head>
 	
-    <BODY>
-    
-    
-    
-    	<!--  Section of the website, user interface -->
-    	<section>
-         
-         
-         	<!-- Left Panel -->
-            <div class="leftpanel">
-            <div class="leftpanelinner">
-             <!---->
-             
-                
-                <!-- Channel Info -->
-                <a class="channislide left" href=""><img src="images/arrow-left.png" alt="<-" /></a>
-                <a class="channislide right" href=""><img src="images/arrow-right.png" alt="->" /></a>
-                <div class="channelinfo">
-                </div>
-             <!---->
-             
-             
-                <!-- Channel -->
-                	<!-- Topic :: (btn|btn)    apply-new topic, remove topic (only show if operator)-->
-                	<div class="topic">
-                    	<span></span>
-                    </div>
-                    <div class="console" id="console" data-role"content" class="ui-content ui-scrollview-clip" role="main" data-scroll="y">
-                		<div id="subconsole">
-                    	</div>
-                	</div>
-                <div id="console-hidden" style="display:none;">
-                </div>
-             <!---->
-                 
-                 
-                <!-- Textbar -->
-                <div class="prompt">
-                	<form name="prompt">
-                        <!--<textarea cols="82" rows="1" name=""></textarea> -->
-                        <input type="text" />
-                    </form>
-                </div>
-             <!---->
-         
-         	</div>
-         	</div>
-         
-         
-         	<!-- Right Panel -->
-            <div class="rightpanel">
-          		
-                <div class="displaysidebar">
-                	<a href="#" shown="0"><img src="images/arrow-left.png" alt="<-" /></a>
-                </div>
-         	
-                
-                <!-- Mentions -->
-                <div class="mentions">
-                	<img src="images/ruby.png" name="ruby" alt="" />
-                </div>
-             <!---->
-             
-             
-                <!-- Users -->
-                <div class="users">
-                
-                </div>
-             <!---->
-             
-             
-                <!-- Actions -->
-                <div class="actions">
-                	<form name="settings">
-                    
-                    <div data-role="fieldcontain" class="options">
-	                        <span class="description">These are your message retrieval systems (Comet protocol). Forever iFrame's are slightly uglier, but slightly faster, while Longpolling is a little cleanlier.</span>
-                            <br/>
-                            
-                            <label for="comet_mode-iframe">Forever iFrame</label>
-                            <input type="radio" name="comet_mode" id="comet_mode-iframe" value="iframe" />
-                            <label for="comet_mode-longpoll">Longpolling</label>
-                            <input type="radio" name="comet_mode" id="comet_mode-longpoll" value="longpoll" />
-                            
-                            <label for="theme" class="select">Choose a Theme:</label>
-                            <select name="theme" title="Choose a Theme">
-                            </select>
-					</div>
-                    </form>
-                </div>
+    <body>		
+        
+        <!-- Topic / Buttons -->
+    	<header data-role="header" data-position="fixed">
+        	<h1 role="heading" class="ui-title">#server - The Topic of the Day</h1> 
+           <div data-role="controlgroup" data-type="horizontal" class="ui-corner-all ui-controlgroup ui-controlgroup-horizontal ui-btn-right" data-inline="true">
+                <a href="#" data-role="button" data-icon="gear" data-iconpos="notext"></a>
+                <a href="#" data-role="button" data-icon="home" data-iconpos="notext"></a>
+                <a href="#" data-role="button" data-icon="gear" data-iconpos="notext"></a>
             </div>
-            
+        </header>
+        
+        <!-- Chatspace -->
+        <section class="console">
         </section>
-    </BODY>
-</html>
+        <channels id="console-hidden">
+        </channels>
+        
+        
+        <!-- Footer -->
+        <footer data-role"footer" data-position="fixed" class="ui-footer ui-footer-fixed">
+            <form name="prompt">
+                <input type="text" />
+            </form>
+        </footer>
+    
+    
+    
+    	
+    </body>
+	</html>
