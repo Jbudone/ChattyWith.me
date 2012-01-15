@@ -18,15 +18,10 @@ function mobileSetup() {
 		$('header').removeClass('out').removeClass('reverse').removeClass('fixed-overlay');
 		mobi_fitView();
 		mobi_adjustChan_valign();
-		
-		$(function(){
-			//Terminal.print("Tap Tap");
-		});
 	}).bind("click",function(){
 		$(document).trigger("tap");
 	});
 	
-	$.getJSON('system/requests.json.php',{request:'status'},function(data){ console.log("ABCDE WOO"); });
 	
 	/*
 		Event Triggers
@@ -36,6 +31,7 @@ function mobileSetup() {
 	// Finish touches on widgets
 	
 	// Load autocomplete
+	//mobi_setupAutocomplete();
 	
 	// Inject code into Terminal
 	
@@ -76,11 +72,9 @@ function mobi_getViewMode() {
 }
 
 
-
-
+function mobi_setupAutocomplete() {
 	
-
-	/*$(function() {
+	$(function() {
 		var availableTags = [
 			"ActionScript",
 			"AppleScript",
@@ -106,9 +100,34 @@ function mobi_getViewMode() {
 			"Scheme"
 		];
 		
+		var minLen=3;
 		Terminal.prompt.autocomplete({
+			minLength:minLen,
 			source: availableTags,
-			position: { my : "left bottom", at: "left top" } 
+			position: { my : "left bottom", at: "left top" } ,
+			search: function() {
+					// custom minLength
+					var term = (this.value.split( /[ \b\t\n\r]+/ )).pop();
+					if ( term.length < minLen ) {
+						return false;
+					}
+			},
+			select: function( event, ui ) {
+					this.value+=ui.item.value;
+					return false;
+			}
 		}).autocomplete('enable');
-	});*/
+	});
+}
+
+
+function mobi_setupChanInfo(channel) {
+	// Reset Chan Info Page
+	
+	// Determine operator status (hide certain parts)
+	
+	// Load Settings (topic/options)
+	
+	// Load Users
+}
 	

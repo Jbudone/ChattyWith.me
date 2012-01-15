@@ -41,6 +41,7 @@ var kOFFSET_TIMEFROMSERVER=0; // The offset from local time to server time (set 
 
 var colourMap=['white','','navy','green','red','maroon','purple','olive','orange','lime','teal','aqua','royalBlue','fuchsia','grey','silver'];
 var emoticonMap={
+	'\\:DD':'grin.gif',
 	'\\(H\\)':'cool.gif',
 	'\\:S':'confused2.gif',
 	'\\:D':'open-smile.gif',
@@ -76,7 +77,9 @@ var emoticonMap={
 	'\\;S':'confused.gif',
 	'\\:\\@':'angry.gif',
 	'\\:\Z':'zip.gif',
-	
+	'\\:O':'surprised.gif',
+	'\\(L\\)':'heart.png',
+	'\\(der\\)':'caveman.gif',
 	
 };
 var themeMap={
@@ -676,7 +679,6 @@ var Terminal={
 	//	@users: list of users in the chatroom
 	//	@swapto: true to swapWin to this newly created window
 	openWin: function(chanid,title,users,swapto) {
-console.log("Opening: "+title);
 		if (Terminal.channels[chanid])
 			return false; // Channel Window already exists!
 		
@@ -727,7 +729,6 @@ console.log("Opening: "+title);
 		
 		if (swapto)
 			Terminal.swapWin(chanid);
-console.log("Opened");
 	},
 	
 	
@@ -1076,6 +1077,15 @@ Channel.prototype.open=function(){
 		$(function(){
 			$(that.console).remove().appendTo($('.console'));
 		});
+		setTimeout(function(){
+			this.loadTopic();
+			/*var title=(that.chanid==0?'Server':
+						that.chanid=='chanlist'?'Channel Listing':
+						(that.topic!=null && that.topic!='') ?
+							'#'+(that.name)+' - '+that.topic:
+							'#'+(that.name));
+			$('header .ui-title').text(title);*/
+		},0);
 	}// else {
 	if (!this.msgInformer) {
 		this.msgInformer=new ArrowMessager();
@@ -1156,25 +1166,25 @@ Channel.prototype.clear=function(){
 	$(this.console).html('');
 };
 Channel.prototype.loadTopic=function(){
-	$('div.topic span').text(this.topic);
+	if (mobileEnabled) {
+		var that=this;
+		setTimeout(function(){
+			var title=(that.chanid==0?'Server':
+						that.chanid=='chanlist'?'Channel Listing':
+						(that.topic!=null && that.topic!='') ?
+							'#'+(that.name)+' - '+that.topic:
+							'#'+(that.name));
+			$('header .ui-title').text(title);
+		},0);
+	} else {
+		$('div.topic span').text(this.topic);
+	}
 };
 Channel.prototype.backToStart=function(){
 	$(this.loadOlder).addClass('disabled');
 };
 Channel.prototype.refresh=function(autoScroll){
 	mobi_adjustChan_valign();
-	/*if (mobileEnabled) {
-		setTimeout(function(){
-		var lastEl=$('#subconsole ul :last(li)');
-		var height=$('#subconsole').offset().top-lastEl.offset().top-(lastEl.height()+30);
-		$(this.console).css({ height: -height });
-		$('#subconsole').css({ height: -height });
-		consoleScroller.refresh();
-		if (autoScroll)
-			consoleScroller.scrollTo(0,-($('#subconsole').height()-$('.console').height()),1);
-			this.msgInformer.turnOff();
-		},0);
-	}*/
 };
 
 

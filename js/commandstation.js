@@ -240,7 +240,6 @@ var CommandStation={
 	// return: NULL
 	_request: function(request,args,callback) {
 		$.getJSON(CommandStation.serverFile, { request: request, args: args }, callback);
-console.log("Request: \""+request+"\"  --  "+args);
 	},
 	
 	
@@ -268,7 +267,6 @@ console.log("Request: \""+request+"\"  --  "+args);
 	//
 	//	@data
 	handleResponse: function(data) {
-console.log("HandleResponse..");
 		if (!data) return;
 		var chanid=data.chanid?data.chanid:0;
 		if (data.error)
