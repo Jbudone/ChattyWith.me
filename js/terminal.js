@@ -1078,13 +1078,14 @@ Channel.prototype.open=function(){
 			$(that.console).remove().appendTo($('.console'));
 		});
 		setTimeout(function(){
-			this.loadTopic();
+			that.loadTopic();
 			/*var title=(that.chanid==0?'Server':
 						that.chanid=='chanlist'?'Channel Listing':
 						(that.topic!=null && that.topic!='') ?
 							'#'+(that.name)+' - '+that.topic:
 							'#'+(that.name));
 			$('header .ui-title').text(title);*/
+			mobi_setupChanInfo(that);
 		},0);
 	}// else {
 	if (!this.msgInformer) {
@@ -1185,6 +1186,14 @@ Channel.prototype.backToStart=function(){
 };
 Channel.prototype.refresh=function(autoScroll){
 	mobi_adjustChan_valign();
+};
+Channel.prototype.getOpStatus=function(){
+	for(var i=0; i<this.users.length; i++) {
+		if (this.users[i].id==Terminal.userid) {
+			return this.users[i].status;
+		}
+	}
+	return 'user';
 };
 
 

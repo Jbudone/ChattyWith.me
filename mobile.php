@@ -52,14 +52,15 @@
             <!-- Topic / Buttons -->
             <header data-role="header" data-position="fixed"> 
                <div data-role="controlgroup" data-type="horizontal" class="ui-corner-all ui-controlgroup ui-controlgroup-horizontal ui-btn-left" data-inline="true">
-                    <a href="#" data-role="button" data-icon="arrow-l" data-iconpos="notext"></a>
-                    <a href="#" data-role="button" data-icon="home" data-iconpos="notext"></a>
-                    <a href="#" data-role="button" data-icon="arrow-r" data-iconpos="notext"></a>
+                    <a id="chanPrev" href="#" data-role="button" data-icon="arrow-l" data-iconpos="notext"></a>
+                    <a id="chanHome" href="#" data-role="button" data-icon="home" data-iconpos="notext"></a>
+                    <a id="chanNext" href="#" data-role="button" data-icon="arrow-r" data-iconpos="notext"></a>
                 </div>
-                <h1 role="heading" class="ui-title">#server - The Topic of the Day</h1> 
+                <h1 role="heading" class="ui-title">Server Console</h1> 
                <div data-role="controlgroup" data-type="horizontal" class="ui-corner-all ui-controlgroup ui-controlgroup-horizontal ui-btn-right" data-inline="true">
                     <a href="#chaninfo" data-transition="flip" data-role="button" data-icon="grid" data-iconpos="notext"></a>
                     <a href="#settings" data-transition="flip" data-role="button" data-icon="gear" data-iconpos="notext"></a>
+                    <a href="#users" data-transition="pop" data-role="button" data-rel="dialog" data-icon="search" data-iconpos="notext"></a>
                 </div>
             </header>
             
@@ -84,10 +85,40 @@
             	<a href="#main" data-transition="flip" data-direction="reverse" data-role="button" data-icon="gear">Back</a>
                 <h1 role="heading" class="ui-title">Channel #</h1> 
             </header>
+                
+                <div id="chansettings" permissions="chanop">
+                	<label for="topic">Topic </label><input id="topic" type="text" value="" /><br/>
+                    
+                    <fieldset data-role="controlgroup" data-type="horizontal">
+                    	<input type="checkbox" name="private" id="private" class="custom" />
+	   					<label for="private">Private</label>
+                    	<input type="checkbox" name="autoclear" id="autoclear" class="custom" />
+	   					<label for="autoclear">Autoclear</label>
+                    	<input type="checkbox" name="moderated" id="moderated" class="custom" />
+	   					<label for="moderated">Moderated</label>
+                    </fieldset>
+                    <a href="#password" data-transition="pop">Password</a>
+                </div>
+                <hr/>
         </div>
     	<div data-role="page" id="settings">
         	Settings!! Woo
             <a href="#main" data-transition="flip" data-direction="reverse" data-role="button" data-icon="gear">Back</a>
+        </div>
+        <div data-role="page" id="password">
+            PASSWORD SHIT HERE
+            <a href="#chaninfo" data-transition="pop" data-direction="reverse" data-role="button" data-rel="back">Okay!</a>
+        </div>
+        <div data-role="dialog" role="dialog" id="users">
+        	USERS WEE
+            <a href="#main" data-transition="pop" data-direction="reverse" data-role="button" data-rel="back">Okay!</a>
+            <div id="chanusers" permissions="all">
+                <select value="Users List">
+                    <option username="glitter" userid="7">@glitter [79.382.38.372]</option>
+                    <option username="JB" userid="1">+JB [24.932.385.283]</option>
+                </select>
+            </div>
+            <hr/>
         </div>
     	
     </body>

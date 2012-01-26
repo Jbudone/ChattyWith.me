@@ -225,7 +225,10 @@
 				
 				$channame=$args['channelname']?$args['channelname']:getChannelName($channel->chanid);
 				$chantopic=getChannelColumn($channel->chanid,'topic');
-				echo json_encode(array('response'=>$kRESPONSE_SUCCESS,'channel'=>array('chanid'=>$channel->chanid,'title'=>$channame,'topic'=>$chantopic,'users'=>$userlist,'messages'=>$messages,'msgid'=>$msgid)));
+				$private=getChannelColumn($channel->chanid,'private');
+				$moderated=getChannelColumn($channel->chanid,'moderated');
+				$autoclear=getChannelColumn($channel->chanid,'autoclear');
+				echo json_encode(array('response'=>$kRESPONSE_SUCCESS,'channel'=>array('chanid'=>$channel->chanid,'title'=>$channame,'topic'=>$chantopic,'users'=>$userlist,'messages'=>$messages,'msgid'=>$msgid,'private'=>$private,'moderated'=>$moderated,'autoclear'=>$autoclear)));
 				exit;
 			} else if ($request=='leave') {
 				// Leave a Channel

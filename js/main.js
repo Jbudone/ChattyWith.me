@@ -105,15 +105,6 @@ var notify=false; // True if there are notifications appending and the user has 
  *  requirements:   jQuery (tested on 1.6.2)
  *
  ****************************/
- console.log("Hello, pretty thing!");
- console.log("Welcome to Developer Console");
- console.log("This is where the programmers hangout when they're doing testing and stuff :)");
- console.log("Because of lack of equipment (the iPhone 4s), I need your help to find where things are going wrong");
- console.log("Each of these messages are being sent to you via. logs");
- console.log("There should be an error message that pops up in one of these logs, either before or (more likely) after these messages");
- console.log("Please find that error, and tell me what it says, which file it came from, and what line it came from");
- console.log("Thanks!");
- console.log("btw, you are absolutely adorable Gellerz :D");
 $(document).ready(function() {
 	
 	
@@ -172,6 +163,7 @@ $(document).ready(function() {
 	// Initialize the Terminal-Server
 	//////////////////////////
 	Terminal.openWin(0,serverChanTitle,{},true);
+ console.log("9");
 	Terminal.console=(!mobileEnabled?$('div.console span'):$('.console'));
 	if (retrieval_mode==kRETRIEVAL_NOCOMET) {
 		Terminal.printMsg("Message Retrieval Mode: ^8No^15-^8Comet");
