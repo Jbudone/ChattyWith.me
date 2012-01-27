@@ -1,0 +1,7 @@
+ExpiresActive On
+
+
+# NEVER Cache
+<FilesMatch "\.(html|php|css|js|png|gif|jpg)$">
+  ExpiresDefault A0
+</FilesMatch>

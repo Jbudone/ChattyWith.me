@@ -252,6 +252,7 @@ var CommandStation={
 	//	@callback
 	// return: NULL
 	_longpoll: function(request,args,callback) {
+		console.log(args);
 		var ret=$.getJSON('./system/longpolling.php', { request: request, args: args, identification: Terminal.identification }, callback).error(function(e){
 			console.log("Longpoll error! Attempting to retry Terminal.update()");
 			Terminal.update();
