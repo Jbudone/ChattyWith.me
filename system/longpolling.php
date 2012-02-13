@@ -18,7 +18,7 @@
 
 	// DEPENDENCIES
 	////////////////
-	if (isset($_GET['identification']))
+	if (!isset($_SESSION['identification']) and isset($_GET['identification']))
 		$_SESSION['identification']=$_GET['identification'];
 	else {
 		echo json_encode(array('error'=>"Identification not included in longpoll request"));
@@ -46,7 +46,7 @@
 	
 	// Message Retrieval Control
 	$kRETRIEVAL_SLEEPTMR=400000; // Sleep time between retrieval-attempts
-	$kRETRIEVAL_MAXTRIES=10; // Maximum number of tries to retrieve messages before returning (good for D/C's)
+	$kRETRIEVAL_MAXTRIES=40; // Maximum number of tries to retrieve messages before returning (good for D/C's)
 	
 
 /************************************ END OF ADMIN MANAGEMENT AREA *****************************************/

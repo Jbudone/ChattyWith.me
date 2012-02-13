@@ -29,10 +29,24 @@ your own sites. Remember that some of the best ways to learn is by learning from
 Created by: JB Braendel (2011-2012)
 Portal: www.jbud.me
 
+
+ ===========================
+	 MASTER TODO LIST
+   =======================
+   
+   * NoScript reload to alternate page
+   * IE page
+   * Auto move to Mobile page (mobile page should be m.chattywith.me[.local])
+   * Implement AJAX.error
+   * Longpolling.php -- auto exits on count mismatch between args & db
+   * Pooled Requests sent out in mass (array of objects in JSON -- requests.json.php handles accordingly)
+    	
+
 -->
 <!DOCTYPE html>
 <html>
 <head>
+<noscript><meta http-equiv="refresh" content="" /></noscript>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>ChattyWith.me</title>
 
@@ -45,29 +59,28 @@ Did You Know?
     attribute).
 -->
 <link href="styles/view_terminal.css" rel="stylesheet" type="text/css" />
+<style type="text/css" id="styleChanDisplay">
+	
+</style>
 
-<script async type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script async type="text/javascript" src="js/jquery.1.7.1.min.js"></script>
 </head>
 
 <body>
 
-	<div id="console">
+	<div id="main">
+        <div id="console">
+        </div>
+    
+    
+        <footer id="footerPrompt">
+            <form id="fPrompt">
+            <input type="text" id="prompt" />
+            </form>
+        </footer>
     </div>
 
-	<input type="text" />
-
-<!--
-EVENT HANDLERS
-
-Did You Know?
-	Google uses a cool hack to load Javascript without even parsing it -- they load the script within Comments like so,
-    	/* Javascript Code Goes Here */
-    And when ready, strip out the /**/ comment tags to begin parsing the Javascipt. Needless to say, thats what happened
-    down here. (don't believe me? try checking it yourself,
-    	UNIX: curl <?php echo $_SERVER['SERVER_NAME'].$_SERVER['PHP_SELF']; ?>
-        Windows: ....get cygwin/mingw, then use UNIX
--->
-<script async id="_events">/* <?php require_once('js/Events.php'); ?> */</script>
+<script async id="_events">/* <?php  require_once('js/Events.php');  require_once('js/Errors.php');  ?> */</script>
 <script async id="_checkjqueryloaded">
 	<!-- Check if jQuery is loaded yet -->
 	var tmrCheckJQuery=50;
@@ -79,29 +92,39 @@ Did You Know?
 		init();
 	};
 	
+	// Script Initialization
 	var init=function(){
 		(function($){
-			// Loader Stuff Here
-			$('<script/>').attr({
-				defer:true,
-				src:'js/utilities.js'
-			}).appendTo('head');
 			
-			$('<script/>').attr({
-				defer:true,
-				src:'js/client.js'
-			}).appendTo('head');
-			
-			$('<script/>').attr({
-				defer:true,
-				src:'js/unixterminal.js'
-			}).appendTo('head');
+			// Determine Scripts to load (including mobile/desktop)
+			var scripts=['js/utilities.new.js','js/client.js'];
+			if (navigator.userAgent.match(/(android|webos|phone|pod|touch)/i))
+				scripts.push('js/mobile.new.js');
+			else
+				scripts.push('js/mobile.new.js');
 			
 			
-			// Remove This Script
-			$('#_checkjqueryloaded').remove();
+			// Load Scripts (in order)
+			loadScripts(function(){
+				(function($){$('#_checkjqueryloaded').remove();})(jQuery)}, // Remove this inline script
+				 scripts);
 		})(jQuery);
 	};
+	
+	// Load Individual Scripts
+	var loadScripts=function(cb_finalize,scripts) {
+		if (scripts.length==0) {
+			if (typeof cb_finalize == 'function')
+				cb_finalize();
+			return;
+		}
+		var src=scripts.shift();
+		var script=document.createElement('script');
+			script.type="text/javascript";
+			script.src=src;
+			script.onload=function(){ loadScripts(cb_finalize,scripts); };
+			document.getElementsByTagName('head')[0].appendChild(script);
+	}
 	
 	checkIfLoaded();
 </script>

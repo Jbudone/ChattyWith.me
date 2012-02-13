@@ -21,7 +21,6 @@
 	require_once "user.php";
 	$user=new User(); // The user should be created here automatically -- via. SESSION[identification]
 	
-	
 	/********************
 		TODO LIST
 		

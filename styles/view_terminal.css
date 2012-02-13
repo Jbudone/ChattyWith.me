@@ -10,10 +10,10 @@ body {
 	color:#999;
 	clear:both;
 	font:Georgia, "Times New Roman", Times, serif;
-	height:300px;
 	width:100%;
 }
 
-input {
+#fPrompt {
+	position:relative;
 	width:100%;	
 }
