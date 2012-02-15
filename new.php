@@ -75,12 +75,11 @@ Did You Know?
     
         <footer id="footerPrompt">
             <form id="fPrompt">
-            <input type="text" id="prompt" />
+            <input type="text" id="prompt" val="test" />
             </form>
         </footer>
     </div>
 
-<script async id="_events">/* <?php  require_once('js/Events.php');  require_once('js/Errors.php');  ?> */</script>
 <script async id="_checkjqueryloaded">
 	<!-- Check if jQuery is loaded yet -->
 	var tmrCheckJQuery=50;
@@ -95,7 +94,6 @@ Did You Know?
 	// Script Initialization
 	var init=function(){
 		(function($){
-			
 			// Determine Scripts to load (including mobile/desktop)
 			var scripts=['js/utilities.new.js','js/client.js'];
 			if (navigator.userAgent.match(/(android|webos|phone|pod|touch)/i))
@@ -128,6 +126,7 @@ Did You Know?
 	
 	checkIfLoaded();
 </script>
+<script async id="_events">/* <?php  require_once('js/Events.php');  require_once('js/Errors.php');  ?> */</script>
 
 </body>
 </html>

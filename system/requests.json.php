@@ -33,10 +33,6 @@
 
 
 /************************************ ADMIN MANAGEMENT AREA BELOW *****************************************/
-
-	// User Details
-	$kMIN_PASSWORD_LEN=4;
-	$kMAX_PASSWORD_LEN=15;
 	
 	
 	

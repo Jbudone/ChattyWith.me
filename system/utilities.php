@@ -24,6 +24,12 @@
 
 $kVERBOSE=TRUE; // Verbose mode
 
+// User Details
+$kMIN_PASSWORD_LEN=4;
+$kMAX_PASSWORD_LEN=15;
+$kMIN_USERNAME_LEN=3;
+$kMAX_USERNAME_LEN=15;
+
 
 // Character Sets
 $kCHARSET_ALPHANUMERIC=0x01<<0;
@@ -111,7 +117,7 @@ $evBAD_PASSWORD=array(0x16,
 $evCOULD_NOT_REIDENIFY_RECENTPING=array(0x17,
 	"Could not reidentify the user - someone else is currently logged in!");
 $evBAD_USERNAME=array(0x18,
-	"Could not create username - usernames MUST be alphanumeric (ie. letters and numbers only)");
+	"Could not create username - usernames MUST be alphanumeric (ie. letters and numbers only), and between ".$kMIN_USERNAME_LEN." and ".$kMAX_USERNAME_LEN." characters");
 $evUNKNOWN_USER=array(0x19,
 	"Could not find given user");
 $evCANNOT_MESSAGE_SELF=array(0x1A,

@@ -57,7 +57,7 @@ function mobi_fitView() {
 	//$('.console').css({'min-height':height});
 	
 	
-	$.mobile.addResolutionBreakpoints($(document).width());	
+	//$.mobile.addResolutionBreakpoints($(document).width());	
 }
 
 
@@ -121,7 +121,8 @@ function mobi_slideChannel(newChanID,direction) {
 		// Trigger mobi_setupChanInfo(), and set Terminal.curChanID
 		Terminal.curChanID=newChanID;
 		Terminal.channels[newChanID].loadTopic();
-		mobi_setupChanInfo(Terminal.channels[newChanID]);
+		if (newChanID!=0)
+			mobi_setupChanInfo(Terminal.channels[newChanID]);
 		mobi_SlidingChannel=false;
 	});
 }

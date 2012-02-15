@@ -144,6 +144,8 @@
 		if (!$result=$mysqli->query(sprintf("SELECT COUNT(*) AS count FROM `userchan` WHERE userid='%d'",$user->userid)))  err($eMYSQLI_QUERY);
 		$row=$result->fetch_assoc();
 		if ($row['count']!=count($channels)) {
+			$maxRuns=min(array($maxRuns,5));
+			continue;
 			echo json_encode(array('response'=>$kRESPONSE_SUCCESS,'channels'=>array()));
 			exit;
 		}

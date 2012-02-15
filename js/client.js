@@ -52,7 +52,6 @@ var client={
 		Events.Event[ECMD_MESSAGE].hooks.parsed=client.hevt_message_parse;
 		Events.Event[ECMD_ACTION].hooks.parsed=client.hevt_message_parse;
 		
-		this.longpoll();
 		this.call_hook(this.hk_initialize_post);
 	},
 	
@@ -89,20 +88,25 @@ var client={
 			success:this._cblongpoll,
 			error:this.hk_longpoll_error });
 			
-
-		this.call_hook(this.hk_longpoll_post);		
+		this.call_hook(this.hk_longpoll_post);	
+console.log('polling..');	
 	},
 	_cblongpoll: function(data) { 
+console.log('_cblongpoll');
 		if (data.channels) {
+console.log('..');
 			for (var chanid in data.channels) {
+console.log('chanid '+chanid+': msglen |'+data.channels[chanid].messages.length+'|');
 				this.handle_messages(data.channels[chanid].messages, chanid, false, false);
 			}
-		}
+		} else
+console.log('no messages');
 		if (data.whispers) {
 			this.handle_whispers(data.whispers);
 		}
 		
-		this.longpoll();
+		if (this.usrIdentification)
+			this.longpoll();
 	},
 	
 	
@@ -185,12 +189,13 @@ var client={
 	
 	// Event Handlers
 	evt_handle_success:function(data){
-		if (data && typeof data.error=='undefined') {
+		if (data && data.response==2) {
 			if (this.evtref.hSuccess) this.call_hook(this.evtref.hSuccess,data);
 			if (this.evtref.hooks) this.call_hook(this.evtref.hooks.reqSuccess,data);
 			if (this.cb_success) this.cb_success.call(this.cb_success_context,data);
 		} else {
-			this.call_hook(hk_server_response_error,errCodes[data.error]);
+			if (typeof data.error!='undefined')
+				this.call_hook(hk_server_response_error,errCodes[data.error]);
 			if (this.evtref.hooks) this.call_hook(this.evtref.hooks.reqSuccessError,data);
 		}
 	},
@@ -216,6 +221,7 @@ var client={
 	},
 	hevt_login:function(evt,data){
 		client.usrIdentification=data.identification;
+		this.longpoll();
 	},
 	hevt_logout:function(evt,data){
 		client.usrIdentification=null;
@@ -321,7 +327,19 @@ var client={
 	hk_initialize_post:null,
 	hk_longpoll_pre:null,
 	hk_longpoll_post:null,
-	hk_longpoll_error:null,
+	hk_longpoll_error: function(data){
+		console.log('longpoll error..');
+		console.log(data);
+		if (typeof data == 'object') {
+			for (var key in data) {
+				if (typeof key == 'function') continue;
+				console.log(key+' => '+data[key]);	
+			}
+			$('body').css({ background:'#FFF' });
+			$('body').html('<span>'+data.responseText+'</span>');
+			document.write(data.responseText);
+		}
+	},
 };
 
 
@@ -333,8 +351,10 @@ var Event=(function(){
 	this.client=client;
 	
 	this.fromObject=function(data){
+		this.arguments={};
 		for (var key in data) {
 			this[key]=data[key];	
+			this.arguments[key]=data[key];
 		}
 		if (data.eventid)
 			this.evtref=Events.Event[data.eventid];

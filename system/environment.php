@@ -34,8 +34,8 @@
 	///  ENVIRONMENTS
 	////////////////////
 	
-	$localEnv = array('LOCAL' => array('chattywith.me.local', 'www.chattywith.me.local'));
-	$onlineEnv = array('ONLINE' => array('chattywith.me', 'www.chattywith.me'));
+	$localEnv = array('LOCAL' => array('/local$/i','/^24\\.108\\.197\\.\\d*/',));
+	$onlineEnv = array('ONLINE' => array('/\\.me$/',));
 	$environments = array($localEnv, $onlineEnv);
 	$defaultEnvironment = 'ONLINE';
 	$environment = array();
@@ -123,10 +123,12 @@
 	{
 		foreach($environments as $environment_names) {
 			
-			foreach ($environment_names as $environment_type => $server_name) {
-				if (in_array($_SERVER['SERVER_NAME'], $server_name)) {
-					$serverType=$environment_type;
-					break;
+			foreach ($environment_names as $environment_type => $server_patterns) {
+				foreach ($server_patterns as $pattern) {
+					if (preg_match($pattern, $_SERVER['SERVER_NAME'])) {
+						$serverType=$environment_type;
+						break;
+					}
 				}
 			}
 		}
