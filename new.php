@@ -34,12 +34,60 @@ Portal: www.jbud.me
 	 MASTER TODO LIST
    =======================
    
+   Current: 
+   -------- ASAP ---------
+   * BUG!! -- parseError on Line 1 (sometimes, unknown file)  -- happens during initial load?
+   * BUG (jQuery) -- Scroll up, type/send message, then close keyboard and the prompt stays in middle of screen
+   * BUG (jQuery) -- send message, keep keyboard up, cursors doesn't move down with the prompt
+   * Longpolling -- TEST Whispers, Joining new channel WHILE polling
+   * Longpolling -- auto exit on logout, fix newchan issue (ignorechannel when user may change his/her mind and re-join)
+   * Styles between message types
+   * Tap button to move between channels + server
+   * Disabled channel-moving buttons when unecessary
+   * Disabled settings buttons
+   * Format messages: timestamp, colours, links, "nick says: "
+   * Organize mobile.new.js
+   * Console messages
+   * Extra Messages: Join message (you have joined, topic is)
+   * Retrieving messages from server is TOO SLOW
+   
+   -------- Semi-Important --------
+   * Test iOS power consumption
+   * Test against Android? Blackberry? Windows Mobile? downloaded mobile browsers?
    * NoScript reload to alternate page
    * IE page
    * Auto move to Mobile page (mobile page should be m.chattywith.me[.local])
    * Implement AJAX.error
-   * Longpolling.php -- auto exits on count mismatch between args & db
    * Pooled Requests sent out in mass (array of objects in JSON -- requests.json.php handles accordingly)
+   * Clean Dir + Github update
+   * Web-release stuff -- JSLint, Spritesheet, LoadImpact, W3C Validity, Cache PHP, Minify JS/CSS files, Optimize Images
+   * Cache settings
+   * Desktop version
+   * Security: User-account for mysql
+   
+   ------ Widgets/Features ------
+   * Autocorrect
+   * New Message Indicator
+   * Ruby shine while loading
+   * Load Older Messages
+   * Pages -- Chan Settings, User List + Actions
+   * Colours + Emoticons
+   * LaTeX
+   * Images (option to save to iPhone + load from iPhone?)
+   * Tap username ("JB says:") like a link for popup on options to that user
+   * LocalStorage
+   * LocalStorage chache-scripting
+   * Chanlist
+   * Send Microphone/Webcam message+offlines
+   * Chanops able to remove RANGE of messages, remove pictures/videos/sound/mic recordings
+   * Store+Send/Rcv Files
+   * Accounts/IP addresses have limited bandwidth/space usage
+   * Connection Strength + AutoReconnect + Warn on D/C
+   * Security: Encrypt/Decrypt messages sent/received; Encrypt/Decrypt logins
+   
+   ------ Easter Eggs for G --------
+   * Auto colour on "( G | Gell | Gellz | Gellerz ),( JB )" specifically in #youandme
+   * Randomly post a diamond beside the word "Gellz" specifically in #youandme from JB, to the upper-right corner of the word
     	
 
 -->
@@ -63,7 +111,8 @@ Did You Know?
 	
 </style>
 
-<script async type="text/javascript" src="js/jquery.1.7.1.min.js"></script>
+<!--<script async type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>-->
+<script async type="text/javascript" src="http://code.jquery.com/jquery-1.6.4.min.js"></script>
 </head>
 
 <body>
@@ -126,7 +175,7 @@ Did You Know?
 	
 	checkIfLoaded();
 </script>
-<script async id="_events">/* <?php  require_once('js/Events.php');  require_once('js/Errors.php');  ?> */</script>
+<script async id="_events">/* <?php require_once('js/Events.php');  require_once('js/Errors.php');  ?> */</script>
 
 </body>
 </html>

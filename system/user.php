@@ -169,7 +169,7 @@ class User
 				// No user set, open-register this user
 				if ($this->id=$this->_createUniqueID()) {
 					if (containsBadChars($username,$GLOBALS[kCHARSET_ALPHANUMERIC])!==FALSE or
-						strlen($username)<$kMIN_USERNAME_LEN or strlen($username)>$kMAX_USERNAME_LEN or
+						strlen($username)<$GLOBALS[kMIN_USERNAME_LEN] or strlen($username)>$GLOBALS[kMAX_USERNAME_LEN] or
 						!$this->mysqli->query(sprintf("INSERT INTO `users` (nick,ping,identification) VALUES('%s',NOW(),'%s')", $this->mysqli->escape_string($username), $this->mysqli->escape_string($this->id))))
 						$ERROR=$GLOBALS[evBAD_USERNAME];
 					else

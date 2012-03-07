@@ -26,12 +26,18 @@ var client={
 					//					.nick
 					//					.status (chanop,voice, )
 					//	
+	ignoreChannels:[],  // NOTE: If you come back to the server, and are still logged in
+						// to another channel, longpolling.php will still find and return
+						// those channels/messages; anonChannels allows it to add the
+						// channel/msgid here, while hiding it from client.channels --
+						// this ultimately allows us to continue the longpoll properly
 	activeChanRef: null,
 	
 	
 	// Called directly by the platform-specific script when it is fully prepared to begin
 	//	the client (eg. desktop.js, mobile.js, unixterminal.js)
 	initialize: function() {
+console.log('client initializing');
 		this.call_hook(this.hk_initialize_pre);
 		
 		// Parse the Events (#_events)
@@ -39,9 +45,19 @@ var client={
 		var script=document.createElement('script');
 		script.defer=true;
 		script.innerHTML=lEvents.html().slice(2,-2);
-		script.innerHTML+="client.initialize_finalize();";
+		script.innerHTML+=" client.initialize_finalize();";
+console.log("client loading internal script");
+		try {
 		document.getElementsByTagName('head')[0].appendChild(script);
+		} catch(e) {
+// NOTE TO SELF: Parse Error does not throw exception :(
+console.log("ERROR LOADING INTERNAL SCRIPT!!!");
+$('body').text(script.innerHTML);
+document.write(script.innerHTML);
+		}
+console.log("client loaded internal script");
 		lEvents.remove();
+console.log('client initialized');
 	},
 	
 	
@@ -66,11 +82,6 @@ var client={
 	longpoll: function() {
 		this.call_hook(this.hk_longpoll_pre);
 		
-		
-		var chanData='';
-		for (chanid in this.channels) {
-			chanData+=chanid+' '+this.channels[chanid].maxmsgid+' ';
-		}
 		// Request Format:
 		//	{ args: [chanid msgid [chanid msgid [...]]
 		//	  identification: [id] }
@@ -81,30 +92,43 @@ var client={
 			type:'GET',
 			url:'system/longpolling.php',
 			data:{
-				args:{
-					args:chanData },
+				channels:this.channels,
+				ignore:this.ignoreChannels,
 				identification:this.usrIdentification},
 			context:this,
 			success:this._cblongpoll,
 			error:this.hk_longpoll_error });
 			
-		this.call_hook(this.hk_longpoll_post);	
-console.log('polling..');	
+		this.call_hook(this.hk_longpoll_post);
 	},
 	_cblongpoll: function(data) { 
-console.log('_cblongpoll');
+		var messages_received=false;
 		if (data.channels) {
-console.log('..');
+			messages_received=true;
 			for (var chanid in data.channels) {
-console.log('chanid '+chanid+': msglen |'+data.channels[chanid].messages.length+'|');
-				this.handle_messages(data.channels[chanid].messages, chanid, false, false);
+				this.handle_messages(data.channels[chanid], chanid, false, false);
 			}
 		} else
-console.log('no messages');
 		if (data.whispers) {
+			messages_received=true;
 			this.handle_whispers(data.whispers);
 		}
+		if (data.newchannels) {
+			// NOTE: These are channels that we have NOT passed to it (eg. channels we joined AFTER
+			//	beginning the longpoll, or channels that we've d/c'd from that haven't been garbage
+			//	collected just yet)
+			for (var chanid in data.channels) {
+				if (typeof this.channels[chanid]!='undefined') {
+					messages_received=true;
+					this.handle_messages(data.channels[chanid], chanid, false, false);
+				}
+				else if (this.ignoreChannels.indexOf(chanid)==-1)
+					this.ignoreChannels.push(chanid);
+			}
+		}
 		
+		if (messages_received)
+			this.call_hook(this.hk_messagesreceived_post);
 		if (this.usrIdentification)
 			this.longpoll();
 	},
@@ -221,7 +245,8 @@ console.log('no messages');
 	},
 	hevt_login:function(evt,data){
 		client.usrIdentification=data.identification;
-		this.longpoll();
+console.log("Login success -- longpoll()")
+		client.longpoll();
 	},
 	hevt_logout:function(evt,data){
 		client.usrIdentification=null;
@@ -340,6 +365,8 @@ console.log('no messages');
 			document.write(data.responseText);
 		}
 	},
+	hk_messagesreceived_post:null,
+_tMessageCreated:null,
 };
 
 
@@ -524,7 +551,7 @@ var Event=(function(){
 	//	NOTE: Hooks that require more arguments than just this event object, will have a single arguments object passed (ie. arguments[1])
 	//	NOTE: Event-specific hooks are listed under Events.php
 	this.hook_context=this;
-	this.call_hook=function(func,args) { if (typeof func=='function') func.call(this.hook_context,this,args); };
+	this.call_hook=function(func,args) { if (typeof func=='function') return func.call(this.hook_context,this,args); return true; };
 	
 	return this;
 });

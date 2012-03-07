@@ -1,4 +1,5 @@
 <?php
+$tStart=microtime(TRUE);
 
 /*
  *		JSON Requests		php
@@ -10,6 +11,8 @@
  *	 here; returning all data via. JSON Parsing.
  *
  ****************************************************/
+ 
+ 
 
 
 	// DEPENDENCIES
@@ -175,19 +178,17 @@
 				// Join a Channel
 				if (!$user->userid)
 					err($evINVALID_USER);
-				if (TRUE or !$channel) { // NOTE: Disallow join-by-id (avoids bugs and complications!)
-					if ($args['channelname']) {
-						$chanid=getChanID($args['channelname']);
-						if (!$chanid)
-							if ($err=createChannel($chanid,$user->userid,$args['channelname'],$args['password'])!=0)
-								err($evCOULD_NOT_CREATE_CHANNEL);
-							
-						$channel=new Channel($chanid,$user->userid,$user->nick);	
-						if (!$channel)
-							err($evBAD_CHANID);
-					} else
+				if ($args['channelname']) {
+					$chanid=getChanID($args['channelname']);
+					if (!$chanid)
+						if ($err=createChannel($chanid,$user->userid,$args['channelname'],$args['password'])!=0)
+							err($evCOULD_NOT_CREATE_CHANNEL);
+						
+					$channel=new Channel($chanid,$user->userid,$user->nick);	
+					if (!$channel)
 						err($evBAD_CHANID);
-				}
+				} else
+					err($evBAD_CHANID);
 					
 				if ($err=$channel->join($args['password']))
 				{
@@ -255,7 +256,8 @@
 					else
 						err($evCOULD_NOT_SEND_MESSAGE);
 				}
-				echo json_encode(array('response'=>$kRESPONSE_SUCCESS)); 
+$tFinish=microtime(TRUE);
+				echo json_encode(array('response'=>$kRESPONSE_SUCCESS,'totaltime'=>($tFinish-$tStart))); 
 				exit;
 			} else if ($request=='retrieve') {
 				// Receive from a Channel

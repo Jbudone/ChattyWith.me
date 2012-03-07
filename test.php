@@ -1,8 +1,12 @@
 <?php
 
-	echo "Name: ".$_SERVER[SERVER_NAME].'<br/>';
-	echo "Addr: ".$_SERVER[SERVER_ADDR].'<br/>';
-	echo 'Environment, <br/>';
-	foreach($_ENV as $key=>$val) {
-		echo '..'.$key.' => '.$val.'<br/>';	
+	phpinfo();
+	exit;
+	$fp = fsockopen("udp://127.0.0.1", 13, $errno, $errstr);
+	if ($fp) {
+		fwrite($fp, "\n");
+		echo fread($fp, 26);
+		fclose($fp);
+	} else {
+		echo 'error..<br/>';	
 	}

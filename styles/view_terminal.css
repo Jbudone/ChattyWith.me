@@ -1,7 +1,7 @@
 /* CSS Document */
 
 body {
-	background:#000;
+	background:#300;
 	margin:0;
 }
 
@@ -10,10 +10,15 @@ body {
 	color:#999;
 	clear:both;
 	font:Georgia, "Times New Roman", Times, serif;
-	width:100%;
+	
+	max-width:100%;
 }
 
 #fPrompt {
 	position:relative;
 	width:100%;	
+}
+
+.ui-controlgroup-horizontal .ui-btn, .ui-controlgroup-horizontal .ui-controlgroup-last {
+	margin:0 0 0 0 !important;
 }
