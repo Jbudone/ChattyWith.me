@@ -34,7 +34,7 @@
 	///  ENVIRONMENTS
 	////////////////////
 	
-	$localEnv = array('LOCAL' => array('/local$/i','/^24\\.108\\.197\\.\\d*/',));
+	$localEnv = array('LOCAL' => array('/local$/i','/^24\\.108\\.\\d*\\.\\d*/',));
 	$onlineEnv = array('ONLINE' => array('/\\.me$/',));
 	$environments = array($localEnv, $onlineEnv);
 	$defaultEnvironment = 'ONLINE';

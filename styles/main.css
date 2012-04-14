@@ -1,0 +1,143 @@
+/* CSS Document */
+
+body {
+	margin:0;
+	background:#300;
+	
+	width:100%;
+}
+
+#console {
+	background: -webkit-gradient(linear, 0% 20%, 0% 91%, from(#3F0000), to(#260009));
+	background: -moz-gradient(linear, 0% 20%, 0% 91%, from(#3F0000), to(#260009));
+	background: -o-gradient(linear, 0% 20%, 0% 91%, from(#3F0000), to(#260009));
+	background: -ms-gradient(linear, 0% 20%, 0% 91%, from(#3F0000), to(#260009));
+	
+	color:#999;
+	clear:both;
+	font-family:Georgia, "Times New Roman", Times, serif;
+	
+	max-width:100%;
+	
+	white-space:pre-wrap;
+	word-wrap:break-word;
+}
+
+.ui-content {
+	padding:0px 15px 0px 15px !important;	
+}
+
+#fPrompt {
+	position:relative;
+	width:100%;	
+}
+
+.ui-controlgroup-horizontal .ui-btn, .ui-controlgroup-horizontal .ui-controlgroup-last {
+	margin:0 0 0 0 !important;
+}
+
+.chanitem {
+	clear:both;
+	float:left;
+	width:100%;
+}
+
+
+
+
+
+/*********************************************************************************/
+/************************          Disconnected          *************************/
+
+.disconnected #console {
+	opacity:0.2;
+}
+
+.disconnected #prompt {
+	opacity:0.5;
+	color:#999;
+}
+
+.disconnected #header {
+	opacity:0.5;	
+}
+
+
+/*********************************************************************************/
+/************************             Header             *************************/
+
+
+#header {
+	position:absolute;
+	width:100%;	
+}
+
+
+/*********************************************************************************/
+/*********************************************************************************/
+/*********************************************************************************/
+/**********************          MESSAGE CLASSES          ************************/
+
+
+.message-error {
+	color:#F00;
+	font-style:italic;	
+	text-shadow:none;
+}
+
+.message-success {
+	color:aqua;
+}
+
+.msg-time {
+	color:#DDD;	
+	font-family:'Lucida Grande', 'Lucida Sans Unicode', Verdana, sans-serif;
+	font-size:12px;
+}
+
+
+
+.message-action {
+	color:#00C !important;	
+	text-shadow:0 0px 0 #002;
+	font-family:'Lucida Grande', 'Lucida Sans Unicode', Verdana, sans-serif;
+	font-family:Arial, Helvetica, sans-serif;
+}
+
+.msg-message {
+	/*text-shadow:none;	*/
+}
+
+.msg-user {
+	color:#CEF;	
+	text-shadow: 0 1px 1px #CEF;
+}
+
+.msg-srvevent {
+	color:#F30;
+	font-family:'Lucida Grande', 'Lucida Sans Unicode', Verdana, sans-serif;
+}
+
+
+
+.message-self {
+	color:white;	
+	text-shadow: 0 1px 1px white;
+}
+
+.message-old {
+	opacity:0.2;	
+}
+
+
+
+
+.hidden {
+	display:none;	
+}
+
+.bold {
+	font-weight:bold;	
+}
+
+

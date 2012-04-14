@@ -1,246 +1,558 @@
+// JavaScript Document
+
+
 /*
-TODO:
-	* Determine Portrait/Landscape mode, and load stylesheet for that particular mode + auto fit to size
+	
 */
-
-
-var MOBI_VIEW_PORTRAIT=0x00;
-var MOBI_VIEW_LANDSCAPE=0x01;
-
-function mobileSetup() {
-	// Event Triggers
-	$(document).bind("orientationchange",function(){
-		mobi_loadViewMode(mobi_getViewMode());
-		mobi_fitView();
-		mobi_adjustChan_valign();
-	}).trigger("orientationchange").bind("tap",function(){
-		//window.scrollTo(0,1);
-		$('header').removeClass('out').removeClass('reverse').removeClass('fixed-overlay');
-		mobi_fitView();
-		mobi_adjustChan_valign();
-	}).bind("click",function(){
-		$(document).trigger("tap");
-	});
-	
-	
-	
-	$("#chaninfo #chansettings input[type='checkbox']").each( function(){ $(this).checkboxradio(); });
-	/*
-		Event Triggers
-			Channel Switchers
-	*/
-	$('#chanPrev').bind('tap',function(){ mobi_slideChannel(mobi_getChanIDFromOffset(Terminal.curChanID, -1),-1); });
-	$('#chanNext').bind('tap',function(){ mobi_slideChannel(mobi_getChanIDFromOffset(Terminal.curChanID, 1),1); });
-	$('#chanHome').bind('tap',function(){ mobi_slideChannel(0,1); });
-	
-	// Finish touches on widgets
-	
-	// Load autocomplete
-	//mobi_setupAutocomplete();
-	
-	// Inject code into Terminal
-	
-	// Modify windows (emoticons, colours)
-	
-	// Setup other pages (settings, users, chanlist)
-}
-
-function mobi_adjustChan_valign() {
-	//var top=$('section').height()-$('channel.open').height();
-	//$('channel.open').css({top:top});
-}
-
-function mobi_fitView() {
-	// TRY: $.mobile.getScreenHeight()
-	
-	//height=$('body').height-($('header').height()+$('footer').height());
-	//$('.console').css({'min-height':height});
-	
-	
-	//$.mobile.addResolutionBreakpoints($(document).width());	
-}
-
-
-function mobi_loadViewMode(mode) {
-	file=(mode==MOBI_VIEW_PORTRAIT?'mobiPortrait.css':'mobiLandscape.css');
-	$('head link[name="mobiviewmode"]').remove();
-	$('<link/>').attr('name','mobiviewmode').attr('href','styles/'+file).attr('type','text/css').attr('rel','stylesheet').appendTo('head');
-}
-
-// mobi_getViewMode
-//	Returns 'portrait' for portrait, and 'landscape' for landscape mode
-function mobi_getViewMode() {
-	if (document.width>document.height)
-		return MOBI_VIEW_LANDSCAPE;
-	else
-		return MOBI_VIEW_PORTRAIT;
-}
-
-
-// mobi_slideChannel
-//	To add to the effect of sliding between channels
-//		offsetIndex: How many index-spaces away from current channel
-var mobi_SlidingChannel=false;
-function mobi_slideChannel(newChanID,direction) {
-	if (mobi_SlidingChannel)
-		return;
-	var curChanID=Terminal.curChanID;
-	if (curChanID==newChanID)
-		return;
-	mobi_SlidingChannel=true;
-	
-	
-	// Prepare the contents [container=(max width*2) ; channel 1 & 2=max width + float left ; add channel 2 to container]
-	var maxWidth=document.width;
-	var iOffscreen=-maxWidth;
-	var lSection=$('section');
-	var lHidden=$('#console-hidden');
-	var lCurChan=$('#chan'+curChanID);
-	var lNewChan=$('#chan'+newChanID);
-	var lMovable=lCurChan;
-	lSection.css({width:(maxWidth*2)+'px !important'});
-	lCurChan.css({width:maxWidth+'px',float:'left'});
-	lNewChan.css({width:maxWidth+'px',display:'block',float:'left'});
-	if (direction>0)
-		lNewChan.remove().appendTo(lSection);
-	else {
-		lNewChan.remove().prependTo(lSection).css({'margin-left':-maxWidth});
-		iOffscreen=0;
-		lMovable=lNewChan;
-	}
-	
-	
-	// Animate the slide effect [ channel 1 - margin-left=-1000px ]
-	lMovable.animate({ 'margin-left':iOffscreen }, 450, 'linear', function(){
-	
-		// Toss channel 1 into hidden channel
-		lCurChan.remove().appendTo(lHidden).css({display:'none','margin-left':'',float:''});
-		lSection.css({width:''});
-		lNewChan.css({width:'',display:'block',float:'','margin-left':''});
-	
-		// Trigger mobi_setupChanInfo(), and set Terminal.curChanID
-		Terminal.curChanID=newChanID;
-		Terminal.channels[newChanID].loadTopic();
-		if (newChanID!=0)
-			mobi_setupChanInfo(Terminal.channels[newChanID]);
-		mobi_SlidingChannel=false;
-	});
-}
-
-
-// mobi_getChanIDFromOffset
-//	Retrieve the channel ID based off the offset from Terminal.channels[curChanID]
-function mobi_getChanIDFromOffset(startID,offset) {
-	if (offset==0)
-		return startID;
-	if (offset<0) {
-		return mobi_getChanIDFromOffset(startID,mobi_getNumberOfChannels()+offset);
-	}
-	var begin=false;
-	var iOffset=offset;
-	var firstElement=null;
-	for (var id in Terminal.channels) {
-		if (firstElement==null)
-			firstElement=id;
-		if (startID==id) {
-			begin=true;	
-			continue;
-		}
-		if (begin && --iOffset==0)
-			return id;
-	}
-	return mobi_getChanIDFromOffset(firstElement,iOffset-1);
-}
-
-function mobi_getNumberOfChannels() {
-	var size=0;
-	for (var i in Terminal.channels) {
-		size++;	
-	}
-	return size;
-}
-
-function mobi_setupAutocomplete() {
-	
-	$(function() {
-		var availableTags = [
-			"ActionScript",
-			"AppleScript",
-			"Asp",
-			"BASIC",
-			"C",
-			"C++",
-			"Clojure",
-			"COBOL",
-			"ColdFusion",
-			"Erlang",
-			"Fortran",
-			"Groovy",
-			"Haskell",
-			"Java",
-			"JavaScript",
-			"Lisp",
-			"Perl",
-			"PHP",
-			"Python",
-			"Ruby",
-			"Scala",
-			"Scheme"
-		];
+		//****************************************************************************************//
+		//*******************************     SETTINGS     ***************************************//
 		
-		var minLen=3;
-		Terminal.prompt.autocomplete({
-			minLength:minLen,
-			source: availableTags,
-			position: { my : "left bottom", at: "left top" } ,
-			search: function() {
-					// custom minLength
-					var term = (this.value.split( /[ \b\t\n\r]+/ )).pop();
-					if ( term.length < minLen ) {
-						return false;
-					}
-			},
-			select: function( event, ui ) {
-					this.value+=ui.item.value;
-					return false;
+		(function(configs){
+			
+			var use_unstable_jquery=true,
+				kJQUERY_STABLE_SOURCE='http://code.jquery.com/mobile/1.0.1/jquery.mobile-1.0.1.min.js',
+				kJQUERY_UNSTABLE_SOURCE='http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js',
+				kJQUERY_STABLE_CSS='http://code.jquery.com/mobile/1.0.1/jquery.mobile-1.0.1.min.css',
+				kJQUERY_UNSTABLE_CSS='http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css';
+			
+			configs.use_unstable_jquery=use_unstable_jquery;
+			configs.jquery_mob_src=(use_unstable_jquery==true?kJQUERY_UNSTABLE_SOURCE:kJQUERY_STABLE_SOURCE);
+			configs.jquery_mob_css=(use_unstable_jquery==true?kJQUERY_UNSTABLE_CSS:kJQUERY_STABLE_CSS);
+		}(settings));
+		
+		
+		var pre_setup=(function(){
+				
+		});
+		
+
+		/********************************************************************************************************/
+		/*********************************** Mobile-Specific Prototyping ****************************************/
+		
+		Message.prototype.getClassesFromType=(function(type){ 
+			var details={ user:[], time:[], message:[], container:[] };
+		
+			if (type.match(/error/)) { details.message=['message-error']; }
+			else if (type.match(/success/)) { details.container=details.message=['message-success','ui-link']; }
+			else if (type.match(/action/)) { details.container=details.message=details.user=['message-action']; }
+			else if (type.match(/message/)) { details.container=['ui-link']; }
+			else if (type.match(/whisper/)) { }
+			else if (type.match(/event/)) { details.container=['ui-link']; details.time=['hidden']; }
+			else { }
+			
+			if (type.match(/self/)) { details.container=details.user=['message-self','bold']; }
+			if (type.match(/old/)) { details.container=['message-old']; }
+			return details;
+		});
+		
+		
+		Terminal.scrollToBottom=(function(forceToBottom) {
+			// Check to Scroll
+			var kTHRESHOLD_TO_AUTOSCROLL=250, // Don't forget to add predicted size of appended content
+				kTIMEOUT_AUTOSCROLL=150, // Slight lag in reflow; 150 appears safe, 100 is too fast for the reflow (tries to scroll before page is reflowed)
+				kAUTOSCROLL_SAFEGUARD=-3; // To safely reach the bottom, scroll this extra amount (document.body.scrollHeight is always off slightly)
+			if (forceToBottom || document.body.scrollHeight-window.innerHeight<=window.pageYOffset+kTHRESHOLD_TO_AUTOSCROLL) {
+				setTimeout(function(){
+					window.scrollTo(0,(document.body.scrollHeight+kAUTOSCROLL_SAFEGUARD));
+					try { JQueryMobWrap.showToolbars(); } catch(e) { }
+				},kTIMEOUT_AUTOSCROLL);
 			}
-		}).autocomplete('enable');
+			else
+				try { JQueryMobWrap.showToolbars(); } catch(e) { }
+		});
+		
+		
+		Terminal.resizePage=(function(){
+			var consoleOffset=($('#console').outerHeight(false)-$('#console').outerHeight(true))-8;
+			$('#console').css({'min-height':(window.innerHeight-$('#fPrompt').height()-$('header').height()+consoleOffset)});
+		});
+		
+		Terminal.removeChannelWin=(function(chanid) { });
+		Terminal.removeChannelWins=(function(chanid) { });
+		
+		Terminal.hk_swapChannel_post=(function(){ setTimeout(function(){ try { Terminal._headerFix.refresh(); } catch(e){ } },1500); });
+		
+		
+		//****************************************************************************************//
+		//********************************     INITIALIZED     ***********************************//
+		
+		client.hk_initialize_post=(function(){
+			pre_setup();
+			JQueryMobWrap.showPageLoadingMsg();
+			setupPage();
+			
+			Terminal.swapChannel(0);
+
+
+			var autologin=(function(){
+				var evt_join=new Event();
+				evt_join.fromObject({ eventid:'ECMD_JOIN', channelname:'8' }).request(function(data){ return true; });
+			}),
+				evt_status=new Event();
+			evt_status.fromObject({ eventid:ECMD_STATUS }).request(function(data){
+				if (data.identification) {
+					client.usrNick=data.nick;
+					client.usrIdentification=data.identification;	
+					client.usrid=data.userid;
+
+					Terminal.print_preset('logon_mobile');
+					Terminal.scrollToBottom(true);
+				
+					autologin();
+					client.longpoll();
+				} else {
+					var evt_login=new Event(),
+						usr='iOS';
+					evt_login.fromObject({ eventid:ECMD_LOGIN, user:usr }).request(function(data){
+						client.usrNick=data.nick;
+						client.usrIdentification=data.identification;
+						client.usrid=data.userid;
+						autologin();
+						return true;
+					});
+				}
+				return false;
+			});
+			
+			
+			
+			
+		});	
+		
+		//****************************************************************************************//
+		
+
+var setupPage=(function(){
+	var setupHooks=(function(){
+		//****************************************************************************************//
+		//*******************************  Event Handlers  ***************************************//
+		Events.Event[ECMD_LOGIN].hooks.reqSuccess=Events.Event[ECMD_IDENTIFY].hooks.reqSuccess=(function(data){
+			// Successful Login
+			Terminal.print_preset('logon_mobile');
+			Terminal.scrollToBottom(true);
+		});
+		Events.Event[ECMD_LOGIN].hooks.reqSuccessError=Events.Event[ECMD_IDENTIFY].hooks.reqSuccessError=(function(evt,data){
+			// Error Login
+		});
+		Events.Event[ECMD_LOGOUT].hooks.reqSuccess=(function(evt,data){
+			// Logged Out
+		});
+		Events.Event[ECMD_STATUS].hooks.reqSuccess=(function(evt,data){
+			// Status Retrieved
+		});
+		Events.Event[ECMD_LEAVE].hooks.reqSuccess=(function(evt,data){
+			// Left Channel
+			
+			for (chanid in client.channels) {
+				if (chanid!=0)
+					return;
+			}
+			
+			try {
+				JQueryMobWrap.disable($('#chanPrev'));
+				JQueryMobWrap.disable($('#chanNext'));
+				JQueryMobWrap.disable($('#chanHome'));
+			} catch(e) { }
+		});
+		
+		Events.Event[ECMD_JOIN].hooks.reqSuccess=(function(evt,data){
+			// Joined Channel
+		
+			try {
+				JQueryMobWrap.enable($('#chanPrev'));
+				JQueryMobWrap.enable($('#chanNext'));
+				JQueryMobWrap.enable($('#chanHome'));
+			} catch(e) { }
+		});
+		
+		Events.Event[ECMD_MESSAGE].hooks.reqSuccess=(function(evt,data){
+			// Message Successfully Sent  (used for Testing server/client messaging speeds)
+		
+			var _date2=new Date();
+			var _tFinish=_date2.getTime();
+			console.log("=========================================================================");
+			console.log(":::::::::: TOTAL TIME FROM ENTER TO SENT MESSAGE: "+((_tFinish-client._tMessageCreated)*0.001));
+			console.log(":::::::::: TOTAL TIME FOR SERVER TO LOAD MESSAGE: "+(data['totaltime']));
+		});
+		
+		Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(evt,data){
+			if (Terminal._disconnected==true) {
+				// Reconnected
+				Terminal._disconnected=false;
+				$('body').removeClass('disconnected');
+				$('#prompt').attr({disabled:false});
+				JQueryMobWrap.hidePageLoadingMsg();
+			}
+		});
+		
+		Events.Event[ECMD_PINGCHAN].hooks.reqSuccessError=(function(evt,data){
+			Terminal._disconnected=true;
+			$('body').addClass('disconnected');
+			$('#prompt').attr({disabled:'disabled'});
+			JQueryMobWrap.showPageLoadingMsg();
+		});
+		
+		//****************************************************************************************//
+		//*******************************  Server Hook Events  ***********************************//
+		hk_server_event_append_message=(function(){ Terminal.print_message(this.arguments.chanid,this.arguments,false,false); });
+		hk_server_event_prepend_message=(function(){ Terminal.print_message(this.arguments.chanid,this.arguments,true,false); });
+		hk_server_event_append_whisper=(function(){ Terminal.print_message(null,this.arguments,false,false); });
+		hk_server_event_append_log=(function(evt,args){ Terminal.print(client.activeChanRef.chanid,args['message'],args['type']); Terminal.scrollToBottom(true); });
+		hk_server_event_add_messages_completed=(function(){ Terminal.scrollToBottom(); });
+		
+		hk_server_event_from_undefined_event=(function(){ }); // Received unknown event from server
+		hk_event_request_from_undefined_event=(function(){ Terminal.print(client.activeChanRef.chanid,"We're not exactly sure what you're trying to do.. ^o)",'error'); Terminal.scrollToBottom(); }); // Unknown Request made
+		hk_server_event_exception_thrown=(function(evt,e){ Terminal.print(client.activeChanRef.chanid,"exception thrown: "+e.message,'error'); Terminal.scrollToBottom(); }); // Exception thrown
+		hk_event_request_exception_thrown=(function(evt,e){ Terminal.print(client.activeChanRef.chanid,"exception thrown: "+e.message,'error'); Terminal.scrollToBottom(); }); // Exception thrown (in request)
+		hk_event_parsed_bad_format=(function(){ Terminal.print(client.activeChanRef.chanid,"Error parsing command: "+this.evtref.help,'error'); Terminal.scrollToBottom(); }); // Bad Parse
+		hk_event_unknown_command=(function(evt,cmd){ Terminal.print(client.activeChanRef.chanid,"Unknown command (^15"+(cmd)+"^1).. ^o)",'error'); Terminal.scrollToBottom(); }); // Unknown Command
+		hk_server_response_error=(function(evt,errmsg){ }); // Server Response Error (message handled in client/Events)
+
+
+
+		
+		//****************************************************************************************//
+		//***********************************  Client Events  ************************************//
+		client.hk_messagesreceived_post=(function(){ Terminal.scrollToBottom(); });
+		client.hk_longpoll_post=(function(){
+			//var scrollY=window.scrollY;
+			//setTimeout(function() { window.scrollTo(0, scrollY+1); }, 100);
+		});
+		
+		
+
 	});
-}
+	
+	var setupLayout=(function(){
+		var header=$('<div/>').attr({'id':'header','data-theme':'a','data-role':'header','data-position':'fixed','data-fullscreen':'true'}).addClass('ui-header-fixed');
+		var ctrlGroupLeft=$('<div/>').attr({id:'header_button_group_left','data-role':'controlgroup','data-type':'horizontal','data-inline':'true'}).addClass('ui-btn-left');
+		var ctrlGroupRight=$('<div/>').attr({id:'header_button_group_right','data-role':'controlgroup','data-type':'horizontal','data-inline':'true'}).addClass('ui-btn-right');
+		var btnChanPrev=$('<a/>').attr({id:'chanPrev',href:'#','data-iconpos':'notext','data-icon':'arrow-l','data-role':'button'}).appendTo(ctrlGroupLeft);
+		var btnChanHome=$('<a/>').attr({id:'chanHome',href:'#','data-iconpos':'notext','data-icon':'home','data-role':'button'}).appendTo(ctrlGroupLeft);
+		var btnChanNext=$('<a/>').attr({id:'chanNext',href:'#','data-iconpos':'notext','data-icon':'arrow-r','data-role':'button'}).appendTo(ctrlGroupLeft);
+		
+		var btnChanInfo=$('<a/>').attr({id:'chanInfo',href:'#','data-iconpos':'notext','data-icon':'grid','data-role':'button'}).appendTo(ctrlGroupRight);
+		var btnChanSettings=$('<a/>').attr({id:'chanSettings',href:'#','data-iconpos':'notext','data-icon':'gear','data-role':'button'}).appendTo(ctrlGroupRight);
+		var btnChanUsers=$('<a/>').attr({id:'chanUsers',href:'#','data-iconpos':'notext','data-icon':'search','data-role':'button'}).appendTo(ctrlGroupRight);
+		
+		ctrlGroupLeft.appendTo(header);
+		var heading=$('<h1/>').attr({id:'chan-title',role:'heading'}).addClass('ui-title').text(client.activeChanRef.channame).appendTo(header);
+		ctrlGroupRight.appendTo(header);
+		
+		header.prependTo($('#main'));
+		
+		
+		try {
+			JQueryMobWrap.disable($('#chanPrev'));
+			JQueryMobWrap.disable($('#chanNext'));
+			JQueryMobWrap.disable($('#chanHome'));
+			JQueryMobWrap.disable($('#chanInfo'));
+			JQueryMobWrap.disable($('#chanSettings'));
+			JQueryMobWrap.disable($('#chanUsers'));
+		} catch(e) { }
+
+		
+		$(btnChanPrev).bind('tap',(function(){ Terminal.swapChannel(getChanIDFromOffset(-1)); }));
+		$(btnChanNext).bind('tap',(function(){ Terminal.swapChannel(getChanIDFromOffset(1)); }));
+		$(btnChanHome).bind('tap',(function(){ Terminal.swapChannel(0); }));
+
+		$(btnChanPrev).bind('click',(function(){$(this).trigger('tap')}));
+		$(btnChanHome).bind('click',(function(){$(this).trigger('tap')}));
+		$(btnChanNext).bind('click',(function(){$(this).trigger('tap')}));
+		
+		
+	});
+	
+	
+	
+	var setupScripts=(function(){
+		var fragment=document.createDocumentFragment();
+		
+		// Meta/Content
+		var metaViewport=document.createElement('meta');
+		metaViewport.setAttribute('name','viewport');
+		metaViewport.setAttribute('content','width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+		fragment.appendChild(metaViewport);
+		
+		// Meta/StatusBar-Style
+		var metaStatusBar=document.createElement('meta');
+		metaStatusBar.setAttribute('name','apple-mobile-web-app-status-bar-style');
+		metaStatusBar.setAttribute('content','red');
+		fragment.appendChild(metaStatusBar);
+		
+		// Meta/HideUI
+		var metaHideUI=document.createElement('meta');
+		metaHideUI.setAttribute('name','apple-mobile-web-app-capable');
+		metaHideUI.setAttribute('content','yes');
+		fragment.appendChild(metaHideUI);
+		
+		// Link/StartupImage
+		var lnkImage=document.createElement('link');
+		lnkImage.setAttribute('rel','apple-touch-startup-image');
+		lnkImage.setAttribute('href','/images/ruby.png');
+		fragment.appendChild(lnkImage);
+		
+		// Stylesheet/jQuery-Mobile
+		var linkJQueryMobile=document.createElement('link');
+		linkJQueryMobile.setAttribute('rel','stylesheet');
+		linkJQueryMobile.setAttribute('href',settings.jquery_mob_css);
+		fragment.appendChild(linkJQueryMobile);
+		
+		// Script/jQuery-Mobile
+		var scriptJQueryMobile=document.createElement('script');
+		scriptJQueryMobile.type='text/javascript';
+		scriptJQueryMobile.src=settings.jquery_mob_src;
+		scriptJQueryMobile.onload=function(){ finalizeSetup(); };
+		fragment.appendChild(scriptJQueryMobile);
+		
+		
+		document.getElementsByTagName('head').item(0).appendChild(fragment);
+	});
+	
+	var setupEventHandlers=(function(){
+		
+		// Setup Header Toolbar (position:fixed)
+		// Setup LoadOlder messages
+		Terminal._headerFix=(function(){
+			
+			var details={
+				refresh:null,	
+			},
+			_header=document.getElementById('header'),
+			yOffset=0;//60;
+			
+			
+			details.refresh=(function(){
+				_header.style.top=(window.scrollY+yOffset)+'px !important';
+			});
+			
+			
+			$(document).bind('scrollstop',function(){
+				if (Terminal._disconnected==true) return;
+				if (window.scrollY<=0 && client.activeChanRef.chanid!=0) {
+					JQueryMobWrap.showPageLoadingMsg();
+					var winHeight=document.body.scrollHeight,
+						scrollY=null;
+						_hk_add_messages=hk_server_event_add_messages_completed,
+						_hk_add_messages_pre=hk_server_event_add_messages_started;
+					hk_server_event_add_messages_completed=null;
+					hk_server_event_add_messages_started=function(){
+						scrollY=window.scrollY;
+					};
+					Terminal.loadOlder.load(function(){
+						setTimeout(function(){
+							JQueryMobWrap.hidePageLoadingMsg();
+							window.scrollTo(0,(document.body.scrollHeight-winHeight-100+scrollY));	
+							details.refresh();
+						},150);
+						hk_server_event_add_messages_completed=_hk_add_messages;
+						hk_server_event_add_messages_started=_hk_add_messages_pre;
+					});	
+				}
+				details.refresh();
+			});
+			
+			return details;
+		}());
+		
+		
+		// Hide the address bar (because of longpolling)
+		window.addEventListener("load",function() {
+		  // NOTE: Timeout 0 is required for this to work
+		  setTimeout(function(){
+			window.scrollTo(0, 1);
+		  }, 0);
+		});
+	});
+	
+	var tranformPage=(function(){
+		document.getElementById('main').setAttribute('data-role','page');
+		document.getElementById('console').setAttribute('data-role','content');
+		var footer=document.getElementById('footer');
+		footer.setAttribute('data-role','footer');
+		footer.setAttribute('data-position','fixed');
+		footer.setAttribute('class','ui-footer ui-footer-fixed');
+		footer.className='ui-bar';
+		
+		var prompt=document.getElementById('prompt');
+		prompt.setAttribute('autocorrect','on');
+		prompt.setAttribute('autocomplete','on');
+		prompt.setAttribute('autocapitalize','sentences');
+	});
+	
+	var setupForm=(function(){
+		$('#fPrompt').submit(function(){
+var _date1=new Date();
+client._tMessageCreated=_date1.getTime();
+			var msg=$('#prompt').val();
+			$('#prompt').val('');
+			
+			var evt=new Event(),
+				ready=evt.parse(msg);
+			if (ready)
+				ready.request();
+			
+			return false;	
+		});
+		
+		var maxlen=settings.message_maxlen;
+		$('#prompt').keyup((function(){
+			var _val=($('#prompt').val()),
+				_valSlashed=_val.replace(/(\\|'|")/g,function(m){ return "\\"+m; });
+			if (_valSlashed.length>maxlen) {
+				$(this).val($(this).attr('safeguard'));
+			} else {
+				$(this).attr('safeguard',_val);	
+			}
+		}));
+	});
+	
+	var finalizeSetup=function(){ 
+	
+		setTimeout((function(){	Terminal.resizePage(); }), 1000);
+		
+		$(document).bind('tap',function(){
+			if (Terminal._disconnected==true) return;
+			JQueryMobWrap.toggleToolbars();
+		});
+		
+		JQueryMobWrap.hidePageLoadingMsg();
+	};
+	
+	
+	setupHooks();
+	setupLayout(); 
+	setupScripts();
+	setupEventHandlers();
+	tranformPage();
+	setupForm();
+});
 
 
-function mobi_setupChanInfo(channel) {
-	var opstatus=channel.getOpStatus();
-	
-	// Set ChanInfo
-	$('#chaninfo #chansettings #topic').val(channel.topic);
-	//$('#chaninfo #chansettings #private').attr("checked",channel.private).checkboxradio("refresh");
-	
-	
-	// Enable/Disable Operator Functionality
-	if (opstatus=='operator') {
-		$("#chaninfo #chansettings input[type='checkbox']").each( function(){ $(this).checkboxradio('enable'); });
-	} else {
-		$("#chaninfo #chansettings input[type='checkbox']").each( function(){ $(this).checkboxradio('disable'); });
-	}
-	
-	// Determine operator status (hide certain parts)
-	
-	// Load Settings (topic/options)
-	
-	// Load Users
-}
 
-/*
-Min delay for a melee weapon is min(7, floor(base delay / 2)), or 5 for a sabre. To achieve min delay, you need your weapon skill to be at least max(base delay, 2*base delay - 14), plus 1 if odd, or 14 skill for a sabre.
+var JQueryMobWrap=(function(){
 	
-	trident[1/1]: A hafted weapon with three points at one end. (Hand-and-a-half medium Polearm; Dam 10 Acc +3 Delay 13)
+	var interface={
+		
+		// Enable/Disable buttons
+		enable:null, disable:null,
+		
+		showPageLoadingMsg:null,
+		hidePageLoadingMsg:null,
+		
+		showToolbars:null, 
+		hideToolbars:null,
+		triggerToolbars:null,
+	};
 	
-	 ktgrey: trident should have min delay 6, so you need (13-6)*2 or 14 polearms skill for min delay
-(6:13:32 PM) ktgrey: ignore stealth/throwing/stabbin
+	(function(){
+		interface.enable=(function(obj){
+			obj.attr( "disabled", false )
+				.removeClass( "ui-disabled" )
+				.attr( "aria-disabled", false );
+		});
+		interface.disable=(function(obj){
+			obj.attr( "disabled", true )
+				.addClass( "ui-disabled" )
+				.attr( "aria-disabled", true );
+		});
+		
+		// turn on/off page loading message.
+		interface.showPageLoadingMsg=(function( theme, msgText, textonly ) {
+			$('body').addClass( "ui-loading" );
 
-ou can also try mibe, which is the same thing except axes instead of polearms and armor except for dodging
+			/*if ( $.mobile.loadingMessage ) {
+				// text visibility from argument takes priority
+				var textVisible = textonly || $.mobile.loadingMessageTextVisible;
 
- ktgrey: oh and always use a shield unless you have a 2h weapon
- but demon trident + shield is probably better than bardiche
+				theme = theme || $.mobile.loadingMessageTheme,
+
+				$loader
+					.attr( "class", loaderClass + " ui-corner-all ui-body-" + ( theme || "a" ) + " ui-loader-" + ( textVisible ? "verbose" : "default" ) + ( textonly ? " ui-loader-textonly" : "" ) )
+					.find( "h1" )
+						.text( msgText || $.mobile.loadingMessage )
+						.end()
+					.appendTo( $.mobile.pageContainer );
+
+				checkLoaderPosition();
+				$window.bind( "scroll", checkLoaderPosition );
+			}*/
+		});
+
+		interface.hidePageLoadingMsg=(function() {
+			$('body').removeClass( "ui-loading" );
+
+			/*if( $.mobile.loadingMessage ){
+				$loader.removeClass( "ui-loader-fakefix" );
+			}
+
+			$( window ).unbind( "scroll", fakeFixLoader );*/
+		});
+		
+		interface.showToolbars=(function(){
+			//$("#header").fixedtoolbar('show');
+			$('#header').show().data({showing:true});
+		});
+		
+		interface.hideToolbars=(function(){
+			//$("#header").fixedtoolbar('hide');
+			$('#header').hide().data({showing:false});
+		});
+		
+		interface.toggleToolbars=(function(){
+			var _header=$('#header'),
+				showing=_header.data('showing');
+			if (showing) _header.hide().data({showing:false});
+			else  _header.show().data({showing:true});
+		});
+		
+	})();
+	
+	return interface;
+})();
+
+
+
+/**
+	NOTES
+	Keyboard Heights for common Devices
+	
+	Device     Portrait     Landscape
+	iPhone/iPod	216px		162px
+	iPad		264pt		352pt
+	Android
+	Windows Mob
+	Playbook
+	Kindle eRea
+	
  */
+var MobDevice=(function(){
+	
+	var details={
+		device:'',
+		keyboardInFocus:false,
+		orientation:'portrait',
+		keyboard_height:0 };
+	
+	(function(){
+		var kDEVICE_IPHONE=0x00,
+			kDEVICE_IPAD=0x01,
+			deviceDimensions=[];
+			deviceDimensions[kDEVICE_IPHONE]={portrait:216,landscape:162};
+			deviceDimensions[kDEVICE_IPAD]={portrait:264,landscape:352};
+		var kUNKNOWN_FULLSCREEN_OFFSET_HEIGHT=236;
+		if (navigator.userAgent.match(/(phone|mobile|pod|android)/) ||
+			screen.width<=480 && screen.height<=800) {
+			details.device='iphone';
+			deviceDimensions=deviceDimensions[kDEVICE_IPHONE];	
+		} else {
+			details.device='ipad';
+			deviceDimensions=deviceDimensions[kDEVICE_IPAD];	
+		}
+		$('#prompt').bind('focus',function(){ details.keyboardInFocus=true; details.keyboard_height=deviceDimensions[details.orientation]; });
+		$('#prompt').bind('blur',function(){ details.keyboardInFocus=false; details.keyboard_height=kUNKNOWN_FULLSCREEN_OFFSET_HEIGHT; });
+	})();
+	return details;
+})();
+
+client.initialize();

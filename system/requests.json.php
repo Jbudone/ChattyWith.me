@@ -95,7 +95,6 @@ $tStart=microtime(TRUE);
 			}
 			
 			if ($request=='status') {
-				// TODO: Remove this Testy Development crap!
 				echo json_encode(array('response'=>$kRESPONSE_SUCCESS,
 										'userid'=>$user->userid,
 										'nick'=>$user->nick,
@@ -178,6 +177,8 @@ $tStart=microtime(TRUE);
 				// Join a Channel
 				if (!$user->userid)
 					err($evINVALID_USER);
+				if ($user->num_channels($args['channelname'])>=$kMAX_USER_CHANNELS)
+					err($evTOO_MANY_CHANNELS);
 				if ($args['channelname']) {
 					$chanid=getChanID($args['channelname']);
 					if (!$chanid)
@@ -224,7 +225,7 @@ $tStart=microtime(TRUE);
 				$private=getChannelColumn($channel->chanid,'private');
 				$moderated=getChannelColumn($channel->chanid,'moderated');
 				$autoclear=getChannelColumn($channel->chanid,'autoclear');
-				echo json_encode(array('response'=>$kRESPONSE_SUCCESS,'channel'=>array('chanid'=>$channel->chanid,'title'=>$channame,'topic'=>$chantopic,'users'=>$userlist,'messages'=>$messages,'msgid'=>$msgid,'private'=>$private,'moderated'=>$moderated,'autoclear'=>$autoclear)));
+				echo json_encode(array('response'=>$kRESPONSE_SUCCESS,'channel'=>array('chanid'=>$channel->chanid,'title'=>$channame,'topic'=>$chantopic,'users'=>$userlist,'messages'=>$messages,'msgid'=>$msgid,'private'=>$private,'moderated'=>$moderated,'autoclear'=>$autoclear),'chanid'=>$channel->chanid,'title'=>$channame,'topic'=>$chantopic,'users'=>$userlist,'private'=>$private,'moderated'=>$moderated,'autoclear'=>$autoclear));
 				exit;
 			} else if ($request=='leave') {
 				// Leave a Channel
@@ -413,7 +414,9 @@ $tFinish=microtime(TRUE);
 				
 				$kickid=getUserID($args['kickid']);
 				if (!$kickid)
-					err($evINVALID_USER);
+					err($evUNKNOWN_USER);
+				if ($kickid==$user->userid)
+					err($evUSER_YOURSELF);
 				if ($err=$channel->kick($kickid,$args['reason'])) // Error!
 					err($evCOULD_NOT_KICK_USER);
 				
@@ -460,7 +463,7 @@ $tFinish=microtime(TRUE);
 				
 				$opid=getUserID($args['opid']);
 				if (!$opid)
-					err($evINVALID_USER);
+					err($evUNKNOWN_USER);
 				
 				$optype;
 				switch($args['optype']) {
@@ -470,7 +473,7 @@ $tFinish=microtime(TRUE);
 				}
 				
 				if ($err=$channel->setOps($opid,$optype,NULL)) // Error!
-					err($evCOULD_NOT_APPLY_OPS);
+					err($err);
 					
 				echo json_encode(array('response'=>$kRESPONSE_SUCCESS));
 				exit;
@@ -487,7 +490,7 @@ $tFinish=microtime(TRUE);
 					err($evINVALID_ARGS);
 				
 				if ($err=$channel->modify($args['setting'],$args['value'])) // Error!
-					err($evCOULD_NOT_APPLY_SETTINGS);
+					err($err);
 					
 				echo json_encode(array('response'=>$kRESPONSE_SUCCESS));
 				exit;
@@ -512,7 +515,7 @@ $tFinish=microtime(TRUE);
 						
 				} else {
 					while ($row=$result->fetch_assoc()) {
-						array_push($whois['channels'],$row['name']);	
+						array_push($whois['channels'],'#'.$row['name']);	
 					}
 				}
 								
@@ -533,7 +536,7 @@ $tFinish=microtime(TRUE);
 				$mysqli->close();
 				
 				//unset($whois['private']);
-				echo json_encode(array('response'=>$kRESPONSE_SUCCESS,'whois'=>$whois));
+				echo json_encode(array('response'=>$kRESPONSE_SUCCESS,'whois'=>$whois,'nick'=>$whois['nick'],'userid'=>$whois['userid'],'ping'=>$whois['ping'],'channels'=>implode(', ',$whois['channels'])));
 			} else if ($request=='pingchan') {
 				// Ping all the provided channels for `userchan`.ping
 				if (!$user->userid)
@@ -553,8 +556,11 @@ $tFinish=microtime(TRUE);
 								$user->userid,$channels);
 				if (!$result=$mysqli->query($query))
 					err($evMYSQLI);
-				$channels=$mysqli->affected_rows;
+				$info=$mysqli->info; //affected_rows; NOTE: rows don't always get changed, therefore we check Rows matched instead				
 				$mysqli->close();
+				
+				preg_match("/\\d+/",$info,$matches); // Rows matched: 1  Changed: 1  Warnings: 0
+				$channels=$matches[0];
 				
 				echo json_encode(array('response'=>$kRESPONSE_SUCCESS,'pinged'=>$channels));
 			} else if ($request=='whisper') {

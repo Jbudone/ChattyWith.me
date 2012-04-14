@@ -76,7 +76,7 @@
 	function getUserchanQuery(&$mysqli,$chanlist,$userid) {
 		$query="SELECT chanid, msgid FROM `userchan` WHERE userid=".$userid." AND chanid NOT IN (";
 		foreach($chanlist as $channel) {
-			$query.=$channel[chanid].',';	
+			$query.=$channel['chanid'].',';	
 		}
 		$query.='0);'; // Minor hack to complete our , delimited query
 		return $query;	

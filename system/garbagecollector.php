@@ -33,9 +33,9 @@
 
 	// 
 	// ..........
-	$kMAX_PINGTIME=date("Y-m-d H:i:s",strtotime("1 minute ago"));
-	$kMAX_WHISPERTIME=date("Y-m-d H:i:s",strtotime("1 week ago"));
-	$kMAX_CLEARTIME=date("Y-m-d H:i:s",strtotime("2 minutes ago"));
+	$kMAX_PINGTIME=date("Y-m-d H:i:s",strtotime("1 minute ago"));		// Max time since last ping before logging out user
+	$kMAX_WHISPERTIME=date("Y-m-d H:i:s",strtotime("1 month ago"));		// Max time for whispers to stay in db
+	$kMAX_CLEARTIME=date("Y-m-d H:i:s",strtotime("2 minutes ago"));		// Max time before clearing out auto-clear channels
 	
 	$kNEUTRAL_MODE=FALSE; // TRUE to NOT garbage collect anything, but instead cry out the queries
 	
@@ -196,11 +196,10 @@ if (!$result=$mysqli->query("SELECT id FROM `channels` WHERE autoclear=1")) {
  *  RULES
  *
  *	n messages		last active
- *		< 10		2 days
- *		< 100		1 week
- *		< 250		2 weeks
- *		< 1500		1 month
- *		< 3000		3 months
+ *		< 5			2 days
+ *		< 30		1 week
+ *		< 100		2 weeks
+ *		< 300		3 months
  *		< 20000		12 months
  ***********************************/
  
@@ -213,11 +212,10 @@ if (!$result=$mysqli->query("SELECT id FROM `channels` WHERE autoclear=1")) {
 	$active=strtotime($active);
 	if ($n>20000)
 		return FALSE;
-	else if (($n<10 and strtotime("2 days ago")>$active) or
-			($n<100 and strtotime("1 week ago")>$active) or
-			($n<250 and strtotime("2 weeks ago")>$active) or
-			($n<1500 and strtotime("1 month ago")>$active) or
-			($n<3000 and strtotime("3 months ago")>$active))
+	else if (($n<5 and strtotime("2 days ago")>$active) or
+			($n<30 and strtotime("1 week ago")>$active) or
+			($n<100 and strtotime("2 weeks ago")>$active) or
+			($n<300 and strtotime("3 months ago")>$active))
 		return TRUE;
 	return FALSE;
  }

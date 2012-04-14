@@ -238,6 +238,16 @@ class User
 	}
 	
 	
+	// num_channels
+	//	 @channelname: Name of the channel we're attempting to join (in case we're re-joining a channel that we've already entered previously)
+	function num_channels($channelname) {
+		if (!$result=$this->mysqli->query(sprintf("SELECT COUNT(*) AS count FROM `userchan` JOIN `channels` ON userchan.chanid=channels.id WHERE userid='%s' AND channels.name!='%s'",$this->mysqli->escape_string($this->userid),$this->mysqli->escape_string($channelname))))
+			return NULL;
+		$row=$result->fetch_row();
+		return $row[0];
+	}
+	
+	
 	
 	// _touch
 	//		touch the user's lastaccessed date
@@ -308,6 +318,9 @@ class User
 			return NULL;
 		
 	}
+	
+	
+	
 }
 
 
