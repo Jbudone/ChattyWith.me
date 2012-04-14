@@ -1,8 +1,6 @@
 <?php
 	if(preg_match('/MSIE/i',$_SERVER['HTTP_USER_AGENT']))
-	{
-		header("Location: iesucks.php"); 
-	}
+		header("Location: iesucks.php"); // Relocate IE users
 ?>
 
 <!--
@@ -41,7 +39,7 @@ Portal: www.jbud.me
 	 MASTER TODO LIST
    =======================
    
-   Current: 
+   
    -------- ASAP ---------
    ### Bugs in outside system
    * BUG (jQuery) -- send message, keep keyboard up, cursors doesn't move down with the prompt
@@ -51,17 +49,19 @@ Portal: www.jbud.me
    * BUG (untested/jquerymob) -- https://github.com/scottjehl/Device-Bugs/issues/1
    
    ### BUGS TO FIX
+   * Parse Error is back -- REMOVE PERMANENTLY!!!
+   * Swapping desktop windows makes the view spaz out (tries to load older messages, and ends up bouncing around)
+   * On init, channel-selector doesn't hover over server chan
    * Mobile -- Loading older messages improperly affects the window scroll (goes all over the place)
    * Garbage Collector clears up auto-clear channels (since messages get erased regularly)
    * Scroll to bottom on init (note we MUST scroll to 0,1 first to hide address bar on LOAD)
    
    ### TODO
    * CSS -- Check mobile message/css (compare to desktop)
-   * Clean Dir + Github update + Cleanup all files before releasing (eg. remove "Gellz" easter eggs from TODO list; document JS files; More details on the top of this file)
-   * More in-depth guide at startup for logging in and details on Author + Socials; Mention background (http://fullhdwallpapers.info/abstract/colorful-abstract-wallpaper-2/); Mention mobile supported/untested (iOS 3 supported, none others tested, please message with results)
-   * Web-release stuff -- Re-enable GZip (+test out)  Minify JS/CSS files, Robots.txt, Add site to Google
+   * Web-release stuff -- Re-enable GZip (+test out)  Minify JS/CSS files, Add site to Google
+   * Google Page-Speed test & YSlow
    
-   * LocalStorage
+   * Hover over channel to view channel name
    * Messages Waiting
    * Cache settings
    * RequireJS
@@ -73,7 +73,6 @@ Portal: www.jbud.me
    
    
    ### Bugs - Unable to Reproduce
-   * Parse Error is back -- REMOVE PERMANENTLY!!!
    * BUG -- "/leave #chan" on #chan for first time
    * BUG -- mobile on startup is slightly offset from the bottom
    * BUG -- after sending message, prompt is offset slightly
@@ -87,11 +86,8 @@ Portal: www.jbud.me
    * NoScript reload to alternate page
    * Modern Browser Page (FF 11+, Chrome 17+, Opera 10+?, Safari 3.1+ --- these should be styled to
    									match the theme of the browser its being viewed in)
-   * Auto move to Mobile page (mobile page should be m.chattywith.me[.local])
-   * Implement AJAX.error
    * Pooled Requests sent out in mass (array of objects in JSON -- requests.json.php handles accordingly)
    * Security: User-account for mysql
-   * Security: unable to attack my computer (local)
    * Security: protection on garbage collector
    * Retrieving messages from server is TOO SLOW
    * Effects (mob) -- scroll-down animation for new messages (instead of instant scrollTo); Slide left/right to change channel
@@ -142,19 +138,15 @@ Portal: www.jbud.me
    * Server/Client Accurate Time Offset (Localization)
    * Fixed Throbber of Doom
    * Encrypt messages in channels (animated shake the cube/box, and convert each letter to another symbol; then shake again to decrypt)
-   * Node.js + MongoDB replacement on Amazon EC3
-   * "Really?" -- "Now how do you possibly expect to read Chatty like this?"
+   * Node.js + MongoDB replacement on Amazon EC2
+   * Small window: "Really?" -- "Now how do you possibly expect to read Chatty like this?"
    * (Desktop) Window dragging offscreen auto resizes/repositions elements to still display them properly
-   * CSS: Custom scrollbar appearance; 
+   * Custom scrollbar appearance
    * Implement WebWorkers
    * Garbage collector to automatically call the next garbage collector instance (in ~30 seconds, through terminal); use CRON as a regular checker that things are still going
    * Improve IE Sucks page
    
-   ------ Easter Eggs for G --------
-   * Auto colour on "( G | Gell | Gellz | Gellerz ),( JB )" specifically in #youandme
-   * Randomly post a diamond beside the word "Gellz" specifically in #youandme from JB, to the upper-right corner of the word
-    	
-
+   
    ---- NOTES OF RECENT CHANGES ----
    * client.js (line 616) Event.read (after this.call_hook(this.evtref.handler);) removed line:    this.call_hook(hk_server_event_append_message);
    
@@ -199,6 +191,16 @@ Did You Know?
         </footer>
     </div>
 
+<!--
+CGI-Generated Scripts
+	Well, it was a little too much of a hassle to copy/paste event and error codes between PHP
+    and JS scripts; so instead I have them generated on server files. Note that these scripts
+    are wrapped in /* comments */ so they can be manually setup later, and minimize startup
+    -downtime
+    
+    NOTE: If you don't see the scripts below, then they have already been cleverly-dynamically
+    removed after parsing ;)
+-->
 <script id="_events">/* <?php require_once('js/Events.php');  require_once('js/Errors.php'); ?> */</script>
 
 <script id="_checkjqueryloaded">
@@ -216,11 +218,11 @@ Did You Know?
 	init=function(){
 		(function($){
 			// Determine Scripts to load (including mobile/desktop)
-			var scripts=['js/utilities.js','js/client.js'];
+			var scripts=['js/utilities.js','js/client.min.js'];
 			if (navigator.userAgent.match(/(android|webos|phone|pod|touch)/i))
-				scripts.push('js/mobile.js');
+				scripts.push('js/mobile.min.js');
 			else
-				scripts.push('js/desktop.js');
+				scripts.push('js/desktop.min.js');
 			
 			
 			// Load Scripts (in order)

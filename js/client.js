@@ -54,33 +54,59 @@ var settings=(function(){
 			'\\(der\\)':'caveman.gif',
 		},
 		messages:{
-			logon:{chanid:0,type:'',messages:[
-					"^8Welcome to ChattyWith.me !!!,",
+			loaded:{chanid:0,type:'startup',messages:[
+					"Welcome to ^8ChattyWith.me ^14!!!,",
 					"^14  An AJAX approach to IRC",
 					" ",
-					"^11Now that you have logged in it is time to start chatting",
-					"^11Type the following to join the room called 'lolfun': ^13/join #lolfun",
-					"^11Or otherwise, type ^13/list^11 to see a list of other chatrooms you can join",
-					"^11Have fun, stay a while and make some friends.",
-					" ",
-					" ",
-					"^11\tAuthor: JB Braendel",
-					" ",
-					" ",
 					]},
-			logon_mobile:{chanid:0,type:'',messages:[
-					"^8Welcome to ChattyWith.me !!!,",
+			loaded_mobile:{chanid:0,type:'startup',messages:[
+					"Welcome to ^8ChattyWith.me ^14!!!,",
 					"^14  An AJAX approach to IRC",
 					"^15  The ^0mobile^15 edition",
 					" ",
-					"^11Now that you have logged in it is time to start chatting",
-					"^11Type the following to join the room called 'lolfun': ^13/join #lolfun",
-					"^11Or otherwise, type ^13/list^11 to see a list of other chatrooms you can join",
-					"^11Have fun, stay a while and make some friends.",
+					]},
+			loaded_loggedout:{chanid:0,type:'startup',messages:[
+					"Now that ^8ChattyWith^15.^8me ^1has loaded",
+					"\tyou may pick a nickname to start chatting by. Type ^0/nick ^15[^9username^15] ^1to choose your username.",
+					"\texample, ^0/nick ^9superman",
+					"\tor perhaps ^0/nick ^9leeroyjenkins",
+					]},
+			loaded_loggedout_mobile:{chanid:0,type:'startup',messages:[
+					"Now that ^8ChattyWith^15.^8me ^11has loaded",
+					"Pick a nickname to start chatting, like this: ^0/nick ^15[^9username^15] ^1to choose your username.",
+					"  example, ^0/nick ^9superman",
+					"  or perhaps ^0/nick ^9leeroyjenkins",
+					]},
+			logon:{chanid:0,type:'startup',messages:[
+					"Now that you have logged in it is time to start chatting",
+					"Type the following to join the room called 'lolfun': ^0/join ^9#lolfun",
+					"Or otherwise, click the list icon on the right to display a list of all public chatrooms",
+					"Have fun, stay a while and make some friends.",
 					" ",
 					" ",
-					"^11\tAuthor: JB Braendel",
+					"\tAuthor: ^0JB Braendel",
+					"   You can find me on,",
+					"   ^15Portal^1: http://jbud.me",
+					"   ^15Twitter^1: https://twitter.com/#!/thatsjb",
+					"   ^15Facebook^1: http://www.facebook.com/jb.braendel",
+					"   ^15Github^1: #",
 					" ",
+					"Thanks go out to: ^0jQuery^1, ^0LESS",
+					"Beautiful Background from: http://fullhdwallpapers.info/abstract/colorful-abstract-wallpaper-2/",
+					]},
+			logon_mobile:{chanid:0,type:'startup',messages:[
+					" ",
+					"Now that you have logged in it is time to start chatting",
+					"Type the following to join the room called 'lolfun': ^0/join ^9#lolfun",
+					"Have fun, stay a while and make some friends.",
+					" ",
+					" ",
+					"\tAuthor: JB Braendel",
+					" ",
+					"Thanks go out to: ^0jQuery^1, ^0jQuery-Mobile",
+					" ",
+					"Supported Devices: ^0iOS3",
+					"Untested Devices: ^0iOS4+^1, ^0Android^1, ^0Blackberry^1, ^0Windows Phone^1, ^0Symbian",
 					" ",
 					]},
 		},
@@ -154,8 +180,6 @@ var client={
 		Events.Event[ECMD_MESSAGE].hooks.parsed=client.hevt_message_parse;
 		Events.Event[ECMD_ACTION].hooks.parsed=client.hevt_message_parse;
 		
-		Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=0;
-		Events.Event[ECMD_PINGCHAN].hooks.reqSuccessError=0;
 		
 		this.auto_ping();
 		
@@ -324,7 +348,6 @@ var client={
 				//	eg. users send messages since you've left, passwords
 				//		on channels, modifications on channel, users
 				//		join/leave/change since you've left
-				Events.Event['ECMD_JOIN'].hooks.reqPost=function(){ console.log(this); };
 				for (var chanid in client.channels) {
 					if (chanid==0) continue;
 					(new Event()).fromObject({ eventid:'ECMD_JOIN', channelname:client.channels[chanid].channame}).request();
@@ -389,7 +412,7 @@ var client={
 	},
 	
 	auto_ping_err: function(data) {
-		console.log('auto_ping_err');
+		//console.log('auto_ping_err');
 		this.call_hook(this.evtref.hooks.reqSuccessError,data);
 		setTimeout(client.auto_ping,settings.pingTimer);
 	},
@@ -517,9 +540,11 @@ var client={
 		this.arguments['chanid']=client.activeChanRef.chanid;
 	},
 	hevt_login:function(evt,data){
+		client.usrNick=data.nick;
 		client.usrIdentification=data.identification;
 		client.usrid=data.userid;
 		client.longpoll();
+		localStorage.setItem('identification',data.identification);
 	},
 	hevt_logout:function(evt,data){
 		client.usrIdentification=null;
@@ -530,6 +555,7 @@ var client={
 		Terminal.removeChannelWins();
 		Terminal.scrollToBottom();
 		client.channels={0:client.channels[0]};
+		localStorage.removeItem('identification');
 	},
 	hevt_join:function(evt,data){
 		// data {
@@ -664,7 +690,7 @@ var client={
 	hk_longpoll_pre:null,
 	hk_longpoll_post:null,
 	hk_longpoll_error: function(data){
-		console.log('longpoll error..');
+		//console.log('longpoll error..');
 		setTimeout(function(){
 			client.longpoll.apply(client);
 		},settings.longpollRetry);
@@ -929,7 +955,7 @@ var Message=(function(chanid,message,type,timestamp,user,suspendEffects){
 	replaceLinks=(function(message){
 		
 		// Replace Links
-		message=message.replace(/((https?:\/\/|(www\.))([\da-z\-\Q_.\E]+\.[a-z]+[a-z\d\-\Q_.?=&%#*\/\E]*))/gi,"<a href='http://$3$4' target='_blank'>$1</a>");
+		message=message.replace(/((https?:\/\/|(www\.))([\da-z\-\Q_.\E]+\.[a-z]+[a-z\d\-\Q_!.?=&%#*\/\E]*))/gi,"<a href='http://$3$4' target='_blank'>$1</a>");
 		return message;
 	});
 	
@@ -1075,11 +1101,11 @@ var Terminal=(function(){
 				document.getElementsByTagName('head').item(0).removeChild(chanDisplay);
 				document.getElementsByTagName('head').item(0).appendChild(chanDisplay);
 			} catch(e) {
+				// NOTE: iOS throws, NO_MODIFICATION_ALLOWED_ERR  on above
 				$('#console').css({display:'none'});
-				$('.chanitem:not(.chanid-'+chanid+')').css({display:'none'});
+				$('.chanitem:not(.chanid-'+chanid+')').css({display:'none !important'});
 				$('.chanid-'+chanid).css({display:'block !important'});
 				$('#console').css({display:'block'});
-				
 			}
 			
 			try {

@@ -77,19 +77,17 @@
 		//********************************     INITIALIZED     ***********************************//
 		
 		client.hk_initialize_post=(function(){
+			document.body.style.display='none';
 			pre_setup();
 			JQueryMobWrap.showPageLoadingMsg();
 			setupPage();
-			
 			Terminal.swapChannel(0);
+			document.body.style.display='';
 
 
-			var autologin=(function(){
-				var evt_join=new Event();
-				evt_join.fromObject({ eventid:'ECMD_JOIN', channelname:'8' }).request(function(data){ return true; });
-			}),
-				evt_status=new Event();
-			evt_status.fromObject({ eventid:ECMD_STATUS }).request(function(data){
+			
+			Terminal.print_preset('loaded_mobile');
+			(new Event()).fromObject({ eventid:ECMD_STATUS }).request(function(data){
 				if (data.identification) {
 					client.usrNick=data.nick;
 					client.usrIdentification=data.identification;	
@@ -98,18 +96,20 @@
 					Terminal.print_preset('logon_mobile');
 					Terminal.scrollToBottom(true);
 				
-					autologin();
 					client.longpoll();
-				} else {
-					var evt_login=new Event(),
-						usr='iOS';
-					evt_login.fromObject({ eventid:ECMD_LOGIN, user:usr }).request(function(data){
+				} else if (localStorage && localStorage.getItem('identification')) {
+					(new Event()).fromObject({ eventid:ECMD_IDENTIFY, id:(localStorage.getItem('identification')) }).request(function(data){
 						client.usrNick=data.nick;
 						client.usrIdentification=data.identification;
 						client.usrid=data.userid;
-						autologin();
-						return true;
+
+						Terminal.print_preset('logon_mobile');
+						Terminal.scrollToBottom(true);
+					
+						client.longpoll();
 					});
+				} else {
+					Terminal.print_preset('loaded_loggedout_mobile');
 				}
 				return false;
 			});
@@ -168,11 +168,11 @@ var setupPage=(function(){
 		Events.Event[ECMD_MESSAGE].hooks.reqSuccess=(function(evt,data){
 			// Message Successfully Sent  (used for Testing server/client messaging speeds)
 		
-			var _date2=new Date();
+			/*var _date2=new Date();
 			var _tFinish=_date2.getTime();
 			console.log("=========================================================================");
 			console.log(":::::::::: TOTAL TIME FROM ENTER TO SENT MESSAGE: "+((_tFinish-client._tMessageCreated)*0.001));
-			console.log(":::::::::: TOTAL TIME FOR SERVER TO LOAD MESSAGE: "+(data['totaltime']));
+			console.log(":::::::::: TOTAL TIME FOR SERVER TO LOAD MESSAGE: "+(data['totaltime']));*/
 		});
 		
 		Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(evt,data){

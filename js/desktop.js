@@ -45,6 +45,7 @@
 			else if (type.match(/message/)) { }
 			else if (type.match(/whisper/)) { }
 			else if (type.match(/event/)) { details.container=['ui-link']; details.time=['hidden']; }
+			else if (type.match(/startup/)) { details.container=['message-startup']; }
 			else { details.container=['ui-link']; }
 			
 			if (type.match(/self/)) { details.container=details.user=['message-self']; }
@@ -118,7 +119,7 @@
 				fragment,
 				channelLegend=document.getElementById('rc-details-channame'),
 				channelUsersList=client.activeChanRef.users;
-			channelLegend.innerHTML='channel: '+client.channels[chanid].channame;
+			channelLegend.innerHTML=client.channels[chanid].channame;
 			while (userlist.children.length>0) {
 				userlist.removeChild(document.getElementById('rc-userlist').children[0])
 			}
@@ -253,46 +254,44 @@
 		//********************************     INITIALIZED     ***********************************//
 		
 		client.hk_initialize_post=(function(){
+			document.body.style.display='none';
 			pre_setup();
 			setupPage();
-			
-			
 			Terminal.openChannelWin('server',0);
+			document.body.style.display='';
+			
+			
 			setTimeout(function(){ 
 				Terminal.swapChannel(0);
 			},settings.reflowTime); // delay to allow the reflow to occur
 
 			
-			setTimeout(function(){
-				var autologin=(function(){
-					var evt_join=new Event();
-					evt_join.fromObject({ eventid:'ECMD_JOIN', channelname:'8' }).request(function(data){ return true; });
-				}),
-					evt_status=new Event();
-				evt_status.fromObject({ eventid:ECMD_STATUS }).request(function(data){
-					if (data.identification) {
+			Terminal.print_preset('loaded');
+			(new Event()).fromObject({ eventid:ECMD_STATUS }).request(function(data){
+				if (data.identification) {
+					client.usrNick=data.nick;
+					client.usrIdentification=data.identification;	
+					client.usrid=data.userid;
+
+					Terminal.print_preset('logon');
+					Terminal.scrollToBottom(true);
+				
+					client.longpoll();
+				} else if (localStorage && localStorage.getItem('identification')) {
+					(new Event()).fromObject({ eventid:ECMD_IDENTIFY, id:(localStorage.getItem('identification')) }).request(function(data){
 						client.usrNick=data.nick;
-						client.usrIdentification=data.identification;	
+						client.usrIdentification=data.identification;
 						client.usrid=data.userid;
-	
+
 						Terminal.print_preset('logon');
 						Terminal.scrollToBottom(true);
-					
-						autologin();
 						client.longpoll();
-					} else {
-						var evt_login=new Event(),
-							usr='iPC';
-						evt_login.fromObject({ eventid:ECMD_LOGIN, user:usr }).request(function(data){
-							client.usrNick=data.nick;
-							client.usrIdentification=data.identification;
-							autologin();
-							return true;
-						});
-					}
-					return false;
-				});
-			},500);
+					});
+				} else {
+					Terminal.print_preset('loaded_loggedout');
+				}
+				return false;
+			});
 			
 			
 			
@@ -332,11 +331,11 @@ var setupPage=(function(){
 			// Message Successfully Sent  (used for Testing server/client messaging speeds)
 			// TODO properly implement message-speed testing
 		
-			var _date2=new Date();
+			/*var _date2=new Date();
 			var _tFinish=_date2.getTime();
 			console.log("=========================================================================");
 			console.log(":::::::::: TOTAL TIME FROM ENTER TO SENT MESSAGE: "+((_tFinish-client._tMessageCreated)*0.001));
-			console.log(":::::::::: TOTAL TIME FOR SERVER TO LOAD MESSAGE: "+(data['totaltime']));
+			console.log(":::::::::: TOTAL TIME FOR SERVER TO LOAD MESSAGE: "+(data['totaltime']));*/
 		});
 		
 		//****************************************************************************************//
@@ -730,7 +729,6 @@ var setupPage=(function(){
 				for(i in data.channels) {
 					message+='^8#'+data.channels[i].name+' ^1(^0'+data.channels[i].users+'^1)'+(data.channels[i].topic?' - ^11'+data.channels[i].topic:'')+'\\n      ';
 				}
-				console.log(message);
 				client.handle_evtMessage.call(evt,{
 					type:'',
 					data:'',
@@ -807,7 +805,7 @@ var setupPage=(function(){
 				interval=250,
 				checker=(function(){
 					if (window.screenX!=capScreenX || window.screenY!=capScreenY) {
-						console.log("MOVED ("+capScreenX+","+capScreenY+")");
+						//console.log("MOVED ("+capScreenX+","+capScreenY+")");
 						if (window.screenX<0) {
 							document.body.style.display='none';
 							document.getElementById('wrapper2').style.left=(-window.screenX)+'px';

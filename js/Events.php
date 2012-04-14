@@ -167,7 +167,7 @@ echo <<<EOF
 	//
 	var Events={
 		Event: { ECMD_LOGIN:{		_eventid:ECMD_LOGIN,
-									name:['login','nickname'],
+									name:['login','nickname','nick'],
 							 		request:'login',
 							 		parseFormat:[{name:'user'},
 												 {name:'pass',optional:1}],

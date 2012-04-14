@@ -831,6 +831,22 @@ footer {
 	font-weight:bold;	
 }
 
+.message-startup {
+	font-family: Trebuchet;
+	font-size: 18px;
+	color:#FFD900;
+}
+
+.message-startup a[href] {
+	text-decoration: none;
+	color: #FFF;
+	font-weight: 600;
+}
+
+.message-startup a[href]:hover {
+	color: #A65500;
+}
+
 /*********************************************************************************/
 /*********************************************************************************/
 /*********************************************************************************/

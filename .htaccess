@@ -5,3 +5,5 @@ ExpiresActive On
 <FilesMatch "\.(html|php|css|js|png|gif|jpg)$">
   ExpiresDefault A0
 </FilesMatch>
+
+#AddOutputFilterByType DEFLATE text/html text/plain application/javascript text/css
