@@ -175,23 +175,6 @@ var setupPage=(function(){
 			console.log(":::::::::: TOTAL TIME FOR SERVER TO LOAD MESSAGE: "+(data['totaltime']));*/
 		});
 		
-		Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(evt,data){
-			if (Terminal._disconnected==true) {
-				// Reconnected
-				Terminal._disconnected=false;
-				$('body').removeClass('disconnected');
-				$('#prompt').attr({disabled:false});
-				JQueryMobWrap.hidePageLoadingMsg();
-			}
-		});
-		
-		Events.Event[ECMD_PINGCHAN].hooks.reqSuccessError=(function(evt,data){
-			Terminal._disconnected=true;
-			$('body').addClass('disconnected');
-			$('#prompt').attr({disabled:'disabled'});
-			JQueryMobWrap.showPageLoadingMsg();
-		});
-		
 		//****************************************************************************************//
 		//*******************************  Server Hook Events  ***********************************//
 		hk_server_event_append_message=(function(){ Terminal.print_message(this.arguments.chanid,this.arguments,false,false); });
@@ -353,6 +336,50 @@ var setupPage=(function(){
 			});
 			
 			return details;
+		}());
+		
+		
+		
+		
+		(function(){
+			// Ping/Connection Details
+			var consecutiveFailures=0,
+				numFailuresToDisconnect=settings.minPingTimeoutsToDisconnect;
+			
+		
+			
+			Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(evt,totalTime){
+				if (Terminal._disconnected==true) {
+					// Reconnected
+					Terminal._disconnected=false;
+					$('body').removeClass('disconnected');
+					$('#prompt').attr({disabled:false});
+					JQueryMobWrap.hidePageLoadingMsg();
+				}
+				
+				consecutiveFailures=0;
+				_rcDetails.style.display='none';
+				_rcDetails_Ping.innerHTML='Ping: '+totalTime+'ms';
+				_rcDetails_Ping.setAttribute('connection-level',getConnectionStrength(totalTime));
+				_rcDetails.style.display='';
+				
+			});
+		
+			Events.Event[ECMD_PINGCHAN].hooks.reqSuccessError=(function(evt,data){
+				consecutiveFailures++;
+				if (consecutiveFailures>=numFailuresToDisconnect) {
+					Terminal._disconnected=true;
+					$('body').addClass('disconnected');
+					//$('#prompt').attr({disabled:'disabled'});  // NOTE: This would be nice for the effect, but if the user is holding down BACKSPACE it will defocus and send to the browser
+					JQueryMobWrap.showPageLoadingMsg();
+				}
+				
+				_rcDetails.style.display='none';
+				_rcDetails_Ping.innerHTML='x';
+				_rcDetails_Ping.setAttribute('connection-level','0');
+				_rcDetails.style.display='';
+			});
+		
 		}());
 		
 		

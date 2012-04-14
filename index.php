@@ -49,18 +49,22 @@ Portal: www.jbud.me
    * BUG (untested/jquerymob) -- https://github.com/scottjehl/Device-Bugs/issues/1
    
    ### BUGS TO FIX
-   * Parse Error is back -- REMOVE PERMANENTLY!!!
-   * Swapping desktop windows makes the view spaz out (tries to load older messages, and ends up bouncing around)
-   * On init, channel-selector doesn't hover over server chan
-   * Mobile -- Loading older messages improperly affects the window scroll (goes all over the place)
+   * (mobile) TAP to swap channel isn't working
+   * (mobile) address-bar sometimes stays
+   * (mobile) Parse Error is back -- REMOVE PERMANENTLY!!!
+   * (desktop) Swapping desktop windows makes the view spaz out (tries to load older messages, and ends up bouncing around)
+   * (mobile) Loading older messages improperly affects the window scroll (goes all over the place)
    * Garbage Collector clears up auto-clear channels (since messages get erased regularly)
-   * Scroll to bottom on init (note we MUST scroll to 0,1 first to hide address bar on LOAD)
+   * (mobile) Scroll to bottom on init (note we MUST scroll to 0,1 first to hide address bar on LOAD)
+   * Attempts to load older messages on channels with no older messages
    
    ### TODO
-   * CSS -- Check mobile message/css (compare to desktop)
-   * Web-release stuff -- Re-enable GZip (+test out)  Minify JS/CSS files, Add site to Google
-   * Google Page-Speed test & YSlow
+   * Link   x.(com|net|...)
+   * Allow selecting text
+   * CSS (desktop) -- links remove text-shadow, use rollover, remove text-decoration, add colour
    
+   * Minify CSS files (can we minify LESS?)
+   * Talk to DreamHost about enabling mod_gzip
    * Hover over channel to view channel name
    * Messages Waiting
    * Cache settings
@@ -73,9 +77,10 @@ Portal: www.jbud.me
    
    
    ### Bugs - Unable to Reproduce
+   * On init, channel-selector doesn't hover over server chan
    * BUG -- "/leave #chan" on #chan for first time
-   * BUG -- mobile on startup is slightly offset from the bottom
-   * BUG -- after sending message, prompt is offset slightly
+   * BUG (mobile)-- on startup is slightly offset from the bottom
+   * BUG (mobile) -- after sending message, prompt is offset slightly
    
    
    -------- Semi-Important --------
@@ -145,6 +150,7 @@ Portal: www.jbud.me
    * Implement WebWorkers
    * Garbage collector to automatically call the next garbage collector instance (in ~30 seconds, through terminal); use CRON as a regular checker that things are still going
    * Improve IE Sucks page
+   * Anti-porn scanner (for sending picture-messages)
    
    
    ---- NOTES OF RECENT CHANGES ----
@@ -218,11 +224,11 @@ CGI-Generated Scripts
 	init=function(){
 		(function($){
 			// Determine Scripts to load (including mobile/desktop)
-			var scripts=['js/utilities.js','js/client.min.js'];
+			var scripts=['js/utilities.js','js/client.js'];
 			if (navigator.userAgent.match(/(android|webos|phone|pod|touch)/i))
-				scripts.push('js/mobile.min.js');
+				scripts.push('js/mobile.js');
 			else
-				scripts.push('js/desktop.min.js');
+				scripts.push('js/desktop.js');
 			
 			
 			// Load Scripts (in order)

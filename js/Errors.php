@@ -9,9 +9,9 @@ echo "
 			
 			var errCodes={";
 				foreach($uERROR_LIST as $error) {
-					echo $error[0].': {
-						message:\''.$error[1].'\',
-						handler:null },';
+					echo $error[0].": {
+						message:'".$error[1]."',
+						handler:null },";
 				}
 			echo "};";
 			

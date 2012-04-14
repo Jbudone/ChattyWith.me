@@ -418,10 +418,12 @@ echo <<<EOF
 										handler:client.hsrv_modify_chan },
 			ESRV_JOINOPS_CHANOPS:{		_eventid:ESRV_JOINOPS_CHANOPS,
 										parseFormat:['suserid','susernick'],
-										message:'%susernick has been given +O chanops by ChanServ' },
+										message:'%susernick has been given +O chanops by ChanServ',
+										handler:client.hsrv_modify_ops },
 			ESRV_JOINOPS_VOICEOPS:{		_eventid:ESRV_JOINOPS_VOICEOPS,
 										parseFormat:['suserid','susernick'],
-										message:'%susernick has been given +v voiceops by ChanServ' },
+										message:'%susernick has been given +v voiceops by ChanServ',
+										handler:client.hsrv_modify_ops },
 		},
 		
 		

@@ -10,6 +10,7 @@ var settings=(function(){
 		pingTimeout:3000,
 		longpollRetry:750,
 		longpollTimeout:8000,
+		minPingTimeoutsToDisconnect:3,
 		
 		colourMap:['white','','navy','green','red','maroon','purple','olive','orange','lime','teal','aqua','royalBlue','fuchsia','grey','silver'],
 		emoticonMap:{
@@ -89,7 +90,7 @@ var settings=(function(){
 					"   ^15Portal^1: http://jbud.me",
 					"   ^15Twitter^1: https://twitter.com/#!/thatsjb",
 					"   ^15Facebook^1: http://www.facebook.com/jb.braendel",
-					"   ^15Github^1: #",
+					"   ^15Github^1: https://github.com/Jbudone/ChattyWith.me",
 					" ",
 					"Thanks go out to: ^0jQuery^1, ^0LESS",
 					"Beautiful Background from: http://fullhdwallpapers.info/abstract/colorful-abstract-wallpaper-2/",
@@ -180,6 +181,8 @@ var client={
 		Events.Event[ECMD_MESSAGE].hooks.parsed=client.hevt_message_parse;
 		Events.Event[ECMD_ACTION].hooks.parsed=client.hevt_message_parse;
 		
+		Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(){ });
+		Events.Event[ECMD_PINGCHAN].hooks.reqSuccessError=(function(){ });
 		
 		this.auto_ping();
 		
@@ -380,7 +383,7 @@ var client={
 						url:'system/requests.json.php',
 						data:{request:'identify', args:{id:client.usrIdentification}},
 						context:this,
-						success:function(data){
+						success:(function(data){
 							console.log("Successful Response on Re-login request..");	
 							if (data.response==2) {
 								console.log("Silently Re-logged in");
@@ -388,11 +391,11 @@ var client={
 								autoRejoin();
 							} else
 								attemptRelogin();
-						},
-						error:function(data){
+						}),
+						error:(function(data){
 							console.log("ERROR re-attemping login..trying again");
 							attemptRelogin();
-						},
+						}),
 						timeout:settings.pingTimeout });
 						this.call_hook(this.evtref.hooks.reqSuccessError,totalTime);
 					});
@@ -648,6 +651,8 @@ var client={
 		this.call_hook(client.hk_user_left_post,this.arguments);
 	},
 	hsrv_modify_ops:function(){
+		if (!this.arguments.duserid)
+			this.arguments.duserid=this.arguments.userid; // NOTE: JoinOps does not use duserid
 		this.call_hook(client.hk_user_changed_pre,this.arguments);
 		var chanid=this.arguments.chanid;
 		var chanRef=client.channels[chanid];
@@ -655,7 +660,9 @@ var client={
 		var usrRef=chanRef.users[this.arguments.duserid];
 		if (typeof usrRef=='undefined') return;
 		usrRef.status=(	(this.evtref._eventid)==ESRV_SETOPS_CHANOPS_ON?'operator':
-						(this.evtref._eventid)==ESRV_SETOPS_VOICE_ON?'voice':'');
+						(this.evtref._eventid)==ESRV_SETOPS_VOICE_ON?'voice':
+						(this.evtref._eventid)==ESRV_JOINOPS_CHANOPS?'operator':
+						(this.evtref._eventid)==ESRV_JOINOPS_VOICEOPS?'voice':'');
 		this.arguments.status=usrRef.status;
 		this.call_hook(client.hk_user_changed_post,this.arguments);
 	},
@@ -1136,8 +1143,6 @@ var Terminal=(function(){
 		interface.loadOlder=(function(client){
 			var details={
 				load:null,
-				
-				
 			},
 			_client=client;
 			

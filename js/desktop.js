@@ -126,7 +126,7 @@
 			if (users) {
 				fragment=document.createDocumentFragment();
 				for (userid in users) {
-					var user=this._addUser(channelUsersList,userid,users[userid].status,users[userid].nick,true);
+					var user=this._addUser(chanid,userid,users[userid].status,users[userid].nick,true);
 					fragment.appendChild(user);
 				}
 				userlist.appendChild(fragment);
@@ -137,30 +137,36 @@
 			},settings.safeReflowTime);
 		});
 		
-		Terminal._addUser=(function(chanUsers,userid,status,nick,suspendAppend){
-				var user=document.createElement('a');
-				user.setAttribute('href','#');
-				user.setAttribute('status',status);
-				user.userdetails={userid:userid,status:status,nick:nick,element:user};
-				user.appendChild(document.createTextNode(nick));
-				user.className='channel-user';
-				user.onclick=user.oncontextmenu=(function(){
-					if (Terminal._isUserBoxShowing) Terminal._switchUserBox(this.userdetails);
-					else Terminal._showUserBox(this.userdetails);
-					return false;
-				});
-				chanUsers[userid]._element=user;
-				if (suspendAppend)
-					return user;
-				else
-					document.getElementById('rc-userlist').appendChild(user);
+		Terminal._addUser=(function(chanid,userid,status,nick,suspendAppend){
+			if (client.activeChanRef.chanid!=chanid) return;
+			var user=document.createElement('a'),
+				chanUsers=client.channels[chanid].users;
+			user.setAttribute('href','#');
+			user.setAttribute('status',status);
+			user.userdetails={userid:userid,status:status,nick:nick,element:user};
+			user.appendChild(document.createTextNode(nick));
+			user.className='channel-user';
+			user.onclick=user.oncontextmenu=(function(){
+				if (Terminal._isUserBoxShowing) Terminal._switchUserBox(this.userdetails);
+				else Terminal._showUserBox(this.userdetails);
+				return false;
+			});
+			chanUsers[userid]._element=user;
+			if (suspendAppend)
+				return user;
+			else
+				document.getElementById('rc-userlist').appendChild(user);
 		});
 		
-		Terminal._remUser=(function(chanref,userid){
+		Terminal._remUser=(function(chanid,userid){
+			if (client.activeChanRef.chanid!=chanid) return;
+			var chanref=client.channels[chanid];
 			$(chanref.users[userid]._element).remove();
 		});
 		
-		Terminal._changeUser=(function(chanUsers,userid,status){
+		Terminal._changeUser=(function(chanid,userid,status){
+			if (client.activeChanRef.chanid!=chanid) return;
+			var chanUsers=client.channels[chanid].users;
 			chanUsers[userid].status=status;
 			chanUsers[userid]._element.setAttribute('status',status);
 		});
@@ -263,6 +269,12 @@
 			
 			setTimeout(function(){ 
 				Terminal.swapChannel(0);
+				
+				setTimeout(function(){
+					// NOTE: Slight lag cause this to not work in swapChannel, so do it a second time here
+					leftPos=$('.channels-chanitem[chanid="0"]').attr({id:'channels-selected'}).position().left;
+					document.getElementById('channels-selector').style.left=leftPos+'px';
+				},settings.reflowTime);
 			},settings.reflowTime); // delay to allow the reflow to occur
 
 			
@@ -362,13 +374,14 @@ var setupPage=(function(){
 		//***********************************  Client Events  ************************************//
 		client.hk_messagesreceived_post=(function(){ Terminal.scrollToBottom(); });
 		client.hk_user_joined_post=(function(){
-			Terminal._addUser(client.channels[this.arguments.chanid].users,this.arguments.suserid,this.arguments.status,this.arguments.nick,false);
+			Terminal._addUser(this.arguments.chanid,this.arguments.suserid,this.arguments.status,this.arguments.nick,false);
 		});
 		client.hk_user_left_pre=(function(){
-			Terminal._remUser(client.channels[this.arguments.chanid],this.arguments.duserid);
+			Terminal._remUser(this.arguments.chanid,this.arguments.userid);
 		});
 		client.hk_user_changed_post=(function(){
-			Terminal._changeUser(client.channels[this.arguments.chanid].users,this.arguments.duserid,this.arguments.status);
+			console.log(this.arguments);
+			Terminal._changeUser(this.arguments.chanid,this.arguments.duserid,this.arguments.status);
 		});
 		client.hk_channel_changed_post=(function(){
 			
@@ -743,13 +756,19 @@ var setupPage=(function(){
 				thresholdScroll=0,
 				ajaxLoader=document.getElementById('loading-indicator');
 			$(document.getElementById('console-cube-front')).scroll(function(){
-				if (client.activeChanRef.chanid==0) return;
-				var offsetFromTop=_el.scrollHeight;
+				if (client.activeChanRef.chanid==0 || client.activeChanRef._reachedEnd==true) return;
+				var offsetFromTop=_el.scrollHeight,
+					chanid=client.activeChanRef.chanid;
 				if (_el.scrollTop<=thresholdScroll) {
 					ajaxLoader.style.display='block';
-					Terminal.loadOlder.load(function(){
+					Terminal.loadOlder.load(function(data){
 						ajaxLoader.style.display='';
-						_el.scrollTop=(_el.scrollHeight-offsetFromTop);	
+						if (data.end!=true) {
+							if (client.activeChanRef.chanid==chanid)
+								_el.scrollTop=(_el.scrollHeight-offsetFromTop);	
+						} else {
+							client.channels[chanid]._reachedEnd=true;
+						}
 					});	
 				}
 			});
@@ -767,7 +786,9 @@ var setupPage=(function(){
 					else if (ping<=500) return 2;
 					else if (ping<=800) return 1;
 					else return 0;
-				});
+				}),
+				consecutiveFailures=0,
+				numFailuresToDisconnect=settings.minPingTimeoutsToDisconnect;
 			
 		
 			
@@ -779,6 +800,7 @@ var setupPage=(function(){
 					$('#prompt').attr({disabled:false});
 				}
 				
+				consecutiveFailures=0;
 				_rcDetails.style.display='none';
 				_rcDetails_Ping.innerHTML='Ping: '+totalTime+'ms';
 				_rcDetails_Ping.setAttribute('connection-level',getConnectionStrength(totalTime));
@@ -787,9 +809,12 @@ var setupPage=(function(){
 			});
 		
 			Events.Event[ECMD_PINGCHAN].hooks.reqSuccessError=(function(evt,data){
-				Terminal._disconnected=true;
-				$('body').addClass('disconnected');
-				$('#prompt').attr({disabled:'disabled'});
+				consecutiveFailures++;
+				if (consecutiveFailures>=numFailuresToDisconnect) {
+					Terminal._disconnected=true;
+					$('body').addClass('disconnected');
+					//$('#prompt').attr({disabled:'disabled'});  // NOTE: This would be nice for the effect, but if the user is holding down BACKSPACE it will defocus and send to the browser
+				}
 				
 				_rcDetails.style.display='none';
 				_rcDetails_Ping.innerHTML='x';
