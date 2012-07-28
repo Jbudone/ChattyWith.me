@@ -638,6 +638,7 @@ var client={
 		this.call_hook(client.hk_user_joined_post,this.arguments);
 	},
 	hsrv_leave:function(){
+console.log(this.arguments);
 		this.call_hook(client.hk_user_left_pre,this.arguments);
 		var chanid=this.arguments.chanid;
 		var chanRef=client.channels[chanid];

@@ -358,10 +358,6 @@ var setupPage=(function(){
 				}
 				
 				consecutiveFailures=0;
-				_rcDetails.style.display='none';
-				_rcDetails_Ping.innerHTML='Ping: '+totalTime+'ms';
-				_rcDetails_Ping.setAttribute('connection-level',getConnectionStrength(totalTime));
-				_rcDetails.style.display='';
 				
 			});
 		
@@ -373,11 +369,6 @@ var setupPage=(function(){
 					//$('#prompt').attr({disabled:'disabled'});  // NOTE: This would be nice for the effect, but if the user is holding down BACKSPACE it will defocus and send to the browser
 					JQueryMobWrap.showPageLoadingMsg();
 				}
-				
-				_rcDetails.style.display='none';
-				_rcDetails_Ping.innerHTML='x';
-				_rcDetails_Ping.setAttribute('connection-level','0');
-				_rcDetails.style.display='';
 			});
 		
 		}());

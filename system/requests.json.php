@@ -84,7 +84,7 @@ $tStart=microtime(TRUE);
 		if ($_GET['request']) {
 			
 			$request=$_GET['request'];
-			$args=$_GET['args']?$_GET['args']:NULL;
+			$args=isset($_GET['args'])?$_GET['args']:NULL;
 			
 			// Decipher the arguments, and setup any required variables (eg. channel)
 			if (isset($args['chanid'])) {

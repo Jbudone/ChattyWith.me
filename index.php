@@ -49,24 +49,26 @@ Portal: www.jbud.me
    * BUG (untested/jquerymob) -- https://github.com/scottjehl/Device-Bugs/issues/1
    
    ### BUGS TO FIX
-   * (mobile) TAP to swap channel isn't working
-   * (mobile) address-bar sometimes stays
-   * (mobile) Parse Error is back -- REMOVE PERMANENTLY!!!
-   * (desktop) Swapping desktop windows makes the view spaz out (tries to load older messages, and ends up bouncing around)
+   *** (desktop) Disconnected users (both when chan in view AND not in view) doesn't remove user 
+   *** (mobile) TAP to swap channel isn't working
+   *** (mobile) address-bar sometimes stays
+   *** (mobile) Parse Error is back -- REMOVE PERMANENTLY!!!
+   * (desktop) switching channel scrolls up to top
    * (mobile) Loading older messages improperly affects the window scroll (goes all over the place)
    * Garbage Collector clears up auto-clear channels (since messages get erased regularly)
    * (mobile) Scroll to bottom on init (note we MUST scroll to 0,1 first to hide address bar on LOAD)
    * Attempts to load older messages on channels with no older messages
    
    ### TODO
-   * Link   x.(com|net|...)
-   * Allow selecting text
+   *** Messages Waiting
+   *** Remove server-side checking if user is in new channels (otherwise issues with flooding longpoll requests; instead decrease longpoll time and show a join-wait time -- OR -- a request to CANCEL longpoll ON join (instead return to allow new longpoll))
    * CSS (desktop) -- links remove text-shadow, use rollover, remove text-decoration, add colour
    
-   * Minify CSS files (can we minify LESS?)
+   * Check that the Ping is as efficient as possible (minimal size)
+   * Remove jQuery (bad for bandwidth hogging)
+   * Minify JS/CSS files (can we minify LESS?)
    * Talk to DreamHost about enabling mod_gzip
    * Hover over channel to view channel name
-   * Messages Waiting
    * Cache settings
    * RequireJS
    * Spritesheets
@@ -77,6 +79,7 @@ Portal: www.jbud.me
    
    
    ### Bugs - Unable to Reproduce
+   * (desktop) Swapping desktop windows makes the view spaz out (tries to load older messages, and ends up bouncing around)
    * On init, channel-selector doesn't hover over server chan
    * BUG -- "/leave #chan" on #chan for first time
    * BUG (mobile)-- on startup is slightly offset from the bottom
@@ -84,6 +87,8 @@ Portal: www.jbud.me
    
    
    -------- Semi-Important --------
+   * Make it VERY easy to start (on startup automatically assign nickname; auto-list most popular channels w/ click-to-join; on-join warn
+   					that user is still using default username; warn that username is not saved)
    * Longpolling -- auto exit on logout, fix newchan issue (ignorechannel when user may change his/her mind and re-join) ;; perhaps auto
    					-join the new channels and have longpolling check new channels against recently left channels
    * Test iOS power consumption
@@ -102,33 +107,32 @@ Portal: www.jbud.me
    * Avoid jQuery selectors? http://jsperf.com/getelementbyid-vs-jquery-id/5
    * Check if jQuery already included (ie. from plugins/extensions that we can use -- make sure they use acceptable version)
    * App Manifest (mobi) to auto add Chatty to homescreen
-   * Implement Ping
    * (desktop) Save previous messages, press up/down keys to iterate through them
    * Channel Options in Desktop (right container OR context menu) + Mobile (double-tap for settings/chan details)
    * Mobile userlist on right (small box that you can pull outwards to reveal userlist, able to pull it all the way out to see it *pop*; operator options)
    * Default topic for new channels
    * Mobile emoticons/colours box
    * Stop Mobile *flash* on new message received
+   * Link   x.(com|net|...)
+   * Allow selecting text
+   * Ruby shine while loading
+   * Load console (background) + ruby (front) instantaneously to show them loading while everything loads
+   * SEO Search Terms
+   * Images (option to save to iPhone + load from iPhone?)
+   * Send Microphone/Webcam message+offlines
    
    ------ Widgets/Features ------
    * Effects (desktop) -- cube-transition, allow spammed clicking to make the cube go wild
-   * Load console (background) + ruby (front) instantaneously to show them loading while everything loads -- treat console like Linux console (output all details,
-   				make the user feel like a hacker on it, also allow % load time)
    * Autocorrect
    * New Message Indicator
-   * Ruby shine while loading
    * Pages -- Chan Settings, User List + Actions
-   * Colours + Emoticons windows (shows just above the top/left of textbox when in focus)
    * Show Colour/Emoticons within the textbox
    * LaTeX
-   * Images (option to save to iPhone + load from iPhone?)
    * Tap username ("JB says:") like a link for popup on options to that user
    * Double-Tap console for Settings/Chan details (only short list/immediate stuff)
    * Tap timestamp for details on time (full time + time according to the user who sent it + time settings)
-   * LocalStorage
    * LocalStorage cache-scripting
    * Chanlist (mobile implementation; desktop properly formated + links to join)
-   * Send Microphone/Webcam message+offlines
    * Chanops able to remove RANGE of messages, remove pictures/videos/sound/mic recordings
    * Store+Send/Rcv Files
    * Accounts/IP addresses have limited bandwidth/space usage
