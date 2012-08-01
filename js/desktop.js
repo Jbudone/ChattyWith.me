@@ -1004,6 +1004,13 @@ var setupPage=(function(){
 				off:(function(){}), on:(function(){}),
 				notify:(function(){}), stopNotify:(function(){}),
 				message:(function(){}), openChan:(function(){}),
+				debug:(function(){
+					console.log("DEBUG");
+					console.log(settings);
+					console.log(unread);
+					console.log("notifying: "+notifying);
+					console.log("focus: "+inFocus);
+				}),
 			},
 			settings={
 				sounds:true,
@@ -1012,13 +1019,18 @@ var setupPage=(function(){
 				flashOnTime:1000,
 				flashOffTime:1000,
 				flashMessage:"New Message Notification",
+				flashChannelColour:"green",
+				
+				beepSound:"beep.wav",//"sounds-900-you-know.mp3",
 			},
+			beep=(new Audio(settings.beepSound)),
 			flashStoredMessage, // Current window title (saved during flashes)
 			storeSettings,
 			unread=[], // channel id's which have unread messages
 			notifying=false, // TRUE if message notification is currently being handled
 			inFocus=false;
 			
+			beep.load();
 			// Load Settings from localStorage
 			if (typeof localStorage == 'object') {
 				if (localStorage.getItem('notification-sound')) settings.sounds=localStorage.getItem('notification-sound');
@@ -1048,9 +1060,7 @@ var setupPage=(function(){
 			interface.notify=(function(){
 				// NOTE: If notifying is true, then only cause a sound/beep
 				
-				// TODO: BEEP
-				
-				
+				beep.play();
 				if (notifying) return;
 				notifying=true;
 				flashStoredMessage=window.document.title;
@@ -1059,10 +1069,18 @@ var setupPage=(function(){
 						if (!notifying) return;
 						window.document.title=settings.flashMessage;
 						setTimeout(flashOff,settings.flashOnTime);
+						
+						for (var i=0; i<unread.length; i++) {
+							$('.channels-chanitem[chanid="'+unread[i]+'"]')[0].style.background=settings.flashChannelColour;
+						}
 					}), flashOff=(function(){
 						if (!notifying) return;
 						window.document.title=flashStoredMessage;
 						setTimeout(flashOn,settings.flashOffTime);
+						
+						for (var i=0; i<unread.length; i++) {
+							$('.channels-chanitem[chanid="'+unread[i]+'"]')[0].style.background='';
+						}
 					});
 					flashOn();
 				}());
@@ -1070,6 +1088,10 @@ var setupPage=(function(){
 			interface.stopNotify=(function(){
 				notifying=false;
 				window.document.title=flashStoredMessage; // To appear responsive/immediate
+				
+				for (var i=0; i<unread.length; i++) {
+					$('.channels-chanitem[chanid="'+unread[i]+'"]')[0].style.background='';
+				}
 			});
 			interface.message=(function(chanid){
 				// Are we currently in focus AND in this channel?
@@ -1092,7 +1114,10 @@ var setupPage=(function(){
 						break;
 					}
 				}
-				if (unreadId>-1) unread.splice(unreadId,1);
+				if (unreadId>-1) {
+					$('.channels-chanitem[chanid="'+unread[unreadId]+'"]')[0].style.background='';
+					unread.splice(unreadId,1);
+				}
 				if (unread.length==0) interface.stopNotify();
 			});
 			
