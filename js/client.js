@@ -10,7 +10,7 @@ var settings=(function(){
 		pingTimeout:3000,
 		longpollRetry:750,
 		longpollTimeout:8000,
-		minPingTimeoutsToDisconnect:3,
+		minPingTimeoutsToDisconnect:10,
 		
 		colourMap:['white','','navy','green','red','maroon','purple','olive','orange','lime','teal','aqua','royalBlue','fuchsia','grey','silver'],
 		emoticonMap:{

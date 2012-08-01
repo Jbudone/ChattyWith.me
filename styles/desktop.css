@@ -156,7 +156,7 @@ header {
 	min-width: 100px;
 	height: 40px;
 	z-index: 2;
-	.transform(translatez(999999px)); /* Cube-Translations will sneakily float in front of this */
+	/*.transform(translatez(999999px));*/ /* Cube-Translations will sneakily float in front of this */
 	
 	.box-shadow(0px,0px,5px,3px,whitesmoke);
 	.border-radius(3px);
@@ -370,7 +370,7 @@ header {
 #console-cube {
 	.transform-style;
 	.transition-with-transform(~"",@cube-transform-speed,linear,~"");
-	.transform(rotateX(0deg) rotateY(0deg));
+	/*.transform(rotateX(0deg) rotateY(0deg));*/
 	
 	
 	height:inherit;
@@ -390,12 +390,12 @@ header {
 }
 
 
-#console-cube-top    { .transform(rotateX(90deg)  translateZ(200px)); background:lighten(#111, 3%) !important; }
-#console-cube-left   { .transform(rotateY(-90deg) translateZ(200px)); background:darken(#111, 10%) !important; }
-#console-cube-right  { .transform(rotateY(90deg)  translateZ(200px)); background:lighten(#111, 10%) !important; }
-#console-cube-bottom { .transform(rotateX(-90deg)  translateZ(200px)); background:darken(#111, 30%) !important; }
-#console-cube-back   { .transform(rotateY(180deg) translateZ(200px)); background:darken(#111, 10%) !important; }
-#console-cube-front  { .transform(translateZ(200px));
+#console-cube-top    { /*.transform(rotateX(90deg)  translateZ(200px));*/ background:lighten(#111, 3%) !important; }
+#console-cube-left   { /*.transform(rotateY(-90deg) translateZ(200px));*/ background:darken(#111, 10%) !important; }
+#console-cube-right  { /*.transform(rotateY(90deg)  translateZ(200px));*/ background:lighten(#111, 10%) !important; }
+#console-cube-bottom { /*.transform(rotateX(-90deg)  translateZ(200px));*/ background:darken(#111, 30%) !important; }
+#console-cube-back   { /*.transform(rotateY(180deg) translateZ(200px));*/ background:darken(#111, 10%) !important; }
+#console-cube-front  { /*.transform(translateZ(200px));*/
 	height:100%;
 	overflow:auto;
 	.border-radius(@box-border-radius);
@@ -404,25 +404,26 @@ header {
 /* NOTE: For 3D cube to work, the faces all need to be square (width=height); Use this during animation stage */
 /* TODO: Make this scalable (media-queries depending on window dimensions) */
 .console-cube-turntocube {
-	width:400px !important;
-	height:400px !important;
-	margin:auto;
-	position:relative;
-	top:100px;
+	/*width:400px !important;
+	height:400px !important;*/
+	/*margin:auto;
+	position:relative;*/
+	/*top:100px;*/
 	
-	.transition-with-transform(~"all 100 ms, ",@cube-transform-speed,linear,~"!important");
+	/*.transition-with-transform(~"all 100 ms, ",@cube-transform-speed,linear,~"!important");*/
 }
 
 .console-cube-turntocube .face {
 	overflow:hidden !important;	
+	.transition(left 0.6s cubic-bezier(0.42,0,0.58,1)); 
 }
 
 
-.console-cube-reset { .transition-with-transform(~"all 200ms, ",0s,linear,~"!important"); .transform(~"rotateX(0deg) rotateY(0deg) !important"); }
-.console-cube-animate-right1 { .transform(~"rotateX(-9deg) rotateY(-60deg) !important"); }
-.console-cube-animate-right2 { .transform(~"rotateX(0deg) rotateY(-90deg) !important"); }
-.console-cube-animate-left1 {  .transform(~"rotateX(-9deg) rotateY(60deg) !important"); }
-.console-cube-animate-left2 {  .transform(~"rotateX(0deg) rotateY(90deg) !important"); }
+.console-cube-reset { /*.transition-with-transform(~"all 200ms, ",0s,linear,~"!important"); .transform(~"rotateX(0deg) rotateY(0deg) !important");*/ }
+.console-cube-animate-right1 { /*.transform(~"rotateX(-9deg) rotateY(-60deg) !important");*/ }
+.console-cube-animate-right2 { /*.transform(~"rotateX(0deg) rotateY(-90deg) !important");*/ }
+.console-cube-animate-left1 {  /*.transform(~"rotateX(-9deg) rotateY(60deg) !important");*/ }
+.console-cube-animate-left2 {  /*.transform(~"rotateX(0deg) rotateY(90deg) !important");*/ }
 
 
 
@@ -465,7 +466,7 @@ header {
 
 #user-optionscontainer {
 	position: absolute;
-	.transform(translatez(999999px));
+	/*.transform(translatez(999999px));*/
 	z-index:2;
 }
 
@@ -638,7 +639,7 @@ footer {
 #prompt-goodies {
 	position: absolute;
 	margin: -5px 20px;
-	.transform(translatez(999999px)); /* Cube-Translations will sneakily float in front of this */
+	/*.transform(translatez(999999px));*/ /* Cube-Translations will sneakily float in front of this */
 }
 
 #prompt-goodies a {
@@ -696,7 +697,7 @@ footer {
 	.border-radius(7px);
 	padding: 1px 3px;	
 	max-width: 100px;
-	.transform(translatez(999999px));
+	/*.transform(translatez(999999px));*/
 	border: solid 1px white;
 	.box-shadow(0px,0px,6px,2px,whiteSmoke);
 	opacity: 0.95;
@@ -725,7 +726,7 @@ footer {
 	border-radius: 7px;
 	padding: 0px 3px;	
 	max-width: 100px;
-	.transform(translatez(999999px));
+	/*.transform(translatez(999999px));*/
 }
 
 #ew-emoticons-container a {
@@ -887,11 +888,11 @@ footer {
 }
 
 .transform-style {
-	transform-style: 			preserve-3d;
-	-webkit-transform-style: 	preserve-3d;
-	-moz-transform-style: 		preserve-3d;
-	-o-transform-style: 		preserve-3d;
-	-ms-transform-style: 		preserve-3d;
+/* 	transform-style: 			preserve-3d; */
+/* 	-webkit-transform-style: 	preserve-3d; */
+/* 	-moz-transform-style: 		preserve-3d; */
+/* 	-o-transform-style: 		preserve-3d; */
+/* 	-ms-transform-style: 		preserve-3d; */
 }
 
 .transform(@f) {

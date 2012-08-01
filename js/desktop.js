@@ -74,30 +74,35 @@
 				
 				// Cube Effect
 				this._prevChanid=client.activeChanRef['chanid'];
+				/*
 				var console=document.getElementById('console'),
 					clone=console.cloneNode(true),
 					face=(leftTransition?document.getElementById('console-cube-left'):document.getElementById('console-cube-right')),
 					transitionName=(leftTransition?'left':'right');
 				console.setAttribute('id','_console');
-				face.appendChild(clone);
+				face.appendChild(clone); // OLD Channel is appended to left/right face
+				
+				//face.style.left='0px';
 				document.getElementById('console-cube').className='console-cube-turntocube console-cube-animate-'+(transitionName)+'1';
 				document.getElementById('console-cube').className='console-cube-turntocube console-cube-animate-'+(transitionName)+'2';
+				//face.style.left='-500px';
 				setTimeout(function(){
 					document.getElementById('_console').parentNode.removeChild(document.getElementById('_console')); // ORIGINAL CONSOLE REMOVED
 					var console=document.getElementById('console'),
 						clone=console.cloneNode(true);
-					document.getElementById('wrapper-cube').style.height=(document.getElementById('wrapper-cube').offsetHeight)+'px';
-					document.getElementById('wrapper-cube').style.width=(document.getElementById('wrapper-cube').offsetWidth)+'px';
+					//document.getElementById('wrapper-cube').style.height=(document.getElementById('wrapper-cube').offsetHeight)+'px';
+					//document.getElementById('wrapper-cube').style.width=(document.getElementById('wrapper-cube').offsetWidth)+'px';
 					document.getElementById('console-cube').className='console-cube-reset';
 					console.parentNode.removeChild(console); // ORIGINAL CLONED CONSOLE REMOVED
 					document.getElementById('console-cube-front').appendChild(clone);
 					setTimeout(function(){
 						document.getElementById('console-cube').className='';
-						document.getElementById('wrapper-cube').style.height='';
-						document.getElementById('wrapper-cube').style.width='';
+						document.getElementById('console-cube-front').style.left='';
+						//document.getElementById('wrapper-cube').style.height='';
+						//document.getElementById('wrapper-cube').style.width='';
 					},transitionTime);
 				},transitionTime);
-				
+			*/	
 				
 			} catch (e) { window['console'].log(e); } finally {
 				setTimeout(function(){
@@ -135,6 +140,8 @@
 			setTimeout(function(){
 				Terminal.scrollToBottom(true);
 			},settings.safeReflowTime);
+			
+			Terminal.messageNotification.openChan(chanid);
 		});
 		
 		Terminal._addUser=(function(chanid,userid,status,nick,suspendAppend){
@@ -348,13 +355,13 @@ var setupPage=(function(){
 			console.log("=========================================================================");
 			console.log(":::::::::: TOTAL TIME FROM ENTER TO SENT MESSAGE: "+((_tFinish-client._tMessageCreated)*0.001));
 			console.log(":::::::::: TOTAL TIME FOR SERVER TO LOAD MESSAGE: "+(data['totaltime']));*/
-		});
+		}); 
 		
 		//****************************************************************************************//
 		//*******************************  Server Hook Events  ***********************************//
-		hk_server_event_append_message=(function(){ Terminal.print_message(this.arguments.chanid,this.arguments,false,false); });
+		hk_server_event_append_message=(function(){ Terminal.print_message(this.arguments.chanid,this.arguments,false,false); if (!this.arguments.old) Terminal.messageNotification.message(this.arguments.chanid); });
 		hk_server_event_prepend_message=(function(){ Terminal.print_message(this.arguments.chanid,this.arguments,true,false); });
-		hk_server_event_append_whisper=(function(){ Terminal.print_message(null,this.arguments,false,false); });
+		hk_server_event_append_whisper=(function(){ Terminal.print_message(null,this.arguments,false,false); if (!this.arguments.old) Terminal.messageNotification.message(this.arguments.chanid); });
 		hk_server_event_append_log=(function(evt,args){ Terminal.print(client.activeChanRef.chanid,args['message'],args['type']); Terminal.scrollToBottom(true); });
 		hk_server_event_add_messages_completed=(function(){ Terminal.scrollToBottom(); });
 		
@@ -989,6 +996,123 @@ var setupPage=(function(){
 		});
 		
 		
+		// Message Notification
+		// Can trigger when messages are received (and channel is not active OR page is not in focus), or
+		//	when the channel becomes active, or page comes into focus
+		var messageNotification=(function(){
+			var interface={
+				off:(function(){}), on:(function(){}),
+				notify:(function(){}), stopNotify:(function(){}),
+				message:(function(){}), openChan:(function(){}),
+			},
+			settings={
+				sounds:true,
+				message:true,
+				
+				flashOnTime:1000,
+				flashOffTime:1000,
+				flashMessage:"New Message Notification",
+			},
+			flashStoredMessage, // Current window title (saved during flashes)
+			storeSettings,
+			unread=[], // channel id's which have unread messages
+			notifying=false, // TRUE if message notification is currently being handled
+			inFocus=false;
+			
+			// Load Settings from localStorage
+			if (typeof localStorage == 'object') {
+				if (localStorage.getItem('notification-sound')) settings.sounds=localStorage.getItem('notification-sound');
+				if (localStorage.getItem('notification-message')) settings.message=localStorage.getItem('notification-message');
+			}
+			
+			
+			// Interface Setup
+			storeSettings=(function(){
+				if (typeof localStorage=='object') {
+					return (function(){
+						localStorage.setItem('notification-sound',settings.sounds);
+						localStorage.setItem('notification-message',settings.message);
+					});
+				} else return (function(){return;}); // Store Settings does nothing (localStorage DNE)
+			}());
+			interface.off=(function(){
+				settings.sounds=false;
+				settings.message=false;
+				storeSettings();
+			});
+			interface.on=(function(){
+				settings.sounds=true;
+				settings.message=true;
+				storeSettings();
+			});
+			interface.notify=(function(){
+				// NOTE: If notifying is true, then only cause a sound/beep
+				
+				// TODO: BEEP
+				
+				
+				if (notifying) return;
+				notifying=true;
+				flashStoredMessage=window.document.title;
+				(function(){
+					var flashOn=(function(){
+						if (!notifying) return;
+						window.document.title=settings.flashMessage;
+						setTimeout(flashOff,settings.flashOnTime);
+					}), flashOff=(function(){
+						if (!notifying) return;
+						window.document.title=flashStoredMessage;
+						setTimeout(flashOn,settings.flashOffTime);
+					});
+					flashOn();
+				}());
+			});
+			interface.stopNotify=(function(){
+				notifying=false;
+				window.document.title=flashStoredMessage; // To appear responsive/immediate
+			});
+			interface.message=(function(chanid){
+				// Are we currently in focus AND in this channel?
+				if (inFocus && chanid==client.activeChanRef.chanid) return;
+				
+				// Does chanid exist in unread?
+				for (var i=0; i<unread.length; i++) {
+					if (unread[i]==chanid) {
+						interface.notify();
+					}
+				}
+				unread.push(chanid);
+				interface.notify();
+			});
+			interface.openChan=(function(chanid){
+				var unreadId=-1, i;
+				for (i=0; i<unread.length; i++) {
+					if (unread[i]==chanid) {
+						unreadId=i;
+						break;
+					}
+				}
+				if (unreadId>-1) unread.splice(unreadId,1);
+				if (unread.length==0) interface.stopNotify();
+			});
+			
+			
+			
+			// Event Handling Here
+			// NOTE: Receive message in channel (implemented in Server Hooks)
+			// NOTE: Channel Opened (implemented elsewhere)
+			window.onfocus=(function(){
+				inFocus=true;
+				interface.openChan(client.activeChanRef.chanid);
+			});
+			window.onblur=(function(){
+				inFocus=false;
+			});
+			
+			flashStoredMessage=window.document.title;
+			return interface;
+		}());
+		Terminal.messageNotification=messageNotification;
 		
 	});
 	
