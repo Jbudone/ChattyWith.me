@@ -1028,7 +1028,7 @@ var setupPage=(function(){
 			storeSettings,
 			unread=[], // channel id's which have unread messages
 			notifying=false, // TRUE if message notification is currently being handled
-			inFocus=false;
+			inFocus=true;
 			
 			beep.load();
 			// Load Settings from localStorage
