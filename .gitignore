@@ -1,6 +1,12 @@
 _notes/
 NOTES
-.NOTES.swp
 favicon.ico
 images/
 system/secret/
+.buildpath
+.project
+.settings/
+*.swp
+*.swo
+*.wav
+*.mp3

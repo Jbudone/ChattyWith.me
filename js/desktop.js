@@ -359,9 +359,9 @@ var setupPage=(function(){
 		
 		//****************************************************************************************//
 		//*******************************  Server Hook Events  ***********************************//
-		hk_server_event_append_message=(function(){ Terminal.print_message(this.arguments.chanid,this.arguments,false,false); if (!this.arguments.old) Terminal.messageNotification.message(this.arguments.chanid); });
+		hk_server_event_append_message=(function(){ Terminal.print_message(this.arguments.chanid,this.arguments,false,false); if (!this.arguments.old && this.arguments.userid!=client.usrid) Terminal.messageNotification.message(this.arguments.chanid); });
 		hk_server_event_prepend_message=(function(){ Terminal.print_message(this.arguments.chanid,this.arguments,true,false); });
-		hk_server_event_append_whisper=(function(){ Terminal.print_message(null,this.arguments,false,false); if (!this.arguments.old) Terminal.messageNotification.message(this.arguments.chanid); });
+		hk_server_event_append_whisper=(function(){ Terminal.print_message(null,this.arguments,false,false); if (!this.arguments.old && this.arguments.userid!=client.usrid) Terminal.messageNotification.message(this.arguments.chanid); });
 		hk_server_event_append_log=(function(evt,args){ Terminal.print(client.activeChanRef.chanid,args['message'],args['type']); Terminal.scrollToBottom(true); });
 		hk_server_event_add_messages_completed=(function(){ Terminal.scrollToBottom(); });
 		
@@ -1004,13 +1004,7 @@ var setupPage=(function(){
 				off:(function(){}), on:(function(){}),
 				notify:(function(){}), stopNotify:(function(){}),
 				message:(function(){}), openChan:(function(){}),
-				debug:(function(){
-					console.log("DEBUG");
-					console.log(settings);
-					console.log(unread);
-					console.log("notifying: "+notifying);
-					console.log("focus: "+inFocus);
-				}),
+				dbg:(function(){}),
 			},
 			settings={
 				sounds:true,
@@ -1047,6 +1041,13 @@ var setupPage=(function(){
 					});
 				} else return (function(){return;}); // Store Settings does nothing (localStorage DNE)
 			}());
+			interface.dbg=(function(){
+				console.log("DEBUG");
+				console.log(settings);
+				console.log(unread);
+				console.log("notifying: "+notifying);
+				console.log("focus: "+inFocus);
+			});
 			interface.off=(function(){
 				settings.sounds=false;
 				settings.message=false;
@@ -1097,10 +1098,11 @@ var setupPage=(function(){
 				// Are we currently in focus AND in this channel?
 				if (inFocus && chanid==client.activeChanRef.chanid) return;
 				
-				// Does chanid exist in unread?
+				// Does chanid exist in unread?		
 				for (var i=0; i<unread.length; i++) {
-					if (unread[i]==chanid) {
+					if (parseInt(unread[i])==chanid) {
 						interface.notify();
+						return;
 					}
 				}
 				unread.push(chanid);
@@ -1109,7 +1111,7 @@ var setupPage=(function(){
 			interface.openChan=(function(chanid){
 				var unreadId=-1, i;
 				for (i=0; i<unread.length; i++) {
-					if (unread[i]==chanid) {
+					if (parseInt(unread[i])==chanid) {
 						unreadId=i;
 						break;
 					}
