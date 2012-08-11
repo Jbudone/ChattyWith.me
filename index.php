@@ -44,8 +44,6 @@ Portal: www.jbud.me
    ### Bugs in outside system
    * BUG (jQuery) -- send message, keep keyboard up, cursors doesn't move down with the prompt
    * BUG (jQuery) -- Typing in prompt auto scrolls up slightly
-   * BUG (browser) -- (cube) Swap from scrollable to non-scrollable channel (scroll sometimes still displays by browser bug)
-   * BUG (browser) -- (cube) Resizing browser needs to trigger cube (bad scale)
    * BUG (untested/jquerymob) -- https://github.com/scottjehl/Device-Bugs/issues/1
    
    ### BUGS TO FIX
@@ -54,6 +52,7 @@ Portal: www.jbud.me
    *** (mobile) address-bar sometimes stays
    *** (mobile) Parse Error is back -- REMOVE PERMANENTLY!!!
    * (desktop) switching channel scrolls up to top
+   * (desktop) resizing browser breaks scroll position
    * (mobile) Loading older messages improperly affects the window scroll (goes all over the place)
    * Garbage Collector clears up auto-clear channels (since messages get erased regularly)
    * (mobile) Scroll to bottom on init (note we MUST scroll to 0,1 first to hide address bar on LOAD)
@@ -124,7 +123,7 @@ Portal: www.jbud.me
    ------ Widgets/Features ------
    * Effects (desktop) -- cube-transition, allow spammed clicking to make the cube go wild
    * Autocorrect
-   * New Message Indicator
+   * (mobile) New Message Indicator
    * Pages -- Chan Settings, User List + Actions
    * Show Colour/Emoticons within the textbox
    * LaTeX

@@ -795,9 +795,49 @@ var setupPage=(function(){
 					else return 0;
 				}),
 				consecutiveFailures=0,
-				numFailuresToDisconnect=settings.minPingTimeoutsToDisconnect;
+				numFailuresToDisconnect=settings.minPingTimeoutsToDisconnect,
+				lastPingTime=null,
+				disconnect=(function(){}),
+				checkIfActive=(function(){});
 			
 		
+			// Disconnect
+			//	Auto logout, close channels, etc.
+			disconnect=(function(){
+				(new Event()).fromObject({ eventid:ECMD_LOGOUT }).request();
+				lastPingTime=null;
+			});
+			
+			// checkIfActive
+			//	Checks if the page is still active (eg. laptop lid is closed?)
+			//	If this suddenly executes and it's been way too long since our
+			//	last successful ping, then it could be that the laptop lid was 
+			//	closed, and thus we should auto d/c
+			checkIfActive=(function(){
+				if (client.usrid!=null && !Terminal._disconnected && lastPingTime!=null) {
+	
+					// Check the last time we've successfully pinged the server -- IF time has exceeded, then auto-logout before even asking the server
+					//	eg. the laptop lid has closed, and reopened
+					if ((new Date()).getTime()-lastPingTime>settings.maxTimeSinceLastPingToDisconnect) {
+						// Disconnect
+						window['console'].log("D/C!");
+						disconnect();
+					}
+				} else {
+					// If we're not inside any channels, then set lastPingTime to null to avoid the checking (its unecessary)
+					var _lastPingTime=lastPingTime;
+					lastPingTime=null;
+					for (var chanid in client.channels) {
+						if (chanid!=null) {
+							lastPingTime=_lastPingTime;
+							break;
+						}
+					}
+				}
+				
+				setTimeout(checkIfActive,settings.checkIfActiveTimer);
+			});
+			checkIfActive();
 			
 			Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(evt,totalTime){
 				if (Terminal._disconnected==true) {
@@ -808,6 +848,7 @@ var setupPage=(function(){
 				}
 				
 				consecutiveFailures=0;
+				lastPingTime=(new Date()).getTime();
 				_rcDetails.style.display='none';
 				_rcDetails_Ping.innerHTML='Ping: '+totalTime+'ms';
 				_rcDetails_Ping.setAttribute('connection-level',getConnectionStrength(totalTime));
@@ -828,7 +869,7 @@ var setupPage=(function(){
 				_rcDetails_Ping.setAttribute('connection-level','0');
 				_rcDetails.style.display='';
 			});
-		
+			
 		}());
 		
 		var winMoveChecker=(function(){
@@ -1128,13 +1169,13 @@ var setupPage=(function(){
 			// Event Handling Here
 			// NOTE: Receive message in channel (implemented in Server Hooks)
 			// NOTE: Channel Opened (implemented elsewhere)
-			window.onfocus=(function(){
+			window.addEventListener('focus',(function(){
 				inFocus=true;
 				interface.openChan(client.activeChanRef.chanid);
-			});
-			window.onblur=(function(){
+			}));
+			window.addEventListener('blur',(function(){
 				inFocus=false;
-			});
+			}));
 			
 			flashStoredMessage=window.document.title;
 			return interface;

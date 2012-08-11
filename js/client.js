@@ -11,6 +11,8 @@ var settings=(function(){
 		longpollRetry:750,
 		longpollTimeout:8000,
 		minPingTimeoutsToDisconnect:10,
+		maxTimeSinceLastPingToDisconnect:25000,
+		checkIfActiveTimer:100, // checks if page is still active (eg. laptop lid closed)
 		
 		colourMap:['white','','navy','green','red','maroon','purple','olive','orange','lime','teal','aqua','royalBlue','fuchsia','grey','silver'],
 		emoticonMap:{
