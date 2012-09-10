@@ -143,12 +143,14 @@ $evBAD_FORMAT_LENGTH=array(0x22,
 	"The settings you have provided are too lengthy");
 $evTOO_MANY_CHANNELS=array(0x23,
 	"You may only be joined in ".$kMAX_USER_CHANNELS." channels at any given moment.");
+$evERROR_PINGING_CHANNELS=array(0x24,
+	"There was an error in pinging the channels.");
 $uERROR_LIST=array($evBAD_CHANID,$evINVALID_USER,$evMISSING_ARGS,$evINVALID_ARGS,$evALREADY_LOGGED_IN,$evCOULD_NOT_IDENTIFY,$evCOULD_NOT_LOGIN,
 	$evCOULD_NOT_USE_NICKNAME,$evCOULD_NOT_LOGOUT,$evCOULD_NOT_REGISTER,$evMYSQLI,$evCOULD_NOT_CREATE_CHANNEL,$evCOULD_NOT_JOIN_CHANNEL,
 	$evCOULD_NOT_RETRIEVE_USERS,$evCOULD_NOT_RETRIEVE_MESSAGES,$evCOULD_NOT_LEAVE_CHANNEL,$evCOULD_NOT_SEND_MESSAGE,$evCOULD_NOT_RETRIEVE_LIST,
 	$evCOULD_NOT_KICK_USER,$evCOULD_NOT_APPLY_BAN,$evCOULD_NOT_APPLY_OPS,$evCOULD_NOT_APPLY_SETTINGS,$evBAD_PASSWORD,$evCOULD_NOT_REIDENIFY_RECENTPING,
 	$evBAD_USERNAME, $evUNKNOWN_USER, $evCANNOT_MESSAGE_SELF, $evUNKNOWN_OR_HIDDEN_USER,$evBANNED,$evMODERATED,$evUSER_YOURSELF,$evUSER_ALREADY_HAS_STATUS,
-	$evINSUFFICIENT_PRIVILEGES,$evNOT_IN_CHANNEL,$evBAD_FORMAT_CHARSET,$evBAD_FORMAT_LENGTH,$evTOO_MANY_CHANNELS);
+	$evINSUFFICIENT_PRIVILEGES,$evNOT_IN_CHANNEL,$evBAD_FORMAT_CHARSET,$evBAD_FORMAT_LENGTH,$evTOO_MANY_CHANNELS,$evERROR_PINGING_CHANNELS);
 		
 		
 // Response Codes
@@ -344,6 +346,14 @@ $kRESPONSE_SUCCESS=0x02;
 		if ($row=$result->fetch_assoc())
 			return $row['ip'];
 		return NULL;
+	}
+	
+	
+	// appendMysqliError
+	//	Appends the mysqli error to the given error
+	function getMysqliError($error, &$mysqli) {
+		$error[1].=': ('.$mysqli->connect_errno.') '.$mysqli->connect_error;
+		return $error;
 	}
 	
 

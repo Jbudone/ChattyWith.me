@@ -37,7 +37,7 @@
 	$kMAX_WHISPERTIME=date("Y-m-d H:i:s",strtotime("1 month ago"));		// Max time for whispers to stay in db
 	$kMAX_CLEARTIME=date("Y-m-d H:i:s",strtotime("2 minutes ago"));		// Max time before clearing out auto-clear channels
 	
-	$kNEUTRAL_MODE=FALSE; // TRUE to NOT garbage collect anything, but instead cry out the queries
+	$kNEUTRAL_MODE=TRUE; // TRUE to NOT garbage collect anything, but instead cry out the queries
 	
 	
 	

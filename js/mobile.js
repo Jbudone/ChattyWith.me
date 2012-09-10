@@ -342,6 +342,7 @@ var setupPage=(function(){
 		
 		
 		(function(){
+			if (!settings.pingEnabled) return false;
 			// Ping/Connection Details
 			var consecutiveFailures=0,
 				numFailuresToDisconnect=settings.minPingTimeoutsToDisconnect;

@@ -34,7 +34,8 @@
 	/********************
 		TODO LIST
 		
-		* ...
+		* Pingchan via. Longpolling (attempts to ping ONLY if user in `userchan`) -- Also remove front-end pingchan (efficiency+stability)
+		* (CHECK) Where does D/C check for pings (then auto ping against that table in here)
 	
 	********************/
 
@@ -43,10 +44,12 @@
 /************************************ ADMIN MANAGEMENT AREA BELOW *****************************************/
 	
 	
+	$_ONE_MILLISECOND=1000;
 	
 	// Message Retrieval Control
-	$kRETRIEVAL_SLEEPTMR=100000; // Sleep time between retrieval-attempts
+	$kRETRIEVAL_SLEEPTMR=100*$_ONE_MILLISECOND; // Sleep time between retrieval-attempts
 	$kRETRIEVAL_MAXTRIES=50; // Maximum number of tries to retrieve messages before returning (good for D/C's)
+	
 	
 
 /************************************ END OF ADMIN MANAGEMENT AREA *****************************************/
@@ -81,6 +84,18 @@
 		$query.='0);'; // Minor hack to complete our , delimited query
 		return $query;	
 	}
+	
+	function pingChan(&$mysqli,$chanlist,$userid) {
+		$query=sprintf("UPDATE `userchan` SET ping=NOW() WHERE userid='%d' AND chanid IN (",$userid);
+		foreach($chanlist as $channel) {
+			$query.=$channel['chanid'].',';	
+		}
+		$query.='0);'; // Minor hack to complete our , delimited query
+		
+		$result=$mysqli->query($query);
+		if (!$result) return false;
+		return true;
+	}
 
 
 	// No User found
@@ -101,6 +116,16 @@
 	$chanlist=$_GET['channels']; // NOTE: No channels given? No problem! This will automatically search `usechan` for new channels
 	//$ignorelist=$_GET['ignoreChannels']; // In case the user is listed somewhere under `userchan` still (the garbage collector hasn't gotten around to it yet),
 										// user will tell us to ignore these channels
+										
+	$pingChan=pingChan($mysqli,$chanlist,$user->userid); // Pingchan
+	if (!$pingChan) { // ERROR Pinging Channels!
+		$_err=$evERROR_PINGING_CHANNELS;
+		$_err[1].=': ('.$mysqli->errno.') '.$mysqli->error;
+		$mysqli->close();
+		err($_err);
+	}
+	
+	
 	$chan_query=getChanQuery($mysqli,$chanlist);
 	$whisper_query=sprintf("SELECT users.nick, whispers.message, whispers.timestamp FROM `whispers` JOIN `users` ON whispers.useridsnd=users.id WHERE whispers.useridrcv='%d' ORDER BY timestamp DESC; ",$user->userid);
 	$whisper_del_query=sprintf("DELETE FROM `whispers` WHERE useridrcv='%d'",$user->userid);

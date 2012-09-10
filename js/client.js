@@ -6,12 +6,13 @@ var settings=(function(){
 	var details={
 		
 		message_maxlen:512,
+		pingEnabled:false, // Temporary switch, while considering swapping entirely to backend-based pinging
 		pingTimer:750,
 		pingTimeout:3000,
 		longpollRetry:750,
 		longpollTimeout:8000,
 		minPingTimeoutsToDisconnect:10,
-		maxTimeSinceLastPingToDisconnect:25000,
+		maxTimeSinceLastPingToDisconnect:500*60*1000,//25000,  // TEMPORARY FIX!!
 		checkIfActiveTimer:100, // checks if page is still active (eg. laptop lid closed)
 		
 		colourMap:['white','','navy','green','red','maroon','purple','olive','orange','lime','teal','aqua','royalBlue','fuchsia','grey','silver'],
@@ -296,16 +297,18 @@ var client={
 	},
 	
 	auto_ping: function() {
+		if (!settings.pingEnabled) return;
 		var _channels=[], _chanid=0, evt=null;
 		for (_chanid in client.channels) {
 			if (_chanid==0) continue;
 			_channels.push(_chanid);	
 		}
 		if (_channels.length==0) {
+window['console'].log('auto_ping:: _channels.length==0');		
 			setTimeout(client.auto_ping, settings.pingTimer);
 			return;	
 		}
-		evt=((new Event).fromObject({ eventid:'ECMD_PINGCHAN' }));
+		evt=((new Event()).fromObject({ eventid:'ECMD_PINGCHAN' }));
 		
 		try {
 			if (evt.evtref.hooks)
@@ -367,6 +370,8 @@ var client={
 			
 			
 			if (data.error) {
+window['console'].log('auto_ping_cb:: data error,');
+window['console'].log(data.error);
 				if (data.error==0x0A) {
 					// Error on Server Side, retry again below
 				} else if (client.usrIdentification) {
@@ -405,6 +410,7 @@ var client={
 					return; // Avoid further pings (so to avoid multiple relogin-attempts
 				}
 			} else {
+window['console'].log('auto_ping_cb:: error without data.error');
 				// Check that we've pinged the proper number of channels
 				if (data.pinged=='0' && this.args.args.channels.length>0) {
 					console.log("Attempting to rejoin channels after disconnect");
@@ -418,6 +424,8 @@ var client={
 	
 	auto_ping_err: function(data) {
 		//console.log('auto_ping_err');
+		window['console'].log('auto_ping_err:: data error,');
+		window['console'].log(data.error);
 		this.call_hook(this.evtref.hooks.reqSuccessError,data);
 		setTimeout(client.auto_ping,settings.pingTimer);
 	},
@@ -443,12 +451,12 @@ var client={
 			for (i=0, msgLength=uMessages.length; i<msgLength; i++) {
 				msgRef=uMessages[i];
 				if (msgRef.id>localChanRef.maxmsgid) {
-					localChanRef.maxmsgid=msgRef.id;	
+					localChanRef.maxmsgid=parseInt(msgRef.id);	
 					if (localChanRef.minmsgid==null)
-						localChanRef.minmsgid=msgRef.id;
+						localChanRef.minmsgid=parseInt(msgRef.id);
 				}
 				else if (old==true && msgRef.id<localChanRef.minmsgid)
-					localChanRef.minmsgid=msgRef.id;
+					localChanRef.minmsgid=parseInt(msgRef.id);
 				else
 					continue;
 				msgRef.chanid=chanid;

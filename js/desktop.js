@@ -23,6 +23,10 @@
 				minTop:0,
 				animationTime:120,
 			};
+			configs.windowResizeSettings={
+				interval:350,
+				enabled:false,
+			};
 			
 			configs._promptPlaceholder="Type Inside of Me!";
 		}(settings));
@@ -767,9 +771,9 @@ var setupPage=(function(){
 				var offsetFromTop=_el.scrollHeight,
 					chanid=client.activeChanRef.chanid;
 				if (_el.scrollTop<=thresholdScroll) {
-					ajaxLoader.style.display='block';
+					ajaxLoader.style.visibility='visible';
 					Terminal.loadOlder.load(function(data){
-						ajaxLoader.style.display='';
+						ajaxLoader.style.visibility='hidden';
 						if (data.end!=true) {
 							if (client.activeChanRef.chanid==chanid)
 								_el.scrollTop=(_el.scrollHeight-offsetFromTop);	
@@ -783,6 +787,7 @@ var setupPage=(function(){
 		
 		
 		(function(){
+			if (!settings.pingEnabled) return false;
 			// Ping/Connection Details
 			var _rcDetails_Ping=document.getElementById('rc-details-ping'),
 				_rcDetails=document.getElementById('rc-details'),
@@ -873,9 +878,10 @@ var setupPage=(function(){
 		}());
 		
 		var winMoveChecker=(function(){
+			if (settings.windowResizeSettings.enabled=false) return null;
 			var capScreenX=window.screenX,
 				capScreenY=window.screenY,
-				interval=250,
+				interval=settings.windowResizeSettings.interval,
 				checker=(function(){
 					if (window.screenX!=capScreenX || window.screenY!=capScreenY) {
 						//console.log("MOVED ("+capScreenX+","+capScreenY+")");
@@ -899,10 +905,10 @@ var setupPage=(function(){
 						capScreenX=window.screenX;
 						capScreenY=window.screenY;
 					}
-					setTimeout(checker,350);
+					setTimeout(checker,interval);
 				});
 				
-				setTimeout(checker,350);
+				setTimeout(checker,interval);
 		}());
 		
 		var colourWin=(function(){

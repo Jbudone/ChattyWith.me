@@ -157,13 +157,13 @@ class User
 					// User set, open, and free to use	
 					if (!$ERROR and $this->id=$this->_createUniqueID()) {
 						if (!$this->mysqli->query(sprintf("UPDATE `users` SET identification='%s' WHERE nick='%s' LIMIT 1", $this->mysqli->escape_string($this->id), $this->mysqli->escape_string($username))))
-							$ERROR=$GLOBALS[evMYSQLI];
+							$ERROR=getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 						else {
 							$this->userid=$row['id'];
 							$this->_touch();
 						}
 					} else if (!$ERROR)
-						$ERROR=$GLOBALS[evMYSQLI];
+						$ERROR=getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 				}
 			} else {
 				// No user set, open-register this user
@@ -175,11 +175,11 @@ class User
 					else
 						$this->userid=$this->mysqli->insert_id;
 				} else
-					$ERROR=$GLOBALS[evMYSQLI];
+					$ERROR=getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 			}
 			$result->close();
 		} else
-			$ERROR=$GLOBALS[evMYSQLI];
+			$ERROR=getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 			
 		if ($ERROR)
 			return NULL;

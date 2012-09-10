@@ -756,7 +756,7 @@ footer {
 	height: 11px;
 	margin: auto;	
 	
-	display:none;
+	visibility:hidden;
 }
 
 
@@ -813,7 +813,7 @@ footer {
 }
 
 .message-old {
-	opacity:0.2;	
+	opacity:0.4;	
 }
 
 .message-action {

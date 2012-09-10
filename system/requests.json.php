@@ -165,7 +165,7 @@ $tStart=microtime(TRUE);
 					
 				$mysqli=getMySQLIi();
 				if (!$result=$mysqli->query(sprintf("SELECT channels.id, channels.name, channels.topic, (SELECT COUNT(*) FROM `userchan` WHERE userchan.chanid=channels.id) AS users FROM `channels` WHERE private=0 ORDER BY users DESC")))
-					err($evMYSQLI);
+					err(getMysqliError($evMYSQLI,$mysqli));
 				$list=array();
 				while ($row=$result->fetch_assoc()) {
 					$list[]=$row;	
@@ -555,7 +555,7 @@ $tFinish=microtime(TRUE);
 				$query=sprintf("UPDATE `userchan` SET ping=NOW() WHERE userid='%d' AND chanid IN (%s)",
 								$user->userid,$channels);
 				if (!$result=$mysqli->query($query))
-					err($evMYSQLI);
+					err(getMysqliError($evMYSQLI,$mysqli));
 				$info=$mysqli->info; //affected_rows; NOTE: rows don't always get changed, therefore we check Rows matched instead				
 				$mysqli->close();
 				
@@ -582,7 +582,7 @@ $tFinish=microtime(TRUE);
 				
 				if (!$result=$mysqli->query(sprintf("INSERT INTO `whispers` (useridsnd,useridrcv,message,timestamp) VALUES ('%d','%d','%s',NOW())",
 						$user->userid,$useridrcv,$mysqli->real_escape_string($args['message']))))
-						err($evMYSQLI);
+						err($getMysqliError($evMYSQLI,$mysqli));
 				$mysqli->close();
 				
 				echo json_encode(array('response'=>$kRESPONSE_SUCCESS));
@@ -605,7 +605,8 @@ $tFinish=microtime(TRUE);
 	// NOTE: This script will return the given error, and immediately
 	//			terminate this script
 	function ret($msg,$error=NULL) {
-		$ret=array('response'=>$GLOBALS[kRESPONSE_ERROR]);
+		$ret=array('response'=>$GLOBALS[kRESPONSE_ERROR],
+					'message'=>$msg);
 		if ($error)
 			$ret['error']=$error;
 		echo json_encode($ret);

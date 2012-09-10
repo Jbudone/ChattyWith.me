@@ -649,7 +649,7 @@ class Channel
 		// What is the provided user's operator status
 		$action;
 		if (!$result=$this->mysqli->query(sprintf("SELECT status FROM `operators` WHERE chanid='%d' AND userid='%d' LIMIT 1",$this->safechanid,$this->mysqli->real_escape_string($opid))))
-			return $GLOBALS[evMYSQLI];
+			return getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 		if ($row=$result->fetch_assoc()) {
 			if ($optype) {
 				// Update Operators Status
@@ -657,18 +657,18 @@ class Channel
 					($row['status']=='voice' and $optype=='voice'))
 					return $GLOBALS[evUSER_ALREADY_HAS_STATUS];
 				if (!$result=$this->mysqli->query(sprintf("UPDATE `operators` SET status='%s' WHERE chanid='%d' AND userid='%d' LIMIT 1",$this->mysqli->real_escape_string($optype),$this->safechanid,$this->mysqli->real_escape_string($opid))))
-					return $GLOBALS[evMYSQLI];
+					return getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 				$action=$GLOBALS[kACTION_MODIFY];
 			} else {
 				// Remove Operators Status
 				if (!$result=$this->mysqli->query(sprintf("DELETE FROM `operators` WHERE chanid='%d' AND userid='%d' LIMIT 1",$this->safechanid,$this->mysqli->real_escape_string($opid))))
-					return $GLOBALS[evMYSQLI];
+					return getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 				$action=$GLOBALS[kACTION_REMOVE];
 			}
 		} else {
 			// Create new Operator	
 			if (!$result=$this->mysqli->query(sprintf("INSERT INTO `operators` (chanid,userid,status) VALUES('%d','%d','%s')",$this->safechanid,$this->mysqli->real_escape_string($opid),$this->mysqli->real_escape_string($optype))))
-				return $GLOBALS[evMYSQLI];
+				return getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 			$action=$GLOBALS[kACTION_CREATE];
 		}
 		
@@ -713,7 +713,7 @@ class Channel
 			}
 				
 			if (!$result=$this->mysqli->query("UPDATE `channels` SET password=".($value?"PASSWORD('".$this->mysqli->real_escape_string($value)."')":'NULL')." WHERE id=".$this->safechanid." LIMIT 1"))
-				return $GLOBALS[evMYSQLI];
+				return getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 			$this->_log(sprintf("%d %d %s",$GLOBALS[kCHANNEL_EVENT_MODIFY_PASSWORD],$this->safeuserid,$this->safeusernick),$GLOBALS[kLOG_EVENT]);
 		} else if ($setting=='topic') {
 			// Topic change	
@@ -724,7 +724,7 @@ class Channel
 				return $GLOBALS[evBAD_FORMAT_LENGTH];
 				
 			if (!$result=$this->mysqli->query(sprintf("UPDATE `channels` SET topic='%s' WHERE id='%d' LIMIT 1",$this->mysqli->real_escape_string($value),$this->safechanid)))
-				return $GLOBALS[evMYSQLI];
+				return getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 			$this->_log(sprintf("%d %d %s %s",$GLOBALS[kCHANNEL_EVENT_MODIFY_TOPIC],$this->safeuserid,$this->safeusernick,$value),$GLOBALS[kLOG_EVENT]);
 		} else if ($setting=='moderated') {
 			// Moderated-Mode change	
@@ -732,7 +732,7 @@ class Channel
 				return $GLOBALS[evINVALID_ARGS];
 				
 			if (!$result=$this->mysqli->query(sprintf("UPDATE `channels` SET moderated='%s' WHERE id='%d' LIMIT 1",$this->mysqli->real_escape_string($value),$this->safechanid)))
-				return $GLOBALS[evMYSQLI];
+				return getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 			$this->_log(sprintf("%d %d %s",($value==1?$GLOBALS[kCHANNEL_EVENT_MODIFY_MODERATED_ON]:$GLOBALS[kCHANNEL_EVENT_MODIFY_MODERATED_OFF]),$this->safeuserid,$this->safeusernick),$GLOBALS[kLOG_EVENT]);
 		} else if ($setting=='private') {
 			// Public Privacy change	
@@ -740,7 +740,7 @@ class Channel
 				return $GLOBALS[evINVALID_ARGS];
 				
 			if (!$result=$this->mysqli->query(sprintf("UPDATE `channels` SET private='%s' WHERE id='%d' LIMIT 1",$this->mysqli->real_escape_string($value),$this->safechanid)))
-				return $GLOBALS[evMYSQLI];
+				return getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 			$this->_log(sprintf("%d %d %s",($value==1?$GLOBALS[kCHANNEL_EVENT_MODIFY_PRIVATE_ON]:$GLOBALS[kCHANNEL_EVENT_MODIFY_PRIVATE_OFF]),$this->safeuserid,$this->safeusernick),$GLOBALS[kLOG_EVENT]);
 		} else if ($setting=='autoclear') {
 			// Public Privacy change	
@@ -748,7 +748,7 @@ class Channel
 				return $GLOBALS[evINVALID_ARGS];
 				
 			if (!$result=$this->mysqli->query(sprintf("UPDATE `channels` SET autoclear='%s' WHERE id='%d' LIMIT 1",$this->mysqli->real_escape_string($value),$this->safechanid)))
-				return $GLOBALS[evMYSQLI];
+				return getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
 			$this->_log(sprintf("%d %d %s",($value==1?$GLOBALS[kCHANNEL_EVENT_MODIFY_AUTOCLEAR_ON]:$GLOBALS[kCHANNEL_EVENT_MODIFY_AUTOCLEAR_OFF]),$this->safeuserid,$this->safeusernick),$GLOBALS[kLOG_EVENT]);
 		} else
 			return $GLOBALS[evINVALID_ARGS];

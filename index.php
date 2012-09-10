@@ -57,6 +57,7 @@ Portal: www.jbud.me
    * Garbage Collector clears up auto-clear channels (since messages get erased regularly)
    * (mobile) Scroll to bottom on init (note we MUST scroll to 0,1 first to hide address bar on LOAD)
    * Attempts to load older messages on channels with no older messages
+   * Still receives messages from channels when you're not inside them
    
    ### TODO
    *** Messages Waiting

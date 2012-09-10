@@ -91,7 +91,10 @@
 	$environment['ONLINE']['DB_PASS']=decrypt('ho98D4GvuvRebSwcy8QrrQMSMp4dANk2ZLuOKEAQLQU=');
 	$environment['ONLINE']['DB_DB']='chattywithme';
 	
-	
+	// TEMPORARY DEBUGGING WITH THE ONLINE DATABASE
+	/*$environment['LOCAL']['DB_HOST']=$environment['LOCAL']['DB_HOST'];
+	$environment['LOCAL']['DB_USER']=$environment['LOCAL']['DB_USER'];
+	$environment['LOCAL']['DB_PASS']=$environment['LOCAL']['DB_PASS'];*/
 	
 	
 	
