@@ -48,18 +48,28 @@ class User
 	var $mysqli=NULL;
 	
 	
-	function __construct($identification=NULL) {
+	function __construct($identification=NULL,&$error) {
 		$this->id=NULL;
 		$this->nick=NULL;
 		$this->userid=NULL;
+		$error=FALSE;
 		
 		$this->mysqli=getMySQLIi();
+		if (!$this->mysqli) {
+			$error=getMysqliError($GLOBALS[evMYSQLI],$this->mysqli);
+			return;
+		}
 		
 		// Attempt to auto-login with $_SESSION['identification']
+		$result;
 		if (isset($_SESSION['identification']))
-			$this->identify($_SESSION['identification']);
+			$result=$this->identify($_SESSION['identification']);
 		else if ($identification)
-			$this->identify($identification);
+			$result=$this->identify($identification);
+		if (!$result) { // Error identifying
+			$error=$GLOBALS[evCOULD_NOT_LOGIN];
+			return;
+		}
 	}
 	
 	

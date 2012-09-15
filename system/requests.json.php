@@ -22,7 +22,9 @@ $tStart=microtime(TRUE);
 	require_once "utilities.php";
 	require_once "channel.php";
 	require_once "user.php";
+	$error=NULL;
 	$user=new User(); // The user should be created here automatically -- via. SESSION[identification]
+
 	
 	/********************
 		TODO LIST
