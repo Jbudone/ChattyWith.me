@@ -36,8 +36,9 @@
 	$kMAX_PINGTIME=date("Y-m-d H:i:s",strtotime("1 minute ago"));		// Max time since last ping before logging out user
 	$kMAX_WHISPERTIME=date("Y-m-d H:i:s",strtotime("1 month ago"));		// Max time for whispers to stay in db
 	$kMAX_CLEARTIME=date("Y-m-d H:i:s",strtotime("2 minutes ago"));		// Max time before clearing out auto-clear channels
+	$kMAX_RECONNECTTIME=date("Y-m-d H:i:s",strtotime("1 hour ago"));	// Max time before clearing the user/chan from `disconnects`
 	
-	$kNEUTRAL_MODE=TRUE; // TRUE to NOT garbage collect anything, but instead cry out the queries
+	$kNEUTRAL_MODE=FALSE; // TRUE to NOT garbage collect anything, but instead cry out the queries
 	
 	
 	
@@ -53,7 +54,7 @@ $mysqli=getMySQLIi();
 //  D/C delayed users
 /////////////
 
-if (!$result=$mysqli->query(sprintf("SELECT userchan.chanid, userchan.userid, users.nick FROM `userchan` JOIN `users` ON userchan.userid=users.id WHERE userchan.ping<'%s'",$kMAX_PINGTIME))) {
+if (!$result=$mysqli->query(sprintf("SELECT userchan.chanid, userchan.userid, users.nick FROM `userchan` JOIN `users` ON userchan.userid=users.id WHERE userchan.ping<'%s' OR userchan.userid=38",$kMAX_PINGTIME))) {
 	// Error	
 	$err=sprintf("Error finding dc/d users: %s",$mysqli->error);
 	echo '<b>'.$err.'</b>';
@@ -64,19 +65,23 @@ if (!$result=$mysqli->query(sprintf("SELECT userchan.chanid, userchan.userid, us
 if ($result->num_rows) {
 	$queryRem="DELETE FROM `userchan` WHERE (";
 	$queryLog="INSERT INTO `logs` (chanid,userid,message,type,timestamp) VALUES";
+	$queryDC="INSERT INTO `disconnects` (chanid,userid,timestamp) VALUES";
 	while ($row=$result->fetch_assoc()) {
 		$queryRem.=sprintf("(chanid='%d' AND userid='%d') OR ",$row['chanid'],$row['userid']);
 		$queryLog.=sprintf("('%d','%d','%d %d %s','event',NOW()),",$row['chanid'],$row['userid'],$kCHANNEL_EVENT_DC,$row['userid'],$row['nick']);
+		$queryDC .=sprintf("('%d','%d',NOW()),",$row['chanid'],$row['userid']);
 	}
 	$queryRem=substr($queryRem,0,strlen($queryRem)-4).')';
 	$queryLog=substr($queryLog,0,strlen($queryLog)-1);
+	$queryDC=substr($queryDC,0,strlen($queryDC)-1);
 	
 	if ($kVERBOSE) {
 		echo "D/C all the expired users!<br />".$queryRem."<br />";
 		echo "Log all D/C's!<br />".$queryLog."<br />";
+		echo "Store all D/C's!<br />".$queryDC."<br />";
 	}
 	if (!$kNEUTRAL_MODE) {
-		if (!$result=$mysqli->query($queryRem) or !$result=$mysqli->query($queryLog)) {
+		if (!$result=$mysqli->query($queryRem) or !$result=$mysqli->query($queryLog) or !$result=$mysqli->query($queryDC)) {
 			// Error
 			$err=sprintf("Error removing d/c's: %s",$mysqli->error);
 			echo '<b>'.$err.'</b>';
@@ -125,6 +130,20 @@ if ($result->num_rows) {
 
 
 
+///////////////////
+//
+//  Remove users/channels from `disconnects`
+/////////////
+
+if (!$kNEUTRAL_MODE and !$result=$mysqli->query(sprintf("DELETE FROM `disconnects` WHERE timestamp<'%s'",$kMAX_RECONNECTTIME))) {
+	// Error
+	$err=sprintf("Error removing disconnects: %s",$mysqli->error);
+	echo '<b>'.$err.'</b>';
+	mailWarning($err);
+} else if ($kVERBOSE) {
+	echo "Removed all expired disconnects<br />";
+}
+
 
 
 ///////////////////
@@ -132,7 +151,7 @@ if ($result->num_rows) {
 //  Remove Expired Whispers
 ////////////
 
-if (!$kNEUTRAL_MODE and !$result=$mysqli->query(sprintf("DELETE FROM `whispers` WHERE timestamp<'%s'",''))) {
+if (!$kNEUTRAL_MODE and !$result=$mysqli->query(sprintf("DELETE FROM `whispers` WHERE timestamp<'%s'",$kMAX_WHISPERTIME))) {
 	// Error	
 	$err=sprintf("Error removing whispers: %s",$mysqli->error);
 	echo '<b>'.$err.'</b>';

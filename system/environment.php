@@ -37,7 +37,7 @@
 	$localEnv = array('LOCAL' => array('/local$/i','/^24\\.108\\.\\d*\\.\\d*/',));
 	$onlineEnv = array('ONLINE' => array('/\\.me$/',));
 	$environments = array($localEnv, $onlineEnv);
-	$defaultEnvironment = 'ONLINE';
+	$defaultEnvironment = 'LOCAL';
 	$environment = array();
 	
 	
@@ -122,7 +122,7 @@
 	////////////////////
 	
 	$serverType=$defaultEnvironment;
-	if ($_SERVER)
+	if ($_SERVER AND $_SERVER['SERVER_NAME'])
 	{
 		foreach($environments as $environment_names) {
 			

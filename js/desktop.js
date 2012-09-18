@@ -786,6 +786,9 @@ var setupPage=(function(){
 		}());
 		
 		
+		// =========================================================
+		//	PING
+		// ==================
 		(function(){
 			if (!settings.pingEnabled) return false;
 			// Ping/Connection Details
@@ -801,10 +804,17 @@ var setupPage=(function(){
 				}),
 				consecutiveFailures=0,
 				numFailuresToDisconnect=settings.minPingTimeoutsToDisconnect,
+				timeConnected=null,
 				lastPingTime=null,
 				disconnect=(function(){}),
 				checkIfActive=(function(){});
 			
+			
+			// Logged In
+			var _func=Events.Event['ECMD_LOGIN'].hooks.reqSuccess;
+			Events.Event['ECMD_LOGIN'].hooks.reqSuccess=(function(data){ _func(data); 
+				timeConnected=(new Date()).getTime();
+			});
 		
 			// Disconnect
 			//	Auto logout, close channels, etc.
@@ -812,6 +822,7 @@ var setupPage=(function(){
 				(new Event()).fromObject({ eventid:ECMD_LOGOUT }).request();
 				lastPingTime=null;
 			});
+			
 			
 			// checkIfActive
 			//	Checks if the page is still active (eg. laptop lid is closed?)
@@ -823,9 +834,10 @@ var setupPage=(function(){
 	
 					// Check the last time we've successfully pinged the server -- IF time has exceeded, then auto-logout before even asking the server
 					//	eg. the laptop lid has closed, and reopened
-					if ((new Date()).getTime()-lastPingTime>settings.maxTimeSinceLastPingToDisconnect) {
+					if ((new Date()).getTime()-lastPingTime>settings.maxTimeSinceLastPingToDisconnect &&
+							timeConnected!=null && (new Date()).getTime()-timeConnected>settings.maxTimeSinceLastPingToDisconnect) {
 						// Disconnect
-						window['console'].log("D/C!");
+						window['console'].log("D/C!  time:"+((new Date()).getTime())+"-"+lastPingTime+">"+settings.maxTimeSinceLastPingToDisconnect);
 						disconnect();
 					}
 				} else {
@@ -844,7 +856,7 @@ var setupPage=(function(){
 			});
 			checkIfActive();
 			
-			Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(evt,totalTime){
+			pingSuccess=(function(totalTime){
 				if (Terminal._disconnected==true) {
 					// Reconnected
 					Terminal._disconnected=false;
@@ -858,10 +870,9 @@ var setupPage=(function(){
 				_rcDetails_Ping.innerHTML='Ping: '+totalTime+'ms';
 				_rcDetails_Ping.setAttribute('connection-level',getConnectionStrength(totalTime));
 				_rcDetails.style.display='';
-				
 			});
-		
-			Events.Event[ECMD_PINGCHAN].hooks.reqSuccessError=(function(evt,data){
+			
+			pingFail=(function(){
 				consecutiveFailures++;
 				if (consecutiveFailures>=numFailuresToDisconnect) {
 					Terminal._disconnected=true;
@@ -874,6 +885,38 @@ var setupPage=(function(){
 				_rcDetails_Ping.setAttribute('connection-level','0');
 				_rcDetails.style.display='';
 			});
+			
+			if (settings.useLongpollPing) {
+				// AUTO PINGING
+				//	USED FROM LONGPOLLING SCRIPT
+					var now;
+					client.hk_longpoll_success=function(data){
+						var delay=data.timeReceived-now;
+						//console.log('============hk_longpoll_success===========');
+						//console.log(delay);
+						//console.log('==========================================');
+						pingSuccess(parseInt(delay));
+					};
+					client.hk_longpoll_error=function(data){
+						pingFail();
+					};
+					client.hk_longpoll_post=function(){
+						// set ping sent time
+						now=Date.now().toString();
+						now=now.substr(0,now.length-3)+'.'+now.substr(now.length-3);
+						now=parseFloat(now);
+					};
+			} else {
+				// MANUAL PINGING
+				//  USED FROM PINGCHAN
+					Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(evt,totalTime){
+						pingSuccess(totalTime);
+					});
+				
+					Events.Event[ECMD_PINGCHAN].hooks.reqSuccessError=(function(evt,data){
+						pingFail();
+					});
+			}
 			
 		}());
 		

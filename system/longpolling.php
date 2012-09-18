@@ -1,5 +1,9 @@
 <?php
 
+    $JSON=array();
+    $timeReceived=microtime(TRUE); // Time since UNIX EPOCH (Jan 1 1970 0:00:00:00 GMT)
+	$JSON['timeReceived']=$timeReceived;
+
 /*
  *		Comet Longpolling			php
  *
@@ -21,7 +25,8 @@
 	if (!isset($_SESSION['identification']) and isset($_GET['identification']))
 		$_SESSION['identification']=$_GET['identification'];
 	else {
-		echo json_encode(array('error'=>"Identification not included in longpoll request"));
+		$JSON['error']="Identification not included in longpoll request";
+		echo json_encode($JSON);
 		exit;
 	}
 	require_once "environment.php";
@@ -34,8 +39,7 @@
 	/********************
 		TODO LIST
 		
-		* Pingchan via. Longpolling (attempts to ping ONLY if user in `userchan`) -- Also remove front-end pingchan (efficiency+stability)
-		* (CHECK) Where does D/C check for pings (then auto ping against that table in here)
+		* 
 	
 	********************/
 
@@ -59,7 +63,9 @@
 	//	err
 	//	Return with an error message
 	function err($errDetails) {
-		echo json_encode(array('response'=>$kRESPONSE_ERROR,'error'=>$errDetails));
+		$JSON['response']=$kRESPONSE_ERROR;
+		$JSON['error']=$errDetails;
+		echo json_encode($JSON);
 		exit;
 	}
 	
@@ -96,6 +102,27 @@
 		if (!$result) return false;
 		return true;
 	}
+	
+	function reconnect(&$mysqli,$userid,$chanid,$usernick) {
+		// User REJOINS CHANNEL
+		// REMOVE user from `disconnects`
+		$chan=new Channel($chanid,$userid,$usernick);
+		$chan->join(NULL,TRUE);
+		
+		$mysqli->query(sprintf("DELETE FROM `disconnects` WHERE userid='%d' AND chanid='%d'",$userid,$chanid));
+	}
+	
+	function userDisconnected(&$mysqli,$userid) {
+		// Fetch all channels from `disconnects` for userid
+		if (!$result=$mysqli->query(sprintf("SELECT chanid FROM `disconnects` WHERE userid='%d'",$userid))) {
+			return FALSE;
+		}
+		$chanlist=array();
+		while ($row=$result->fetch_assoc()) {
+			array_push($chanlist,$row['chanid']);
+		}
+		return empty($chanlist)?FALSE:$chanlist;
+	}
 
 
 	// No User found
@@ -106,6 +133,16 @@
 		$_err=$evMYSQLI;
 		$_err[1].=': ('.$mysqli->connect_errno.') '.$mysqli->connect_error;
 		err($_err);
+	}
+	
+	
+	// Has user been disconnected?
+	$disconnects=userDisconnected($mysqli,$user->userid);
+	if ($disconnects) {
+		// Reconnect user
+		foreach ($disconnects as $chanid) {
+			reconnect($mysqli,$user->userid,$chanid,$user->nick);
+		}
 	}
 	
 	
@@ -130,7 +167,7 @@
 	$whisper_query=sprintf("SELECT users.nick, whispers.message, whispers.timestamp FROM `whispers` JOIN `users` ON whispers.useridsnd=users.id WHERE whispers.useridrcv='%d' ORDER BY timestamp DESC; ",$user->userid);
 	$whisper_del_query=sprintf("DELETE FROM `whispers` WHERE useridrcv='%d'",$user->userid);
 	$userchan_query=getUserchanQuery($mysqli,$chanlist,$user->userid);
-	$messages_found=array('response'=>$kRESPONSE_SUCCESS);
+	$JSON['response']=$kRESPONSE_SUCCESS;
 	$kCALL_ORDER_MESSAGE_QUERIES=array('channels','whispers','userchan');
 	$CALL_i=0;
 	$time_to_return=FALSE;
@@ -148,17 +185,17 @@
 							$chanid=$result['chanid'];
 							$key=($result['newchan']==1?'newchannels':'channels');
 							
-							if (!$messages_found[$key]) $messages_found[$key]=array();
-							if ($messages_found[$key][$chanid]==NULL) $messages_found[$key][$chanid]=array();
-							array_unshift($messages_found[$key][$chanid], $result);
+							if (!$JSON[$key]) $JSON[$key]=array();
+							if ($JSON[$key][$chanid]==NULL) $JSON[$key][$chanid]=array();
+							array_unshift($JSON[$key][$chanid], $result);
 						}
 					}
 					else if ($kCALL_ORDER_MESSAGE_QUERIES[$CALL_i]=='whispers') {
 						// Whisper Messages
 						$time_to_return=TRUE;
-						$messages_found['whispers']=array();
+						$JSON['whispers']=array();
 						while ($result=$res->fetch_assoc()) {
-							array_unshift($messages_found['whispers'],$result);
+							array_unshift($JSON['whispers'],$result);
 						}
 					} 
 					else if ($kCALL_ORDER_MESSAGE_QUERIES[$CALL_i]=='userchan') {
@@ -185,14 +222,14 @@
 		if (!--$kRETRIEVAL_MAXTRIES) break;
 	}
 	
-	if ($messages_found['whispers']) {
+	if ($JSON['whispers']) {
 		// Delete Whispers from db
 		$mysqli->query($whisper_del_query);
 	}
 	
 	$mysqli->close();
 	
-	echo json_encode($messages_found);
+	echo json_encode($JSON);
 	
 	/*
 	

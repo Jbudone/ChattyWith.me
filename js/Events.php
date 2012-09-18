@@ -38,8 +38,7 @@ echo <<<EOF
 		ECMD_WHOIS=0x13,
 		ECMD_PINGCHAN=0x14,
 		ECMD_WHISPER=0x15,
-		_x;
-		
+		_x;	
 		
 		
 	// Event Codes (NOTE: This is in SYNC with channel.php)
@@ -64,6 +63,7 @@ echo <<<EOF
 		ESRV_JOINOPS_VOICEOPS=0x13, // joinops [suserid] [susernick]
 		ESRV_MODIFY_AUTOCLEAR_ON=0x14, // modify [suserid] [susernick]
 		ESRV_MODIFY_AUTOCLEAR_OFF=0x15, // modify [suserid] [susernick]
+		ESRV_RECONNECT=0x16, // reconnect [suserid] [susernick]
 		_x;
 	
 	
@@ -424,6 +424,10 @@ echo <<<EOF
 										parseFormat:['suserid','susernick'],
 										message:'%susernick has been given +v voiceops by ChanServ',
 										handler:client.hsrv_modify_ops },
+			ESRV_RECONNECT:{			_eventid:ESRV_RECONNECT,
+										parseFormat:['suserid','susernick'],
+										message:'%susernick has reconnected to #%channame',
+										handler:client.hsrv_join },
 		},
 		
 		

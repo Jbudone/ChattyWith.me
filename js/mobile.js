@@ -339,16 +339,120 @@ var setupPage=(function(){
 		}());
 		
 		
-		
-		
+		// =========================================================
+		//	PING
+		// ==================
 		(function(){
 			if (!settings.pingEnabled) return false;
 			// Ping/Connection Details
 			var consecutiveFailures=0,
-				numFailuresToDisconnect=settings.minPingTimeoutsToDisconnect;
+				numFailuresToDisconnect=settings.minPingTimeoutsToDisconnect,
+				timeConnected=null,
+				lastPingTime=null,
+				disconnect=(function(){}),
+				checkIfActive=(function(){});
+			
+			
+			// Logged In
+			var _func=Events.Event['ECMD_LOGIN'].hooks.reqSuccess;
+			Events.Event['ECMD_LOGIN'].hooks.reqSuccess=(function(data){ _func(data); 
+				timeConnected=(new Date()).getTime();
+			});
+		
+			// Disconnect
+			//	Auto logout, close channels, etc.
+			disconnect=(function(){
+				(new Event()).fromObject({ eventid:ECMD_LOGOUT }).request();
+				lastPingTime=null;
+			});
+			
+			
+			// checkIfActive
+			//	Checks if the page is still active (eg. laptop lid is closed?)
+			//	If this suddenly executes and it's been way too long since our
+			//	last successful ping, then it could be that the laptop lid was 
+			//	closed, and thus we should auto d/c
+			checkIfActive=(function(){
+				if (client.usrid!=null && !Terminal._disconnected && lastPingTime!=null) {
+	
+					// Check the last time we've successfully pinged the server -- IF time has exceeded, then auto-logout before even asking the server
+					//	eg. the laptop lid has closed, and reopened
+					if ((new Date()).getTime()-lastPingTime>settings.maxTimeSinceLastPingToDisconnect &&
+							timeConnected!=null && (new Date()).getTime()-timeConnected>settings.maxTimeSinceLastPingToDisconnect) {
+						// Disconnect
+						window['console'].log("D/C!  time:"+((new Date()).getTime())+"-"+lastPingTime+">"+settings.maxTimeSinceLastPingToDisconnect);
+						disconnect();
+					}
+				} else {
+					// If we're not inside any channels, then set lastPingTime to null to avoid the checking (its unecessary)
+					var _lastPingTime=lastPingTime;
+					lastPingTime=null;
+					for (var chanid in client.channels) {
+						if (chanid!=null) {
+							lastPingTime=_lastPingTime;
+							break;
+						}
+					}
+				}
+				
+				setTimeout(checkIfActive,settings.checkIfActiveTimer);
+			});
+			checkIfActive();
+			
+			pingSuccess=(function(totalTime){
+				if (Terminal._disconnected==true) {
+					// Reconnected
+					Terminal._disconnected=false;
+					$('body').removeClass('disconnected');
+					$('#prompt').attr({disabled:false});
+					JQueryMobWrap.hidePageLoadingMsg();
+				}
+				
+				consecutiveFailures=0;
+				lastPingTime=(new Date()).getTime();
+			});
+			
+			pingFail=(function(){
+				consecutiveFailures++;
+				if (consecutiveFailures>=numFailuresToDisconnect) {
+					Terminal._disconnected=true;
+					$('body').addClass('disconnected');
+					//$('#prompt').attr({disabled:'disabled'});  // NOTE: This would be nice for the effect, but if the user is holding down BACKSPACE it will defocus and send to the browser
+					JQueryMobWrap.showPageLoadingMsg();
+				}
+			});
+			
+			if (settings.useLongpollPing) {
+				// AUTO PINGING
+				//	USED FROM LONGPOLLING SCRIPT
+					var now;
+					client.hk_longpoll_success=function(data){
+						var delay=data.timeReceived-now;
+						pingSuccess(parseInt(delay));
+					};
+					client.hk_longpoll_error=function(data){
+						pingFail();
+					};
+					client.hk_longpoll_post=function(){
+						// set ping sent time
+						now=Date.now().toString();
+						now=now.substr(0,now.length-3)+'.'+now.substr(now.length-3);
+						now=parseFloat(now);
+					};
+			} else {
+				// MANUAL PINGING
+				//  USED FROM PINGCHAN
+					Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(evt,totalTime){
+						pingSuccess(totalTime);
+					});
+				
+					Events.Event[ECMD_PINGCHAN].hooks.reqSuccessError=(function(evt,data){
+						pingFail();
+					});
+			}
 			
 		
-			
+			/*
 			Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(evt,totalTime){
 				if (Terminal._disconnected==true) {
 					// Reconnected
@@ -370,7 +474,7 @@ var setupPage=(function(){
 					//$('#prompt').attr({disabled:'disabled'});  // NOTE: This would be nice for the effect, but if the user is holding down BACKSPACE it will defocus and send to the browser
 					JQueryMobWrap.showPageLoadingMsg();
 				}
-			});
+			});*/
 		
 		}());
 		

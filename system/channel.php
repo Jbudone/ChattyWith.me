@@ -53,7 +53,7 @@ $kMESSAGE_RETRIEVAL_MAX=30;
 $kALLOW_DOUBLE_JOIN=TRUE; // If user is already in a channel, set this to FALSE to disallow access
 
 
-// Event Codes
+// Event Codes (NOTE: This is in SYNC with /js/Events.php)
 $kCHANNEL_EVENT_JOIN=0x01; // join [suserid] [susernick]
 $kCHANNEL_EVENT_LEAVE=0x02; // leave [suserid] [susernick]
 $kCHANNEL_EVENT_DC=0x03; // dc [suserid] [susernick]
@@ -75,6 +75,7 @@ $kCHANNEL_EVENT_JOINOPS_CHANOPS=0x012; // joinops [suserid] [susernick]
 $kCHANNEL_EVENT_JOINOPS_VOICEOPS=0x013; // joinops [suserid] [susernick]
 $kCHANNEL_EVENT_MODIFY_AUTOCLEAR_ON=0x14; // modify autoclear [1|0]
 $kCHANNEL_EVENT_MODIFY_AUTOCLEAR_OFF=0x15; // modify autoclear [1|0]
+$kCHANNEL_EVENT_RECONNECT=0x16; // join [suserid] [susernick]
 
 
 // msgBan
@@ -296,21 +297,24 @@ class Channel
 	//	Attempt to join a channel
 	//
 	//	@password
+	//	@reconnect
 	// return: 0 on Success, or ERROR/Reason otherwise
 	// NOTE: The channel to join is ALREADY selected, this means
 	//		that the channel must already exist, otherwise it should
 	//		be created BEFORE instantiating this class
-	function join($password=NULL) {
+	function join($password=NULL,$reconnect=FALSE) {
 		
 		// Check if this user/IP is banned
 		if ($this->_isBanned())
 			return $GLOBALS[evBANNED];
 		
 		// Check for a password
-		if (!$result=$this->mysqli->query(sprintf("SELECT password FROM `channels` WHERE id='%d' AND (password IS NULL OR password=PASSWORD('%s')) LIMIT 1",$this->safechanid,$this->mysqli->real_escape_string($password))))
-			return $GLOBALS[evBAD_PASSWORD];
-		if (!$result->num_rows)
-			return $GLOBALS[evBAD_PASSWORD];
+		if (!$reconnect) { // People who are reconnecting to this channel don't need a password
+			if (!$result=$this->mysqli->query(sprintf("SELECT password FROM `channels` WHERE id='%d' AND (password IS NULL OR password=PASSWORD('%s')) LIMIT 1",$this->safechanid,$this->mysqli->real_escape_string($password))))
+				return $GLOBALS[evBAD_PASSWORD];
+			if (!$result->num_rows)
+				return $GLOBALS[evBAD_PASSWORD];
+		}
 			
 		// Get the Latest Message ID (used in `userchan` for communication with Comet msgRetrieve.php)
 		$msgid=0;
@@ -328,12 +332,16 @@ class Channel
 			else
 				$dblJoin=TRUE;
 		} else // Log Join/Event
-			$this->_log($GLOBALS[kCHANNEL_EVENT_JOIN].' '.$this->safeuserid.' '.$this->safeusernick,$GLOBALS[kLOG_EVENT]);
+			$this->_log((($reconnect)?$GLOBALS[kCHANNEL_EVENT_RECONNECT]:$GLOBALS[kCHANNEL_EVENT_JOIN]).' '.$this->safeuserid.' '.$this->safeusernick,$GLOBALS[kLOG_EVENT]);
 			
 		// Check for ChanOps or Voice
 		if ($ops=$this->_isOperator(TRUE) and !$dblJoin) {
 			// Op this User
 			$this->_log(($ops=='operator'?$GLOBALS[kCHANNEL_EVENT_JOINOPS_CHANOPS]:$GLOBALS[kCHANNEL_EVENT_JOINOPS_VOICEOPS]).' '.$this->safeuserid.' '.$this->safeusernick,$GLOBALS[kLOG_EVENT]);
+		}
+		
+		if ($reconnect) {
+			$this->mysqli->query(sprintf("DELETE FROM `disconnects` WHERE chanid='%d' AND userid='%d'",$this->safechanid,$this->safeuserid));
 		}
 		
 		return 0;

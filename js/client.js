@@ -6,13 +6,15 @@ var settings=(function(){
 	var details={
 		
 		message_maxlen:512,
-		pingEnabled:false, // Temporary switch, while considering swapping entirely to backend-based pinging
+		pingEnabled:true, // FALSE to disable any ping handling
+		useLongpollPing:true, // TRUE if we're not manually pinging the servers (pings done within longpolling script)
 		pingTimer:750,
 		pingTimeout:3000,
 		longpollRetry:750,
 		longpollTimeout:8000,
 		minPingTimeoutsToDisconnect:10,
-		maxTimeSinceLastPingToDisconnect:500*60*1000,//25000,  // TEMPORARY FIX!!
+		maxTimeSinceLastPingToDisconnect:25*1000,
+		
 		checkIfActiveTimer:100, // checks if page is still active (eg. laptop lid closed)
 		
 		colourMap:['white','','navy','green','red','maroon','purple','olive','orange','lime','teal','aqua','royalBlue','fuchsia','grey','silver'],
@@ -222,11 +224,19 @@ var client={
 				identification:this.usrIdentification},
 			context:this,
 			success:this._cblongpoll,
-			error:this.hk_longpoll_error,
+			error:this._errlongpoll,
 			timeout:settings.longpollTimeout });
 		this.call_hook(this.hk_longpoll_post);
 	},
+	_errlongpoll: function(data) {
+		//console.log('longpoll error..');
+		setTimeout(function(){
+			client.longpoll.apply(client);
+		},settings.longpollRetry);
+		this.call_hook(this.hk_longpoll_error,this.arguments);
+	},
 	_cblongpoll: function(data) { 
+		this.call_hook(this.hk_longpoll_success,data);
 		//document.body.style.display='none';
 		var messages_received=false;
 		if (data.channels) {
@@ -297,7 +307,7 @@ var client={
 	},
 	
 	auto_ping: function() {
-		if (!settings.pingEnabled) return;
+		if (!settings.pingEnabled || settings.useLongpollPing) return;
 		var _channels=[], _chanid=0, evt=null;
 		for (_chanid in client.channels) {
 			if (_chanid==0) continue;
@@ -702,17 +712,13 @@ console.log(this.arguments);
 	
 	// Hooks (may be used for whatever reason in the future)
 	//	Use call_hook(__hook_function__) to call the hook IF set, and under this context
-	call_hook: function(func) { if (typeof func == 'function') func.call(this); },
+	call_hook: function(func,args) { if (typeof func == 'function') func.call(this,args); },
 	hk_initialize_pre:null,
 	hk_initialize_post:null,
 	hk_longpoll_pre:null,
 	hk_longpoll_post:null,
-	hk_longpoll_error: function(data){
-		//console.log('longpoll error..');
-		setTimeout(function(){
-			client.longpoll.apply(client);
-		},settings.longpollRetry);
-	},
+	hk_longpoll_success: null,
+	hk_longpoll_error: null,
 	hk_messagesreceived_post:null,
 	hk_user_left_pre:null,
 	hk_user_left_post:null,
