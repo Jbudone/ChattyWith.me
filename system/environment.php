@@ -34,8 +34,8 @@
 	///  ENVIRONMENTS
 	////////////////////
 	
-	$localEnv = array('LOCAL' => array('/local$/i','/^24\\.108\\.\\d*\\.\\d*/',));
-	$onlineEnv = array('ONLINE' => array('/\\.me$/',));
+	$localEnv = array('LOCAL' => array('jb'));
+	$onlineEnv = array('ONLINE' => array('lion-o',));
 	$environments = array($localEnv, $onlineEnv);
 	$defaultEnvironment = 'LOCAL';
 	$environment = array();
@@ -120,15 +120,14 @@
 	///
 	///  SETUP ENVIRONMENT
 	////////////////////
-	
 	$serverType=$defaultEnvironment;
-	if ($_SERVER AND $_SERVER['SERVER_NAME'])
+	$hostname=exec('hostname');
+	if ($hostname)
 	{
 		foreach($environments as $environment_names) {
-			
-			foreach ($environment_names as $environment_type => $server_patterns) {
-				foreach ($server_patterns as $pattern) {
-					if (preg_match($pattern, $_SERVER['SERVER_NAME'])) {
+			foreach ($environment_names as $environment_type => $hostnames) {
+				foreach ($hostnames as $_hostname) {
+					if ($hostname==$_hostname) {
 						$serverType=$environment_type;
 						break;
 					}

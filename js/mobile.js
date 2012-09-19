@@ -358,6 +358,17 @@ var setupPage=(function(){
 			Events.Event['ECMD_LOGIN'].hooks.reqSuccess=(function(data){ _func(data); 
 				timeConnected=(new Date()).getTime();
 			});
+			
+			// Joined 1st Channel
+			_func=Events.Event['ECMD_JOIN'].hooks.reqSuccess;
+			Events.Event['ECMD_JOIN'].hooks.reqSuccess=(function(data){ _func(data);
+				// Is this our FIRST channel joined?
+				var chanCount=getChanCount();
+				if (chanCount==2) {
+					console.log("This is FIRST channel Joined!");
+					timeConnected=(new Date()).getTime();
+				}
+			});
 		
 			// Disconnect
 			//	Auto logout, close channels, etc.
@@ -373,7 +384,7 @@ var setupPage=(function(){
 			//	last successful ping, then it could be that the laptop lid was 
 			//	closed, and thus we should auto d/c
 			checkIfActive=(function(){
-				if (client.usrid!=null && !Terminal._disconnected && lastPingTime!=null) {
+				if (client.usrid!=null && !Terminal._disconnected && lastPingTime!=null && getChanCount()>=2) {
 	
 					// Check the last time we've successfully pinged the server -- IF time has exceeded, then auto-logout before even asking the server
 					//	eg. the laptop lid has closed, and reopened

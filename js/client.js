@@ -11,7 +11,7 @@ var settings=(function(){
 		pingTimer:750,
 		pingTimeout:3000,
 		longpollRetry:750,
-		longpollTimeout:8000,
+		longpollTimeout:20000,
 		minPingTimeoutsToDisconnect:10,
 		maxTimeSinceLastPingToDisconnect:25*1000,
 		
@@ -212,24 +212,30 @@ var client={
 		for(chanid in channels) {
 			_chanlist[chanid]={chanid:chanid, maxmsgid:channels[chanid].maxmsgid};
 		}
-		$.ajax({
-			async:'true',
-			cache:'false',
-			dataType:'json',
-			type:'GET',
-			url:'system/longpolling.php',
-			data:{
-				channels:_chanlist,
-				ignore:this.ignoreChannels,
-				identification:this.usrIdentification},
-			context:this,
-			success:this._cblongpoll,
-			error:this._errlongpoll,
-			timeout:settings.longpollTimeout });
-		this.call_hook(this.hk_longpoll_post);
+		if (getChanCount()>=2) {
+			$.ajax({
+				async:'true',
+				cache:'false',
+				dataType:'json',
+				type:'GET',
+				url:'system/longpolling.php',
+				data:{
+					channels:_chanlist,
+					ignore:this.ignoreChannels,
+					identification:this.usrIdentification},
+				context:this,
+				success:this._cblongpoll,
+				error:this._errlongpoll,
+				timeout:settings.longpollTimeout });
+			this.call_hook(this.hk_longpoll_post);
+		} else {
+			// Not in any channels
+			setTimeout(function(){ client.longpoll.apply(client); },settings.longpollRetry);
+		}
 	},
 	_errlongpoll: function(data) {
-		//console.log('longpoll error..');
+		console.log('longpoll error..');
+		console.log(data);
 		setTimeout(function(){
 			client.longpoll.apply(client);
 		},settings.longpollRetry);

@@ -195,7 +195,7 @@ Did You Know?
     
     
         <footer id="footer">
-            <form id="fPrompt">
+            <form id="fPrompt" autocomplete="off">
             <input type="text" id="prompt" val="test" />
             </form>
         </footer>

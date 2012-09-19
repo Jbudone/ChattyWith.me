@@ -18,3 +18,12 @@ var getChanIDFromOffset=function(offset) {
 		iPos=chanlist.length-1;
 	return chanlist[iPos];
 };
+
+
+var getChanCount=function(){
+	chanCount=0;
+	for (var chanid in client.channels) {
+		chanCount++;
+	}
+	return chanCount;
+};
