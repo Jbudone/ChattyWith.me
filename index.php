@@ -182,7 +182,7 @@ Did You Know?
 </style>
 
 <!--<script async src="js/require.min.js" data-main="js/main.new.js"></script>-->
-<script async src="js/jquery.1.7.1.min.js"></script>
+<script async src="js/jquery.min.js"></script>
 <!--<script async src="http://code.jquery.com/jquery-1.6.4.min.js"></script>-->
 </head>
 
