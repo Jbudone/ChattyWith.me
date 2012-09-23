@@ -153,8 +153,9 @@ Portal: www.jbud.me
    * Custom scrollbar appearance
    * Implement WebWorkers
    * Garbage collector to automatically call the next garbage collector instance (in ~30 seconds, through terminal); use CRON as a regular checker that things are still going
-   * Improve IE Sucks page
+   * Improve IE Sucks page (show clippy!)
    * Anti-porn scanner (for sending picture-messages)
+   * Link to chattywith.me/#lolchan to auto connect (as random nick) and join #lolchan
    
    
    ---- NOTES OF RECENT CHANGES ----

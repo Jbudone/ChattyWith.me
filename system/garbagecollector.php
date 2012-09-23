@@ -54,7 +54,7 @@ $mysqli=getMySQLIi();
 //  D/C delayed users
 /////////////
 
-if (!$result=$mysqli->query(sprintf("SELECT userchan.chanid, userchan.userid, users.nick FROM `userchan` JOIN `users` ON userchan.userid=users.id WHERE userchan.ping<'%s' OR userchan.userid=38",$kMAX_PINGTIME))) {
+if (!$result=$mysqli->query(sprintf("SELECT userchan.chanid, userchan.userid, users.nick FROM `userchan` JOIN `users` ON userchan.userid=users.id WHERE userchan.ping<'%s'",$kMAX_PINGTIME))) {
 	// Error	
 	$err=sprintf("Error finding dc/d users: %s",$mysqli->error);
 	echo '<b>'.$err.'</b>';

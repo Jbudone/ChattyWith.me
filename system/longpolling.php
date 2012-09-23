@@ -3,6 +3,7 @@
     $JSON=array();
     $timeReceived=microtime(TRUE); // Time since UNIX EPOCH (Jan 1 1970 0:00:00:00 GMT)
 	$JSON['timeReceived']=$timeReceived;
+$_timeStarted=time();
 
 /*
  *		Comet Longpolling			php
@@ -29,17 +30,17 @@
 		echo json_encode($JSON);
 		exit;
 	}
-	require_once "environment.php";
+	require_once "environment.php";  
 	require_once "utilities.php";
 	require_once "channel.php";
-	require_once "user.php";
+	require_once "user.php"; 
 	$user=new User(); // The user should be created here automatically -- via. SESSION[identification]
 	
 	
 	/********************
 		TODO LIST
 		
-		* 
+		* Check userchan on START rather than every iteration
 	
 	********************/
 
@@ -83,7 +84,7 @@
 	}
 	
 	function getUserchanQuery(&$mysqli,$chanlist,$userid) {
-		$query="SELECT chanid, msgid FROM `userchan` WHERE userid=".$userid." AND chanid NOT IN (";
+		$query="SELECT userchan.chanid, userchan.msgid, channels.name AS title FROM `userchan` JOIN `channels` ON userchan.chanid=channels.id WHERE userchan.userid=".$userid." AND userchan.chanid NOT IN (";
 		foreach($chanlist as $channel) {
 			$query.=$channel['chanid'].',';	
 		}
@@ -162,7 +163,7 @@
 		err($_err);
 	}
 	
-	
+$JSON['timeTo1']=time()-$_timeStarted;
 	$chan_query=getChanQuery($mysqli,$chanlist);
 	$whisper_query=sprintf("SELECT users.nick, whispers.message, whispers.timestamp FROM `whispers` JOIN `users` ON whispers.useridsnd=users.id WHERE whispers.useridrcv='%d' ORDER BY timestamp DESC; ",$user->userid);
 	$whisper_del_query=sprintf("DELETE FROM `whispers` WHERE useridrcv='%d'",$user->userid);
@@ -171,6 +172,7 @@
 	$kCALL_ORDER_MESSAGE_QUERIES=array('channels','whispers','userchan');
 	$CALL_i=0;
 	$time_to_return=FALSE;
+$JSON['timeTo2']=time()-$_timeStarted;
 	while (!$time_to_return) {
 		
 		$CALL_i=0;
@@ -201,7 +203,7 @@
 					else if ($kCALL_ORDER_MESSAGE_QUERIES[$CALL_i]=='userchan') {
 						// User Channels
 						while ($result=$res->fetch_assoc()) {
-							$chanlist[$result['chanid']]=array('chanid'=>$result['chanid'],'maxmsgid'=>$result['msgid'],'newchan'=>1);
+							$chanlist[$result['chanid']]=array('chanid'=>$result['chanid'],'maxmsgid'=>$result['msgid']-30,'newchan'=>1);
 						}
 						$userchan_query=getUserchanQuery($mysqli,$chanlist,$user->userid);
 						$chan_query=getChanQuery($mysqli,$chanlist);
@@ -217,18 +219,59 @@
 			}
 		} while($mysqli->more_results() and $mysqli->next_result() and ++$CALL_i);
 		
+$JSON['timeTo_'.$kRETRIEVAL_MAXTRIES]=time()-$_timeStarted;
 		//o { if ($res=$mysqli->store_result()) { $result=$res->$fetch_(all|array|assoc|field|fields|object|row); $res->free(); } } while($mysqli->more_results() and $mysqli->next_result());
 		usleep($kRETRIEVAL_SLEEPTMR);
 		if (!--$kRETRIEVAL_MAXTRIES) break;
 	}
+$JSON['timeTo4']=time()-$_timeStarted;
 	
 	if ($JSON['whispers']) {
 		// Delete Whispers from db
 		$mysqli->query($whisper_del_query);
 	}
 	
+	if ($JSON['newchannels']) {
+		// Get details on new channels
+		
+		foreach ($JSON['newchannels'] as $chanid=>$chandata) {
+			$channel=new Channel($chanid, $user->userid, $user->nick);
+			$userlist=$channel->getList($kCHANLIST_USERS);
+			$messages=$chandata;
+			$channame=$args['channelname']?$args['channelname']:getChannelName($channel->chanid);
+			$chantopic=getChannelColumn($channel->chanid,'topic');
+			$private=getChannelColumn($channel->chanid,'private');
+			$moderated=getChannelColumn($channel->chanid,'moderated');
+			$autoclear=getChannelColumn($channel->chanid,'autoclear');
+			
+			$_chanDetails=array('channel'=>array(
+					'chanid'=>$channel->chanid,
+					'title'=>$channame,
+					'topic'=>$chantopic,
+					'users'=>$userlist,
+					'messages'=>$messages,
+					'msgid'=>$msgid,
+					'private'=>$private,
+					'moderated'=>$moderated,
+					'autoclear'=>$autoclear),
+				'chanid'=>$channel->chanid,
+				'title'=>$channame,
+				'topic'=>$chantopic,
+				'users'=>$userlist,
+				'private'=>$private,
+				'moderated'=>$moderated,
+				'autoclear'=>$autoclear
+			);
+			
+			$JSON['newchannels'][$chanid]=$_chanDetails;
+		}
+	}
+	
 	$mysqli->close();
 	
+	
+$_timeTotal=time()-$_timeStarted;
+$JSON['totalTime']=$_timeTotal;
 	echo json_encode($JSON);
 	
 	/*

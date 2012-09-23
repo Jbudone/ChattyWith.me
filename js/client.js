@@ -13,7 +13,7 @@ var settings=(function(){
 		longpollRetry:750,
 		longpollTimeout:20000,
 		minPingTimeoutsToDisconnect:10,
-		maxTimeSinceLastPingToDisconnect:25*1000,
+		maxTimeSinceLastPingToDisconnect:125*1000,
 		
 		checkIfActiveTimer:100, // checks if page is still active (eg. laptop lid closed)
 		
@@ -155,6 +155,7 @@ var client={
 						// channel/msgid here, while hiding it from client.channels --
 						// this ultimately allows us to continue the longpoll properly
 	activeChanRef: null,
+	initialReconnect: false,  // Send a longpoll initially to allow any reconnection (o/w wait until we explicitly join a channel)
 	
 	
 	// Called directly by the platform-specific script when it is fully prepared to begin
@@ -212,7 +213,7 @@ var client={
 		for(chanid in channels) {
 			_chanlist[chanid]={chanid:chanid, maxmsgid:channels[chanid].maxmsgid};
 		}
-		if (getChanCount()>=2) {
+		if (getChanCount()>=2 || (this.initialReconnect && !(this.initialReconnect=!this.initialReconnect))) {
 			$.ajax({
 				async:'true',
 				cache:'false',
@@ -233,9 +234,9 @@ var client={
 			setTimeout(function(){ client.longpoll.apply(client); },settings.longpollRetry);
 		}
 	},
-	_errlongpoll: function(data) {
+	_errlongpoll: function(jqXHR, textStatus, errorThrown) {
 		console.log('longpoll error..');
-		console.log(data);
+		console.log(textStatus);
 		setTimeout(function(){
 			client.longpoll.apply(client);
 		},settings.longpollRetry);
@@ -259,13 +260,17 @@ var client={
 			// NOTE: These are channels that we have NOT passed to it (eg. channels we joined AFTER
 			//	beginning the longpoll, or channels that we've d/c'd from that haven't been garbage
 			//	collected just yet)
-			for (var chanid in data.channels) {
+			for (var chanid in data.newchannels) {
 				if (typeof this.channels[chanid]!='undefined') {
 					messages_received=true;
-					this.handle_messages(data.channels[chanid], chanid, false, false);
+					this.handle_messages(data.newchannels[chanid], chanid, false, false);
 				}
-				else if (this.ignoreChannels.indexOf(chanid)==-1)
-					this.ignoreChannels.push(chanid);
+				//else if (this.ignoreChannels.indexOf(chanid)==-1)
+				//	this.ignoreChannels.push(chanid);
+				else {
+					// Join channel
+					this.hevt_join(null,data.newchannels[chanid]);
+				}
 			}
 		}
 		
@@ -572,6 +577,7 @@ window['console'].log('auto_ping_cb:: error without data.error');
 		client.usrNick=data.nick;
 		client.usrIdentification=data.identification;
 		client.usrid=data.userid;
+		client.initialReconnect=true;
 		client.longpoll();
 		localStorage.setItem('identification',data.identification);
 	},

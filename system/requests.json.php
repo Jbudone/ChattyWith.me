@@ -23,7 +23,9 @@ $tStart=microtime(TRUE);
 	require_once "channel.php";
 	require_once "user.php";
 	$error=NULL;
-	$user=new User(); // The user should be created here automatically -- via. SESSION[identification]
+	$user=new User($_GET['identification']); // The user should be created here automatically -- via. SESSION[identification]
+											// NOTE: sometimes SESSION[identification] is spontaneously destroyed!? I've included
+											// 		the id as an arg for all request calls as a backup
 
 	
 	/********************

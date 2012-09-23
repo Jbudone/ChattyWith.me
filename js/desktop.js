@@ -299,6 +299,7 @@
 					Terminal.print_preset('logon');
 					Terminal.scrollToBottom(true);
 				
+					client.initialReconnect=true;
 					client.longpoll();
 				} else if (localStorage && localStorage.getItem('identification')) {
 					(new Event()).fromObject({ eventid:ECMD_IDENTIFY, id:(localStorage.getItem('identification')) }).request(function(data){
@@ -308,6 +309,7 @@
 
 						Terminal.print_preset('logon');
 						Terminal.scrollToBottom(true);
+						client.initialReconnect=true;
 						client.longpoll();
 					});
 				} else {
@@ -822,7 +824,6 @@ var setupPage=(function(){
 				// Is this our FIRST channel joined?
 				var chanCount=getChanCount();
 				if (chanCount==2) {
-					console.log("This is FIRST channel Joined!");
 					timeConnected=(new Date()).getTime();
 				}
 			});
@@ -903,11 +904,11 @@ var setupPage=(function(){
 					var now;
 					client.hk_longpoll_success=function(data){
 						var delay=data.timeReceived-now;
-						/*console.log('============hk_longpoll_success===========');
-						console.log('sent: '+now);
-						console.log('received: '+data.timeReceived);
-						console.log(delay);
-						console.log('==========================================');*/
+						if (data.totalTime>=10) {
+						console.log('============hk_longpoll_success===========');
+							console.log(data);
+						console.log('==========================================');
+						}
 						pingSuccess(parseInt(delay));
 					};
 					client.hk_longpoll_error=function(data){
@@ -934,7 +935,7 @@ var setupPage=(function(){
 		}());
 		
 		var winMoveChecker=(function(){
-			if (settings.windowResizeSettings.enabled=false) return null;
+			if (settings.windowResizeSettings.enabled==false) return null;
 			var capScreenX=window.screenX,
 				capScreenY=window.screenY,
 				interval=settings.windowResizeSettings.interval,

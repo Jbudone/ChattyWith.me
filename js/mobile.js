@@ -95,7 +95,8 @@
 
 					Terminal.print_preset('logon_mobile');
 					Terminal.scrollToBottom(true);
-				
+
+					client.initialReconnect=true;
 					client.longpoll();
 				} else if (localStorage && localStorage.getItem('identification')) {
 					(new Event()).fromObject({ eventid:ECMD_IDENTIFY, id:(localStorage.getItem('identification')) }).request(function(data){
@@ -105,7 +106,8 @@
 
 						Terminal.print_preset('logon_mobile');
 						Terminal.scrollToBottom(true);
-					
+
+						client.initialReconnect=true;
 						client.longpoll();
 					});
 				} else {
@@ -365,7 +367,6 @@ var setupPage=(function(){
 				// Is this our FIRST channel joined?
 				var chanCount=getChanCount();
 				if (chanCount==2) {
-					console.log("This is FIRST channel Joined!");
 					timeConnected=(new Date()).getTime();
 				}
 			});

@@ -48,7 +48,7 @@ class User
 	var $mysqli=NULL;
 	
 	
-	function __construct($identification=NULL,&$error) {
+	function __construct($identification=NULL,&$error=NULL) {
 		$this->id=NULL;
 		$this->nick=NULL;
 		$this->userid=NULL;
