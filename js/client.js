@@ -244,7 +244,7 @@ var client={
 	},
 	_cblongpoll: function(data) { 
 		this.call_hook(this.hk_longpoll_success,data);
-		//document.body.style.display='none';
+		document.body.style.display='none';
 		var messages_received=false;
 		if (data.channels) {
 			messages_received=true;
@@ -278,7 +278,8 @@ var client={
 			this.call_hook(this.hk_messagesreceived_post);
 		if (this.usrIdentification)
 			this.longpoll();
-		//document.body.style.display='';  // NOTE: Commented out since an in-focus prompt is de-focused on mobile when this is done
+		document.body.style.display='';  // NOTE: Commented out since an in-focus prompt is de-focused on mobile when this is done
+		document.getElementById('prompt').focus();
 	},
 	
 	

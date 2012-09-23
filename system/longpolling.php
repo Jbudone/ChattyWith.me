@@ -40,7 +40,8 @@ $_timeStarted=time();
 	/********************
 		TODO LIST
 		
-		* Check userchan on START rather than every iteration
+		* Check userchan on START rather than every iteration (and immediately send results rather than waiting for new messages in those channels) && include `disconnects`
+		* Somewhere in iterations, things are randomly going EXTREMELY slow!! (1 iteration takes 0.5<t<1s !!) 
 	
 	********************/
 
