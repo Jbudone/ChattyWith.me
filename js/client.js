@@ -244,7 +244,8 @@ var client={
 	},
 	_cblongpoll: function(data) { 
 		this.call_hook(this.hk_longpoll_success,data);
-		document.body.style.display='none';
+		window['Terminal'].hideBody();
+		//document.body.style.display='none';
 		var messages_received=false;
 		if (data.channels) {
 			messages_received=true;
@@ -278,8 +279,9 @@ var client={
 			this.call_hook(this.hk_messagesreceived_post);
 		if (this.usrIdentification)
 			this.longpoll();
-		document.body.style.display='';  // NOTE: Commented out since an in-focus prompt is de-focused on mobile when this is done
-		document.getElementById('prompt').focus();
+		window['Terminal'].showBody();
+		//document.body.style.display='';  // NOTE: Commented out since an in-focus prompt is de-focused on mobile when this is done
+		//document.getElementById('prompt').focus();
 	},
 	
 	
@@ -1078,6 +1080,10 @@ var Terminal=(function(){
 		
 		// Loader-Older
 		loadOlder:null,
+		
+		// CSS Hacks
+		hideBody:null, // For efficiency, hide the body BEFORE making changes to page
+		showBody:null,
 	};
 	
 	(function(){
@@ -1166,6 +1172,26 @@ var Terminal=(function(){
 		interface.closeChannelWin=(function(){});
 		interface.scrollToBottom=(function(){});
 		interface.resizePage=(function(){});
+		
+		interface.hideBody=(function(){
+			_console=document.body;
+			_hide=function(){
+				_console.style.display='none';
+				//document.body.style.display='none';
+			};
+			return _hide;
+		}());
+		
+		interface.showBody=(function(){
+			_console=document.body;
+			_prompt=document.getElementById('prompt');
+			_show=function(){
+				_console.style.display='';
+				//document.body.style.display='';
+				_prompt.focus();
+			};
+			return _show;
+		}());
 		
 		
 		// ***************************************************************************

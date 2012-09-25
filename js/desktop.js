@@ -877,7 +877,6 @@ var setupPage=(function(){
 				}
 				
 				consecutiveFailures=0;
-				lastPingTime=(new Date()).getTime();
 				_rcDetails.style.display='none';
 				_rcDetails_Ping.innerHTML='Ping: '+totalTime+'ms';
 				_rcDetails_Ping.setAttribute('connection-level',getConnectionStrength(totalTime));
@@ -891,7 +890,7 @@ var setupPage=(function(){
 					$('body').addClass('disconnected');
 					//$('#prompt').attr({disabled:'disabled'});  // NOTE: This would be nice for the effect, but if the user is holding down BACKSPACE it will defocus and send to the browser
 				}
-				
+
 				_rcDetails.style.display='none';
 				_rcDetails_Ping.innerHTML='x';
 				_rcDetails_Ping.setAttribute('connection-level','0');
@@ -919,16 +918,19 @@ var setupPage=(function(){
 						now=Date.now().toString();
 						now=now.substr(0,now.length-3)+'.'+now.substr(now.length-3);
 						now=parseFloat(now);
+						lastPingTime=(new Date()).getTime();
 					};
 			} else {
 				// MANUAL PINGING
 				//  USED FROM PINGCHAN
 					Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(evt,totalTime){
 						pingSuccess(totalTime);
+						lastPingTime=(new Date()).getTime();
 					});
 				
 					Events.Event[ECMD_PINGCHAN].hooks.reqSuccessError=(function(evt,data){
 						pingFail();
+						lastPingTime=(new Date()).getTime();
 					});
 			}
 			

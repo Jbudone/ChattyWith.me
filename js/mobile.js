@@ -67,6 +67,26 @@
 			$('#console').css({'min-height':(window.innerHeight-$('#fPrompt').height()-$('header').height()+consoleOffset)});
 		});
 		
+
+		Terminal.hideBody=(function(){
+			_console=document.getElementById('console');
+			_hide=function(){
+				_console.style.display='none';
+				//document.body.style.display='none';
+			};
+			return _hide;
+		}());
+		
+		Terminal.showBody=(function(){
+			_console=document.getElementById('console');
+			_show=function(){
+				_console.style.display='';
+				//document.body.style.display='';
+				//document.getElementById('prompt').focus();
+			};
+			return _show;
+		}());
+		
 		Terminal.removeChannelWin=(function(chanid) { });
 		Terminal.removeChannelWins=(function(chanid) { });
 		
@@ -421,7 +441,6 @@ var setupPage=(function(){
 				}
 				
 				consecutiveFailures=0;
-				lastPingTime=(new Date()).getTime();
 			});
 			
 			pingFail=(function(){
@@ -450,16 +469,20 @@ var setupPage=(function(){
 						now=Date.now().toString();
 						now=now.substr(0,now.length-3)+'.'+now.substr(now.length-3);
 						now=parseFloat(now);
+						
+						lastPingTime=(new Date()).getTime();
 					};
 			} else {
 				// MANUAL PINGING
 				//  USED FROM PINGCHAN
 					Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(evt,totalTime){
 						pingSuccess(totalTime);
+						lastPingTime=(new Date()).getTime();
 					});
 				
 					Events.Event[ECMD_PINGCHAN].hooks.reqSuccessError=(function(evt,data){
 						pingFail();
+						lastPingTime=(new Date()).getTime();
 					});
 			}
 			
