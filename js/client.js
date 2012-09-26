@@ -1173,24 +1173,26 @@ var Terminal=(function(){
 		interface.scrollToBottom=(function(){});
 		interface.resizePage=(function(){});
 		
-		interface.hideBody=(function(){
-			_console=document.body;
-			_hide=function(){
-				_console.style.display='none';
-				//document.body.style.display='none';
-			};
-			return _hide;
-		}());
 		
-		interface.showBody=(function(){
-			_console=document.body;
-			_prompt=document.getElementById('prompt');
-			_show=function(){
+		// CSS Hack to hide/show the console before and after making changes
+		(function(){
+			var _elId='wrapper-console',
+				_console=document.body,
+				reSearchTimer=250,
+				findElement=(function(){
+					if (_foundEl=document.getElementById(_elId)) {
+						_console=_foundEl;
+						return;
+					}
+					setTimeout(findElement,reSearchTimer);
+				});
+			interface.hideBody=(function(){
+				_console.style.display='none';
+			});
+			interface.showBody=(function(){
 				_console.style.display='';
-				//document.body.style.display='';
-				_prompt.focus();
-			};
-			return _show;
+			});
+			findElement();
 		}());
 		
 		

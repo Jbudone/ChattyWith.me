@@ -831,6 +831,7 @@ var setupPage=(function(){
 			// Disconnect
 			//	Auto logout, close channels, etc.
 			disconnect=(function(){
+				window['console'].log("DISCONNECTING USER.. from: "+arguments.callee.caller.name);
 				(new Event()).fromObject({ eventid:ECMD_LOGOUT }).request();
 				lastPingTime=null;
 			});
@@ -849,8 +850,10 @@ var setupPage=(function(){
 					if ((new Date()).getTime()-lastPingTime>settings.maxTimeSinceLastPingToDisconnect &&
 							timeConnected!=null && (new Date()).getTime()-timeConnected>settings.maxTimeSinceLastPingToDisconnect) {
 						// Disconnect
+						window['console'].log('==================================');
 						window['console'].log("D/C!  time:"+((new Date()).getTime())+"-"+lastPingTime+">"+settings.maxTimeSinceLastPingToDisconnect);
 						disconnect();
+						window['console'].log('==================================');
 					}
 				} else {
 					// If we're not inside any channels, then set lastPingTime to null to avoid the checking (its unecessary)
