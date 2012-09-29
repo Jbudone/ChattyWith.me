@@ -11,7 +11,7 @@ var settings=(function(){
 		pingTimer:750,
 		pingTimeout:3000,
 		longpollRetry:750,
-		longpollTimeout:20000,
+		longpollTimeout:40000,
 		minPingTimeoutsToDisconnect:10,
 		maxTimeSinceLastPingToDisconnect:125*1000,
 		

@@ -10,3 +10,4 @@ system/secret/
 *.swo
 *.wav
 *.mp3
+*.min.js

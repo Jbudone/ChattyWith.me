@@ -703,16 +703,24 @@ var setupPage=(function(){
 	var setupScripts=(function(){
 		// Add Extra Scripts
 		var fragment=document.createDocumentFragment();
-		
+
 		var linkDesktop=document.createElement('link');
-		linkDesktop.setAttribute('rel','stylesheet/less');
-		linkDesktop.setAttribute('type','text/css');
-		linkDesktop.setAttribute('href','styles/desktop.css');
-		fragment.appendChild(linkDesktop);
+		if (TESTING_MODE==true) {
+			linkDesktop.setAttribute('rel','stylesheet/less');
+			linkDesktop.setAttribute('type','text/css');
+			linkDesktop.setAttribute('href','styles/desktop.less');
+			fragment.appendChild(linkDesktop);
+			
+			var lessJS=document.createElement('script');
+			lessJS.setAttribute('src','js/less-1.3.0.min.js');
+			fragment.appendChild(lessJS);
+		} else {
+			linkDesktop.setAttribute('rel','stylesheet');
+			linkDesktop.setAttribute('type','text/css');
+			linkDesktop.setAttribute('href','styles/desktop.css');
+			fragment.appendChild(linkDesktop);
+		}
 		
-		var lessJS=document.createElement('script');
-		lessJS.setAttribute('src','js/less-1.3.0.min.js');
-		fragment.appendChild(lessJS);
 		
 		document.getElementsByTagName('head').item(0).appendChild(fragment);
 	});

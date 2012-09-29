@@ -1,6 +1,17 @@
 <?php
 	if(preg_match('/MSIE/i',$_SERVER['HTTP_USER_AGENT']))
 		header("Location: iesucks.php"); // Relocate IE users
+	
+	//
+	// Configurations (testing)
+	////////////////////
+	$TESTING_MODE=FALSE; // set to TRUE to use non-minified css and js files
+	$MOBILE_MODE=FALSE;
+	
+	
+	// Apply the configurations
+	$file_postfix=($TESTING_MODE?'':'.min');
+	$desktop_load_file=($MOBILE_MODE?'mobile':'desktop');
 ?>
 
 <!--
@@ -165,7 +176,7 @@ Portal: www.jbud.me
 <!DOCTYPE html>
 <html>
 <head>
-<noscript><meta http-equiv="refresh" content="" /></noscript>
+<!--<noscript><meta http-equiv="refresh" content="" /></noscript> -->
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <title>ChattyWith.me</title>
 
@@ -183,7 +194,9 @@ Did You Know?
 </style>
 
 <!--<script async src="js/require.min.js" data-main="js/main.new.js"></script>-->
-<script async src="js/jquery.min.js"></script>
+
+<script async src="http://code.jquery.com/jquery-1.8.2.js"></script>
+<!--<script async src="js/jquery.min.js"></script>-->
 <!--<script async src="http://code.jquery.com/jquery-1.6.4.min.js"></script>-->
 </head>
 
@@ -217,6 +230,7 @@ CGI-Generated Scripts
 <script id="_checkjqueryloaded">
 	<!-- Check if jQuery is loaded yet -->
 	var tmrCheckJQuery=50,
+	    TESTING_MODE=<?php echo ($TESTING_MODE?'true':'false'); ?>,
 		checkIfLoaded=function(){
 		if (typeof jQuery == 'undefined') {
 			setTimeout(checkIfLoaded,tmrCheckJQuery);
@@ -229,11 +243,11 @@ CGI-Generated Scripts
 	init=function(){
 		(function($){
 			// Determine Scripts to load (including mobile/desktop)
-			var scripts=['js/utilities.js','js/client.js'];
+			var scripts=['js/utilities<?php echo $file_postfix; ?>.js','js/client<?php echo $file_postfix; ?>.js'];
 			if (navigator.userAgent.match(/(android|webos|phone|pod|touch)/i))
-				scripts.push('js/mobile.js');
+				scripts.push('js/mobile<?php echo $file_postfix; ?>.js');
 			else
-				scripts.push('js/desktop.js');
+				scripts.push('js/<?php echo $desktop_load_file; ?><?php echo $file_postfix; ?>.js');
 			
 			
 			// Load Scripts (in order)
