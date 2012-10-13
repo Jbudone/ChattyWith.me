@@ -10,10 +10,11 @@
 		(function(configs){
 			
 			var use_unstable_jquery=true,
-				kJQUERY_STABLE_SOURCE='http://code.jquery.com/mobile/1.0.1/jquery.mobile-1.0.1.min.js',
-				kJQUERY_UNSTABLE_SOURCE='http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js',
-				kJQUERY_STABLE_CSS='http://code.jquery.com/mobile/1.0.1/jquery.mobile-1.0.1.min.css',
-				kJQUERY_UNSTABLE_CSS='http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css';
+				kJQUERY_STABLE_SOURCE='http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js',
+				kJQUERY_UNSTABLE_SOURCE='http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js',
+				kJQUERY_STABLE_CSS='http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css',
+				kJQUERY_UNSTABLE_CSS='http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css';
+				
 			
 			configs.use_unstable_jquery=use_unstable_jquery;
 			configs.jquery_mob_src=(use_unstable_jquery==true?kJQUERY_UNSTABLE_SOURCE:kJQUERY_STABLE_SOURCE);
@@ -72,7 +73,6 @@
 			_console=document.getElementById('console');
 			_hide=function(){
 				_console.style.display='none';
-				//document.body.style.display='none';
 			};
 			return _hide;
 		}());
@@ -81,8 +81,6 @@
 			_console=document.getElementById('console');
 			_show=function(){
 				_console.style.display='';
-				//document.body.style.display='';
-				//document.getElementById('prompt').focus();
 			};
 			return _show;
 		}());
@@ -536,6 +534,8 @@ var setupPage=(function(){
 		prompt.setAttribute('autocorrect','on');
 		prompt.setAttribute('autocomplete','on');
 		prompt.setAttribute('autocapitalize','sentences');
+		prompt.setAttribute('data-mini','true');
+		prompt.style.width='100%';
 	});
 	
 	var setupForm=(function(){

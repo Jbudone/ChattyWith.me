@@ -197,7 +197,6 @@ Did You Know?
 
 <script async src="http://code.jquery.com/jquery-1.8.2.js"></script>
 <!--<script async src="js/jquery.min.js"></script>-->
-<!--<script async src="http://code.jquery.com/jquery-1.6.4.min.js"></script>-->
 </head>
 
 <body>
@@ -210,7 +209,7 @@ Did You Know?
     
         <footer id="footer">
             <form id="fPrompt" autocomplete="off">
-            <input type="text" id="prompt" val="test" />
+            <input type="text" id="prompt" />
             </form>
         </footer>
     </div>

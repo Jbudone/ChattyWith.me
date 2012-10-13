@@ -192,6 +192,7 @@ $JSON['timeTo2']=time()-$_timeStarted;
 							if ($JSON[$key][$chanid]==NULL) $JSON[$key][$chanid]=array();
 							array_unshift($JSON[$key][$chanid], $result);
 						}
+$JSON['timeTo_a'.$kRETRIEVAL_MAXTRIES]=time()-$_timeStarted;
 					}
 					else if ($kCALL_ORDER_MESSAGE_QUERIES[$CALL_i]=='whispers') {
 						// Whisper Messages
@@ -200,6 +201,7 @@ $JSON['timeTo2']=time()-$_timeStarted;
 						while ($result=$res->fetch_assoc()) {
 							array_unshift($JSON['whispers'],$result);
 						}
+$JSON['timeTo_b'.$kRETRIEVAL_MAXTRIES]=time()-$_timeStarted;
 					} 
 					else if ($kCALL_ORDER_MESSAGE_QUERIES[$CALL_i]=='userchan') {
 						// User Channels
@@ -209,6 +211,7 @@ $JSON['timeTo2']=time()-$_timeStarted;
 						$userchan_query=getUserchanQuery($mysqli,$chanlist,$user->userid);
 						$chan_query=getChanQuery($mysqli,$chanlist);
 					} 
+$JSON['timeTo_c'.$kRETRIEVAL_MAXTRIES]=time()-$_timeStarted;
 				}
 				$res->free();
 				
@@ -218,9 +221,9 @@ $JSON['timeTo2']=time()-$_timeStarted;
 				$_err[1].=': ('.$mysqli->connect_errno.') '.$mysqli->connect_error;
 				err($_err);
 			}
+$JSON['timeTo_'.$kRETRIEVAL_MAXTRIES]=time()-$_timeStarted;
 		} while($mysqli->more_results() and $mysqli->next_result() and ++$CALL_i);
 		
-$JSON['timeTo_'.$kRETRIEVAL_MAXTRIES]=time()-$_timeStarted;
 		//o { if ($res=$mysqli->store_result()) { $result=$res->$fetch_(all|array|assoc|field|fields|object|row); $res->free(); } } while($mysqli->more_results() and $mysqli->next_result());
 		usleep($kRETRIEVAL_SLEEPTMR);
 		if (!--$kRETRIEVAL_MAXTRIES) break;
