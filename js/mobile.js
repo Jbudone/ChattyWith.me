@@ -4,9 +4,19 @@
 /*
 	
 */
+
+var _body=null,
+	_logo=null,
+	startLoading=function(){
+		_body.style.display='none';
+	}, finishLoading=function(){
+		if (_logo) _logo.style.display='none';
+		_body.style.display='';
+	};
+	_body=(MOBILE_LOADING?document.getElementsByTagName('innerBody')[0]:document.body);
+	_logo=(MOBILE_LOADING?document.getElementById('top-logo'):null);
 		//****************************************************************************************//
 		//*******************************     SETTINGS     ***************************************//
-		
 		(function(configs){
 			
 			var use_unstable_jquery=true,
@@ -47,20 +57,25 @@
 		});
 		
 		
-		Terminal.scrollToBottom=(function(forceToBottom) {
-			// Check to Scroll
+		Terminal.scrollToBottom=(function(){
 			var kTHRESHOLD_TO_AUTOSCROLL=250, // Don't forget to add predicted size of appended content
-				kTIMEOUT_AUTOSCROLL=150, // Slight lag in reflow; 150 appears safe, 100 is too fast for the reflow (tries to scroll before page is reflowed)
-				kAUTOSCROLL_SAFEGUARD=-3; // To safely reach the bottom, scroll this extra amount (document.body.scrollHeight is always off slightly)
-			if (forceToBottom || document.body.scrollHeight-window.innerHeight<=window.pageYOffset+kTHRESHOLD_TO_AUTOSCROLL) {
-				setTimeout(function(){
-					window.scrollTo(0,(document.body.scrollHeight+kAUTOSCROLL_SAFEGUARD));
-					try { JQueryMobWrap.showToolbars(); } catch(e) { }
-				},kTIMEOUT_AUTOSCROLL);
-			}
-			else
-				try { JQueryMobWrap.showToolbars(); } catch(e) { }
-		});
+				kTIMEOUT_AUTOSCROLL=0, // Slight lag in reflow; 150 appears safe, 100 is too fast for the reflow (tries to scroll before page is reflowed)
+				kAUTOSCROLL_SAFEGUARD=0, // To safely reach the bottom, scroll this extra amount (document.body.scrollHeight is always off slightly)
+				fScroll=function(forceToBottom){
+					// Check to Scroll
+					if (forceToBottom || document.body.scrollHeight-window.innerHeight<=window.pageYOffset+kTHRESHOLD_TO_AUTOSCROLL) {
+						setTimeout(function(){
+							window.scrollTo(0,(document.body.scrollHeight+kAUTOSCROLL_SAFEGUARD));
+							//try { JQueryMobWrap.showToolbars(); } catch(e) { }
+
+						},kTIMEOUT_AUTOSCROLL);
+					}
+					else
+						try { JQueryMobWrap.showToolbars(); } catch(e) { }
+			};
+			
+			return fScroll;
+		}());
 		
 		
 		Terminal.resizePage=(function(){
@@ -95,12 +110,10 @@
 		//********************************     INITIALIZED     ***********************************//
 		
 		client.hk_initialize_post=(function(){
-			document.body.style.display='none';
 			pre_setup();
 			JQueryMobWrap.showPageLoadingMsg();
 			setupPage();
 			Terminal.swapChannel(0);
-			document.body.style.display='';
 
 
 			
@@ -135,7 +148,8 @@
 			});
 			
 			
-			
+
+			setTimeout(finishLoading, 200);
 			
 		});	
 		
@@ -227,6 +241,7 @@ var setupPage=(function(){
 	});
 	
 	var setupLayout=(function(){
+		return;
 		var header=$('<div/>').attr({'id':'header','data-theme':'a','data-role':'header','data-position':'fixed','data-fullscreen':'true'}).addClass('ui-header-fixed');
 		var ctrlGroupLeft=$('<div/>').attr({id:'header_button_group_left','data-role':'controlgroup','data-type':'horizontal','data-inline':'true'}).addClass('ui-btn-left');
 		var ctrlGroupRight=$('<div/>').attr({id:'header_button_group_right','data-role':'controlgroup','data-type':'horizontal','data-inline':'true'}).addClass('ui-btn-right');
@@ -270,12 +285,6 @@ var setupPage=(function(){
 	
 	var setupScripts=(function(){
 		var fragment=document.createDocumentFragment();
-		
-		// Meta/Content
-		var metaViewport=document.createElement('meta');
-		metaViewport.setAttribute('name','viewport');
-		metaViewport.setAttribute('content','width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-		fragment.appendChild(metaViewport);
 		
 		// Meta/StatusBar-Style
 		var metaStatusBar=document.createElement('meta');
@@ -483,32 +492,6 @@ var setupPage=(function(){
 						lastPingTime=(new Date()).getTime();
 					});
 			}
-			
-		
-			/*
-			Events.Event[ECMD_PINGCHAN].hooks.reqSuccess=(function(evt,totalTime){
-				if (Terminal._disconnected==true) {
-					// Reconnected
-					Terminal._disconnected=false;
-					$('body').removeClass('disconnected');
-					$('#prompt').attr({disabled:false});
-					JQueryMobWrap.hidePageLoadingMsg();
-				}
-				
-				consecutiveFailures=0;
-				
-			});
-		
-			Events.Event[ECMD_PINGCHAN].hooks.reqSuccessError=(function(evt,data){
-				consecutiveFailures++;
-				if (consecutiveFailures>=numFailuresToDisconnect) {
-					Terminal._disconnected=true;
-					$('body').addClass('disconnected');
-					//$('#prompt').attr({disabled:'disabled'});  // NOTE: This would be nice for the effect, but if the user is holding down BACKSPACE it will defocus and send to the browser
-					JQueryMobWrap.showPageLoadingMsg();
-				}
-			});*/
-		
 		}());
 		
 		
@@ -648,16 +631,19 @@ var JQueryMobWrap=(function(){
 		});
 		
 		interface.showToolbars=(function(){
+			return;
 			//$("#header").fixedtoolbar('show');
 			$('#header').show().data({showing:true});
 		});
 		
 		interface.hideToolbars=(function(){
+			return;
 			//$("#header").fixedtoolbar('hide');
 			$('#header').hide().data({showing:false});
 		});
 		
 		interface.toggleToolbars=(function(){
+			return;
 			var _header=$('#header'),
 				showing=_header.data('showing');
 			if (showing) _header.hide().data({showing:false});

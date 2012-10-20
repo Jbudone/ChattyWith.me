@@ -7,6 +7,15 @@
 	////////////////////
 	$TESTING_MODE=FALSE; // set to TRUE to use non-minified css and js files
 	$MOBILE_MODE=FALSE;
+	$MOBILE_LOADING=FALSE;
+	
+	// Attempt Mobile Loading Screen
+	$phones=array('iphone','mobile','ipod','itunes',
+				'blackberry','rim',
+				'htc','nexus','dell','motorola','samsung','sony','asus','palm','vertu');
+	if ($MOBILE_MODE or preg_match('/('.implode('|', $phones).')/i', $_SERVER['HTTP_USER_AGENT']) ){
+		$MOBILE_LOADING=TRUE;
+	}
 	
 	
 	// Apply the configurations
@@ -167,6 +176,7 @@ Portal: www.jbud.me
    * Improve IE Sucks page (show clippy!)
    * Anti-porn scanner (for sending picture-messages)
    * Link to chattywith.me/#lolchan to auto connect (as random nick) and join #lolchan
+   * Submit code to be compiled by LLVM/Clang, run in a Sandbox (given certain permissions for safety reasons), and its output displayed in a little box
    
    
    ---- NOTES OF RECENT CHANGES ----
@@ -174,10 +184,11 @@ Portal: www.jbud.me
    
 -->
 <!DOCTYPE html>
-<html>
+<html style="height:100%;">
 <head>
 <!--<noscript><meta http-equiv="refresh" content="" /></noscript> -->
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="viewport" content="initial-scale=0.7, maximum-scale=0.7, user-scalable=no" />
 <title>ChattyWith.me</title>
 
 <!--
@@ -188,7 +199,6 @@ Did You Know?
     Hence you should always consider loading CSS first, followed by Javascript scripts (preferably with HTML5's async
     attribute).
 -->
-<link href="styles/main.css" rel="stylesheet" type="text/css" />
 <style type="text/css" id="styleChanDisplay">
 	
 </style>
@@ -199,7 +209,16 @@ Did You Know?
 <!--<script async src="js/jquery.min.js"></script>-->
 </head>
 
-<body>
+<body style="height:100%;">
+<?php if ($MOBILE_LOADING) { ?>
+<div style="position:absolute; width:150px; height:150px; overflow:hidden; left:28%; top:26%;">
+<img id="top-logo" style="width:100%; height:100%" src="<?php include_once('logo-datasrc'); ?>" />
+</div>
+<?php } ?>
+<link href="styles/main.css" rel="stylesheet" type="text/css" />
+<?php if ($MOBILE_LOADING) { ?>
+ <innerBody style="display:none;">
+<?php } ?>
 
 
 	<div id="main">
@@ -230,6 +249,7 @@ CGI-Generated Scripts
 	<!-- Check if jQuery is loaded yet -->
 	var tmrCheckJQuery=50,
 	    TESTING_MODE=<?php echo ($TESTING_MODE?'true':'false'); ?>,
+		MOBILE_LOADING=<?php echo ($MOBILE_LOADING?'true':'false'); ?>,
 		checkIfLoaded=function(){
 		if (typeof jQuery == 'undefined') {
 			setTimeout(checkIfLoaded,tmrCheckJQuery);
@@ -273,5 +293,8 @@ CGI-Generated Scripts
 	checkIfLoaded();
 </script>
 
+<?php if ($MOBILE_LOADING) { ?>
+</innerBody>
+<?php } ?>
 </body>
 </html>

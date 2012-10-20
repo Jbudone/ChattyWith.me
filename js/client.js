@@ -632,14 +632,12 @@ window['console'].log('auto_ping_cb:: error without data.error');
 		
 		client.handle_messages(data.messages, data.chanid, true, false);
 		
-		//client.activeChanRef=client.channels[data.chanid];
 		Terminal.openChannelWin(data.title,data.chanid);
 		Terminal.swapChannel(data.chanid,false);
 		Terminal.scrollToBottom();
 	},
 	hevt_leave:function(evt,data){
 		
-		//client.activeChanRef=client.channels[0];
 		Terminal.swapChannel(getChanIDFromOffset(-1),true);
 		delete client.channels[data.chanid];
 		Terminal.removeChannel(data.chanid);

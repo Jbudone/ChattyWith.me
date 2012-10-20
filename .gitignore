@@ -6,8 +6,7 @@ system/secret/
 .buildpath
 .project
 .settings/
-*.swp
-*.swo
+*.sw[op]
 *.wav
 *.mp3
 *.min.js
