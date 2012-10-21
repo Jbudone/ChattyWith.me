@@ -5,7 +5,7 @@
 	//
 	// Configurations (testing)
 	////////////////////
-	$TESTING_MODE=FALSE; // set to TRUE to use non-minified css and js files
+	$TESTING_MODE=TRUE; // set to TRUE to use non-minified css and js files
 	$MOBILE_MODE=FALSE;
 	$MOBILE_LOADING=FALSE;
 	
@@ -204,6 +204,9 @@ Did You Know?
 </style>
 
 <!--<script async src="js/require.min.js" data-main="js/main.new.js"></script>-->
+<?php if (!$MOBILE_LOADING) { ?>
+ <link href="styles/main.css" rel="stylesheet" type="text/css" />
+<?php } ?>
 
 <script async src="http://code.jquery.com/jquery-1.8.2.js"></script>
 <!--<script async src="js/jquery.min.js"></script>-->
@@ -211,12 +214,10 @@ Did You Know?
 
 <body style="height:100%;">
 <?php if ($MOBILE_LOADING) { ?>
-<div style="position:absolute; width:150px; height:150px; overflow:hidden; left:28%; top:26%;">
-<img id="top-logo" style="width:100%; height:100%" src="<?php include_once('logo-datasrc'); ?>" />
-</div>
-<?php } ?>
-<link href="styles/main.css" rel="stylesheet" type="text/css" />
-<?php if ($MOBILE_LOADING) { ?>
+ <div style="position:absolute; width:150px; height:150px; overflow:hidden; left:28%; top:26%;">
+	<img id="top-logo" style="width:100%; height:100%" src="<?php include_once('logo-datasrc'); ?>" />
+ </div>
+ <link href="styles/main.css" rel="stylesheet" type="text/css" />
  <innerBody style="display:none;">
 <?php } ?>
 

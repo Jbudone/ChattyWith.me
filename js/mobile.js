@@ -70,8 +70,8 @@ var _body=null,
 
 						},kTIMEOUT_AUTOSCROLL);
 					}
-					else
-						try { JQueryMobWrap.showToolbars(); } catch(e) { }
+					//else
+					//	try { JQueryMobWrap.showToolbars(); } catch(e) { }
 			};
 			
 			return fScroll;
