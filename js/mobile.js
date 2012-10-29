@@ -339,7 +339,7 @@ var setupPage=(function(){
 			});
 			
 			
-			$(document).bind('scrollstop',function(){
+			$(document).bind('scroll scrollstop',function(){
 				if (Terminal._disconnected==true) return;
 				if (window.scrollY<=0 && client.activeChanRef.chanid!=0) {
 					JQueryMobWrap.showPageLoadingMsg();
@@ -509,13 +509,14 @@ var setupPage=(function(){
 		document.getElementById('console').setAttribute('data-role','content');
 		var footer=document.getElementById('footer');
 		footer.setAttribute('data-role','footer');
-		footer.setAttribute('data-position','fixed');
-		footer.setAttribute('class','ui-footer ui-footer-fixed');
+		//footer.setAttribute('data-position','fixed');
+		//footer.setAttribute('class','ui-footer ui-footer-fixed');
+		footer.setAttribute('class','ui-footer');
 		footer.className='ui-bar';
 		
 		var prompt=document.getElementById('prompt');
-		prompt.setAttribute('autocorrect','on');
-		prompt.setAttribute('autocomplete','on');
+		//prompt.setAttribute('autocorrect','on');
+		//prompt.setAttribute('autocomplete','on');
 		prompt.setAttribute('autocapitalize','sentences');
 		prompt.setAttribute('data-mini','true');
 		prompt.style.width='100%';
@@ -693,8 +694,16 @@ var MobDevice=(function(){
 			details.device='ipad';
 			deviceDimensions=deviceDimensions[kDEVICE_IPAD];	
 		}
-		$('#prompt').bind('focus',function(){ details.keyboardInFocus=true; details.keyboard_height=deviceDimensions[details.orientation]; });
-		$('#prompt').bind('blur',function(){ details.keyboardInFocus=false; details.keyboard_height=kUNKNOWN_FULLSCREEN_OFFSET_HEIGHT; });
+		$('#prompt').bind('focus',function(){ 
+			details.keyboardInFocus=true; 
+			details.keyboard_height=deviceDimensions[details.orientation];
+			//try { $('#viewport').attr({content:'width=device-width; initial-scale=1.2; maximum-scale=1.2; user-scalable=no'}); } catch(e) { }
+		});
+		$('#prompt').bind('blur',function(){ 
+			details.keyboardInFocus=false; 
+			details.keyboard_height=kUNKNOWN_FULLSCREEN_OFFSET_HEIGHT;
+			//try { $('#viewport').attr({content:'width=device-width; initial-scale=0.7; maximum-scale=0.7; user-scalable=no'}); } catch(e) { }
+		});
 	})();
 	return details;
 })();

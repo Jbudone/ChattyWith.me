@@ -6,8 +6,8 @@
 	// Configurations (testing)
 	////////////////////
 	$TESTING_MODE=TRUE; // set to TRUE to use non-minified css and js files
-	$MOBILE_MODE=FALSE;
-	$MOBILE_LOADING=FALSE;
+	$MOBILE_MODE=TRUE;
+	$MOBILE_LOADING=TRUE;
 	
 	// Attempt Mobile Loading Screen
 	$phones=array('iphone','mobile','ipod','itunes',
@@ -188,7 +188,7 @@ Portal: www.jbud.me
 <head>
 <!--<noscript><meta http-equiv="refresh" content="" /></noscript> -->
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="viewport" content="initial-scale=0.7, maximum-scale=0.7, user-scalable=no" />
+<meta id="viewport" name="viewport" content="initial-scale=0.7, maximum-scale=0.7, user-scalable=no" />
 <title>ChattyWith.me</title>
 
 <!--
@@ -208,8 +208,11 @@ Did You Know?
  <link href="styles/main.css" rel="stylesheet" type="text/css" />
 <?php } ?>
 
-<script async src="http://code.jquery.com/jquery-1.8.2.js"></script>
-<!--<script async src="js/jquery.min.js"></script>-->
+<?php if ($TESTING_MODE) { ?>
+ <script async src="http://code.jquery.com/jquery-1.8.2.js"></script>
+<?php } else { ?>
+ <script async src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+<?php } ?>
 </head>
 
 <body style="height:100%;">
@@ -228,8 +231,8 @@ Did You Know?
     
     
         <footer id="footer">
-            <form id="fPrompt" autocomplete="off">
-            <input type="text" id="prompt" />
+            <form id="fPrompt" autocomplete="on" autocorrect="on" >
+            <input type="text" id="prompt" autocomplete="on" autocorrect="on" />
             </form>
         </footer>
     </div>
