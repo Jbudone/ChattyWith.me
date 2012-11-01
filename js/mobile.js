@@ -29,6 +29,9 @@ var _body=null,
 			configs.use_unstable_jquery=use_unstable_jquery;
 			configs.jquery_mob_src=(use_unstable_jquery==true?kJQUERY_UNSTABLE_SOURCE:kJQUERY_STABLE_SOURCE);
 			configs.jquery_mob_css=(use_unstable_jquery==true?kJQUERY_UNSTABLE_CSS:kJQUERY_STABLE_CSS);
+			
+			// TESTING AUTOCORRECT ERROR IN JQUERY MOBILE JS
+			configs.jquery_mob_src="js/jquery.mobile-1.2.0.js";
 		}(settings));
 		
 		
@@ -520,6 +523,7 @@ var setupPage=(function(){
 		prompt.setAttribute('autocapitalize','sentences');
 		prompt.setAttribute('data-mini','true');
 		prompt.style.width='100%';
+		
 	});
 	
 	var setupForm=(function(){
