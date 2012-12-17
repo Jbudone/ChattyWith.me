@@ -7,6 +7,7 @@ body {
 	width:100%;
 }
 
+
 #console {
 	background: -webkit-gradient(linear, 0% 20%, 0% 91%, from(#3F0000), to(#260009));
 	background: -moz-gradient(linear, 0% 20%, 0% 91%, from(#3F0000), to(#260009));
@@ -21,8 +22,123 @@ body {
 	
 	white-space:pre-wrap;
 	word-wrap:break-word;
+
 }
 
+/* (mobile)  swipe-to-slide channels */
+.console-anim-slider {
+  -webkit-transition: margin 1.3s ease-out;  /* Safari 3.2+, Chrome */
+     -moz-transition: margin 1.3s ease-out;  /* Firefox 4-15 */
+       -o-transition: margin 1.3s ease-out;  /* Opera 10.5–12.00 */
+          transition: margin 1.3s ease-out;  /* Firefox 16+, Opera 12.50+ */
+}
+
+.console-clone {
+	background: -webkit-gradient(linear, 0% 20%, 0% 91%, from(#3F0000), to(#260009));
+	background: -moz-gradient(linear, 0% 20%, 0% 91%, from(#3F0000), to(#260009));
+	background: -o-gradient(linear, 0% 20%, 0% 91%, from(#3F0000), to(#260009));
+	background: -ms-gradient(linear, 0% 20%, 0% 91%, from(#3F0000), to(#260009));
+	
+	color:#999;
+	font-family:Georgia, "Times New Roman", Times, serif;
+	
+	/*width:100%;*/
+	height:100%;
+	top:0px;
+	position:relative;
+	float:left;
+	
+	white-space:pre-wrap;
+	word-wrap:break-word;
+	z-index:1;
+	padding:0px 15px 0px 15px !important;	
+	overflow:hidden;
+}
+
+.console-sliding {
+	clear:none !important;
+	float:left;
+}
+
+.console-parent-slidemode {
+	width:50000px !important;
+}
+
+
+/* (mobile) channel bubbles */
+.chan-bubbles {
+	position:fixed;
+	bottom:5px;
+	width:100%;
+
+	display: block;
+	text-align: center;
+	display: box;
+	box-orient: horizontal;
+	box-pack: center;
+	box-align: center;
+	display: -webkit-box;
+	-webkit-box-orient: horizontal;
+	-webkit-box-pack: center;
+	-webkit-box-align: center;
+	-moz-box-orient: horizontal;
+	-moz-box-pack: center;
+	-moz-box-align: center;
+	display: -o-box;
+	-o-box-orient: horizontal;
+	-o-box-pack: center;
+	-o-box-align: center;
+	display: -ms-box;
+	-ms-box-orient: horizontal;
+	-ms-box-pack: center;
+	-ms-box-align: center;
+	margin: 0 auto;
+}
+
+.chan-bubble {
+	-moz-box-flex: 1.0;
+	-webkit-box-flex: 1.0;
+	box-flex: 1.0;
+	display: inline-box;
+	display: -webkit-inline-box;
+	display: -moz-inline-box;
+	display: -o-inline-box;
+	display: -ms-inline-box;
+	width: 10px;
+	height: 12px;
+	padding: 1px;
+	border: thin solid black;
+	margin: 0 2px;
+	border-color: #DDD;
+	position: relative;
+
+	-moz-border-radius: 35px;
+	border-radius: 35px;
+}
+
+.chan-bubble.selected {
+	background:green;
+}
+
+
+.chan-name {
+	position: fixed;
+	top: 35%;
+	width: 100%;
+	text-align: center;
+	font-family: "Comic Sans MS";
+	font-weight: bold;
+	font-size: 4em;
+	margin-left: auto;
+	margin-right: auto;
+	
+	text-shadow: #D1F 0 0 1px, white 0 -1px 2px, white 0 -3px 2px, rgba(0, 0, 0, 0.8) 0 30px 25px;
+	color: transparent;
+}
+
+
+
+/* */
 .ui-content {
 	padding:0px 15px 0px 15px !important;	
 }
@@ -139,7 +255,7 @@ body {
 
 
 .hidden {
-	display:none;	
+	display:none !important;
 }
 
 .bold {

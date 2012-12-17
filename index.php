@@ -231,8 +231,8 @@ Did You Know?
     
     
         <footer id="footer">
-            <form id="fPrompt" autocomplete="on" autocorrect="on" >
-            <input type="text" id="prompt" autocomplete="on" autocorrect="on" />
+            <form id="fPrompt" >
+            <input type="text" id="prompt" autocomplete="off" />
             </form>
         </footer>
     </div>

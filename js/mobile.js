@@ -87,25 +87,32 @@ var _body=null,
 		});
 		
 
-		Terminal.hideBody=(function(){
-			_console=document.getElementById('console');
-			_hide=function(){
-				_console.style.display='none';
-			};
-			return _hide;
-		}());
-		
-		Terminal.showBody=(function(){
-			_console=document.getElementById('console');
-			_show=function(){
-				_console.style.display='';
-			};
-			return _show;
-		}());
+			if (settings.hideBodyOnMessage) {
+				Terminal.hideBody=(function(){
+					_console=document.getElementById('console');
+					_hide=function(){
+						_console.style.display='none';
+					};
+					return _hide;
+				}());
+				
+				Terminal.showBody=(function(){
+					_console=document.getElementById('console');
+					_show=function(){
+						_console.style.display='';
+					};
+					return _show;
+				}());
+			} else {
+				Terminal.hideBody=(function(){ });
+				Terminal.showBody=(function(){ });
+			}
 		
 		Terminal.removeChannelWin=(function(chanid) { });
 		Terminal.removeChannelWins=(function(chanid) { });
 		
+		// commented out in favour of placing WITHIN pageinit
+		// Terminal.hk_swapChannel_pre =(function(chanid,slideLeft){ try { console.log('current chanid: '+client.getActiveChanID()); if (slideLeft) chanSlider.slideLeft(); else chanSlider.slideRight(); console.log(slideLeft); } catch(e){ }  });
 		Terminal.hk_swapChannel_post=(function(){ setTimeout(function(){ try { Terminal._headerFix.refresh(); } catch(e){ } },1500); });
 		
 		
@@ -518,8 +525,8 @@ var setupPage=(function(){
 		footer.className='ui-bar';
 		
 		var prompt=document.getElementById('prompt');
-		//prompt.setAttribute('autocorrect','on');
-		//prompt.setAttribute('autocomplete','on');
+		prompt.setAttribute('autocorrect','on');
+		prompt.setAttribute('autocomplete','on');
 		prompt.setAttribute('autocapitalize','sentences');
 		prompt.setAttribute('data-mini','true');
 		prompt.style.width='100%';
@@ -711,5 +718,214 @@ var MobDevice=(function(){
 	})();
 	return details;
 })();
+
+
+/**
+ * Channel Slider
+ * 
+ * Allows flicking between channels,
+ * Show dots on bottom to resemble number of channels present (they become visible which slider activated)
+ * Activate slider by flicking left/right
+ * Manual usage to call channel slider (eg. when leaving/joining channels)
+ ****/
+var chanSlider = (function(){
+	
+	/*
+	 * Ideas
+	 * * create a fragment div (with styles similar to #console); insert before/after console and reposition so that clone shows instead (then slide into view)
+	 */
+	
+	var interface={
+		slideLeft:null,
+		slideRight:null,
+	}, configs={
+		slideTime:1300,
+		bubbleFadeTime:400,
+		chanNameTimeToComeIn:600,
+		chanNameFadeTime:400,
+        
+        animateSlider:true,
+		testMode:false, // pauses after cloning (used for manual animation)
+	}, chanSliding=false, // Do NOT allow sliding when this is true
+	   chanBubbles=null;  // The bubbles which represent the channels
+		
+	/* 
+	 * NOTES
+	 *  * Deltas may be either positive or negative (one implies left, the other implies right)
+	 *
+	 *  TODO
+     *  * request testers w/ faster phones
+     *
+	 *  * better looking dots
+	 *  * make swipe settings easier 
+	 */
+	
+	var chanBubbles=$('<div/>').addClass('chan-bubbles').appendTo('body'),
+        chanName=$('<div/>').addClass('chan-name').appendTo('body'),
+	    updateChanBubbles=function(){
+
+			// Update the channels within the chan bubbles
+			chanBubbles.html('');
+			for (var i in client.channels) {
+				$('<div/>').addClass('chan-bubble').attr('chanid',i).appendTo(chanBubbles);
+			}
+		
+	},  cloneConsole=function(chanid){
+
+			// Create a clone of the current console-Channel
+			// Append the top 30 messages (so that you don't notice any difference)
+			var _clone = $('<div/>').addClass('console-clone').attr('id','console-clone'),
+				items = $('#console .chanitem.chanid-'+chanid).slice(-30);
+			for (var i=0; i<items.length; i++) {
+				$(_clone).append($(items[i]).clone(false));
+			}
+
+			return _clone;
+	},  cloneToLeft=function(chanid){
+
+			// Place clone to the LEFT of console
+			var width=Math.min($('#console').width(),$(window).width()),
+				height=$('#console').height(),
+				clone=cloneConsole(chanid);
+			$('#console').addClass('console-sliding').css({ width: width, height: height });
+			$(clone).css({ width: width, height: height, 'margin-left':0 }).insertBefore('#console');
+			$('#main').addClass('console-parent-slidemode');
+			return clone;
+	},  cloneToRight=function(chanid){
+
+			// Place clone to the RIGHT of console
+			var width=Math.min($('#console').width(),$(window).width()),
+				height=$('#console').height(),
+				// height=Math.min($('#console').height(),$(window).height()),
+				clone=cloneConsole(chanid);
+			$('#console').addClass('console-sliding').css({ width: width, height: height });
+			$(clone).css({ width: width, height: height }).insertAfter('#console');
+			$('#main').addClass('console-parent-slidemode');
+			return clone;
+	},  slide=function(toLeft) {
+		//
+		// Slide console (new channel) into place
+		/////////////////
+
+		if (chanSliding) return false;
+		chanSliding=true;
+		chanid=client._prevChanid;
+
+        if (configs.animateSlider) {
+			updateChanBubbles();
+            var clone=(toLeft?cloneToLeft(chanid):cloneToRight(chanid)).addClass('console-anim-slider'),
+                cons=$('#console'),
+                width=cons.width(),
+                selectedBubble=$('[chanid="'+chanid+'"]',chanBubbles).addClass('selected');
+
+            if (!toLeft) $(cons).css({ 'margin-left':-width }); // console to the left (to slide right)
+			if (configs.testMode)  {
+				window['clone']=clone;
+				window['cons']=cons;
+				window['width']=width;
+				return;
+			}
+            setTimeout(function(){ // we need a momentary pause in order for a DOM-refresh to update console.margin before adding in the animation class
+
+				if (!toLeft) $(cons).addClass('console-anim-slider');
+                chanBubbles.removeClass('hidden');
+
+				var toAnim=(toLeft?clone:cons);
+				$(toAnim).css({'margin-left':(toLeft?-width:0)});
+
+				setTimeout(function(){ // chan name updates half-way through the transition
+					chanName.text(client.activeChanRef.channame).removeClass('hidden');
+				}, configs.chanNameTimeToComeIn);
+
+				// slider is done via. CSS3; this is simply the callback routine
+				setTimeout(function(){
+                    clone.remove();
+                    $('#console').removeClass('console-sliding').removeClass('console-anim-slider').css({ width: '', height: '' });
+                    $('#main').removeClass('console-parent-slidemode');
+
+
+                    chanBubbles.animate({
+                        'opacity':0
+                    }, configs.bubbleFadeTime, function(){
+                        chanBubbles.addClass('hidden').css({'opacity':''});
+                    });
+
+
+                    chanName.animate({
+                        'opacity':0
+                    }, configs.chanNameFadeTime, function(){
+                        chanName.addClass('hidden').css({'opacity':''});
+                    });
+
+
+                    selectedBubble.removeClass('selected');
+                    $('[chanid="'+chanid+'"]',chanBubbles).addClass('selected');
+                    chanSliding=false;
+				}, configs.slideTime);
+            },0);
+        } else {
+            $('[chanid="'+chanid+'"]',chanBubbles).addClass('selected');
+
+
+            chanBubbles.removeClass('hidden');
+            chanBubbles.animate({
+                'opacity':0
+            }, configs.bubbleFadeTime, function(){
+                chanBubbles.addClass('hidden').css({'opacity':''});
+            });
+
+
+            chanName.animate({
+                'opacity':0
+            }, configs.chanNameFadeTime, function(){
+                chanName.addClass('hidden').css({'opacity':''});
+            });
+
+
+            chanSliding=false;
+        }
+    };
+
+	interface.slideLeft = function() {
+        slide(true);
+	};
+
+
+	interface.slideRight = function() {
+        slide(false);
+	};
+
+	
+	$(document).bind('pageinit',function(){
+			
+		$('#console').bind('swipeleft',function(e) {
+			Terminal.swapChannel(getChanIDFromOffset(1),true);
+		});
+
+
+		$('#console').bind('swiperight',function(e) {
+			Terminal.swapChannel(getChanIDFromOffset(-1),false);
+		});
+
+		// NOTE: issue with swapping channel while page isn't fully initialized
+		setTimeout(function(){
+			Terminal.hk_swapChannel_pre =(function(chanid,slideLeft){
+				chanid=client._prevChanid;
+				console.log('switching from channel: '+chanid);
+				// setTimeout(function(){
+					try {
+						if (slideLeft) chanSlider.slideLeft();
+						else chanSlider.slideRight();
+
+
+					} catch(e){ }
+				// },0); 
+			});
+		},2500);
+	});
+
+	return interface;
+}());
+
 
 client.initialize();

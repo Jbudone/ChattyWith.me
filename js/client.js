@@ -14,6 +14,8 @@ var settings=(function(){
 		longpollTimeout:40000,
 		minPingTimeoutsToDisconnect:10,
 		maxTimeSinceLastPingToDisconnect:125*1000,
+
+		hideBodyOnMessage:false, // NOTE: great for groups of messages; otherwise it can get buggy in windows with lots of messages already
 		
 		checkIfActiveTimer:100, // checks if page is still active (eg. laptop lid closed)
 		
@@ -155,6 +157,7 @@ var client={
 						// channel/msgid here, while hiding it from client.channels --
 						// this ultimately allows us to continue the longpoll properly
 	activeChanRef: null,
+	_prevChanid: null, // used for effects and stuff, when the chanid changes before we're done with it
 	initialReconnect: false,  // Send a longpoll initially to allow any reconnection (o/w wait until we explicitly join a channel)
 	
 	
@@ -164,6 +167,7 @@ var client={
 		this.call_hook(this.hk_initialize_pre);
 		
 		this.activeChanRef=this.channels[0];
+		this._prevChanid=this.channels[0].chanid;
 		
 		// Parse the Events (#_events)
 		lEvents=$('#_events');
@@ -1133,6 +1137,7 @@ var Terminal=(function(){
 		
 		
 		interface.swapChannel=(function(chanid,leftTransition) {
+			client._prevChanid=client.activeChanRef.chanid;
 			if (typeof interface.hk_swapChannel_pre=='function') interface.hk_swapChannel_pre.apply(this,[chanid,leftTransition]);
 			client.activeChanRef=client.channels[chanid];
 			
@@ -1184,12 +1189,17 @@ var Terminal=(function(){
 					}
 					setTimeout(findElement,reSearchTimer);
 				});
-			interface.hideBody=(function(){
-				_console.style.display='none';
-			});
-			interface.showBody=(function(){
-				_console.style.display='';
-			});
+			if (settings.hideBodyOnMessage) {
+				interface.hideBody=(function(){
+					_console.style.display='none';
+				});
+				interface.showBody=(function(){
+					_console.style.display='';
+				});
+			} else {
+				interface.hideBody=(function(){ });
+				interface.showBody=(function(){ });
+			}
 			findElement();
 		}());
 		

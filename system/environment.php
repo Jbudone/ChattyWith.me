@@ -35,7 +35,7 @@
 	////////////////////
 	
 	$localEnv = array('LOCAL' => array('jb'));
-	$onlineEnv = array('ONLINE' => array('lion-o',));
+	$onlineEnv = array('ONLINE' => array('lunenburg',));
 	$environments = array($localEnv, $onlineEnv);
 	$defaultEnvironment = 'LOCAL';
 	$environment = array();
