@@ -33,10 +33,10 @@
 
 	// 
 	// ..........
-	$kMAX_PINGTIME=date("Y-m-d H:i:s",strtotime("1 minute ago"));		// Max time since last ping before logging out user
-	$kMAX_WHISPERTIME=date("Y-m-d H:i:s",strtotime("1 month ago"));		// Max time for whispers to stay in db
-	$kMAX_CLEARTIME=date("Y-m-d H:i:s",strtotime("2 minutes ago"));		// Max time before clearing out auto-clear channels
-	$kMAX_RECONNECTTIME=date("Y-m-d H:i:s",strtotime("1 hour ago"));	// Max time before clearing the user/chan from `disconnects`
+	$kMAX_PINGTIME      = "1 MINUTE"; // Max time since last ping before logging out user
+	$kMAX_WHISPERTIME   = "1 MONTH";  // Max time for whispers to stay in db
+	$kMAX_CLEARTIME     = "2 MINUTE"; // Max time before clearing out auto-clear channels
+	$kMAX_RECONNECTTIME = "1 HOUR";   // Max time before clearing the user/chan from `disconnects`
 	
 	$kNEUTRAL_MODE=FALSE; // TRUE to NOT garbage collect anything, but instead cry out the queries
 	
@@ -54,7 +54,7 @@ $mysqli=getMySQLIi();
 //  D/C delayed users
 /////////////
 
-if (!$result=$mysqli->query(sprintf("SELECT userchan.chanid, userchan.userid, users.nick FROM `userchan` JOIN `users` ON userchan.userid=users.id WHERE userchan.ping<'%s'",$kMAX_PINGTIME))) {
+if (!$result=$mysqli->query(sprintf("SELECT userchan.chanid, userchan.userid, users.nick FROM `userchan` JOIN `users` ON userchan.userid=users.id WHERE userchan.ping<(NOW() + INTERVAL -%s)",$kMAX_PINGTIME))) {
 	// Error	
 	$err=sprintf("Error finding dc/d users: %s",$mysqli->error);
 	echo '<b>'.$err.'</b>';
@@ -135,7 +135,7 @@ if ($result->num_rows) {
 //  Remove users/channels from `disconnects`
 /////////////
 
-if (!$kNEUTRAL_MODE and !$result=$mysqli->query(sprintf("DELETE FROM `disconnects` WHERE timestamp<'%s'",$kMAX_RECONNECTTIME))) {
+if (!$kNEUTRAL_MODE and !$result=$mysqli->query(sprintf("DELETE FROM `disconnects` WHERE timestamp<(NOW() + INTERVAL -%s)",$kMAX_RECONNECTTIME))) {
 	// Error
 	$err=sprintf("Error removing disconnects: %s",$mysqli->error);
 	echo '<b>'.$err.'</b>';
@@ -151,7 +151,7 @@ if (!$kNEUTRAL_MODE and !$result=$mysqli->query(sprintf("DELETE FROM `disconnect
 //  Remove Expired Whispers
 ////////////
 
-if (!$kNEUTRAL_MODE and !$result=$mysqli->query(sprintf("DELETE FROM `whispers` WHERE timestamp<'%s'",$kMAX_WHISPERTIME))) {
+if (!$kNEUTRAL_MODE and !$result=$mysqli->query(sprintf("DELETE FROM `whispers` WHERE timestamp<(NOW() + INTERVAL -%s)",$kMAX_WHISPERTIME))) {
 	// Error	
 	$err=sprintf("Error removing whispers: %s",$mysqli->error);
 	echo '<b>'.$err.'</b>';
@@ -181,7 +181,7 @@ if (!$result=$mysqli->query("SELECT id FROM `channels` WHERE autoclear=1")) {
 			array_push($deleteMe,$row['id']);	
 		}
 		if (!empty($deleteMe)) {
-			$query=sprintf("DELETE FROM `logs` WHERE timestamp<'%s' AND chanid IN (",$kMAX_CLEARTIME);
+			$query=sprintf("DELETE FROM `logs` WHERE timestamp<(NOW() + INTERVAL -%s) AND chanid IN (",$kMAX_CLEARTIME);
 			foreach($deleteMe as $chanid) {
 				$query.=$chanid.',';	
 			}
