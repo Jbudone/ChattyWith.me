@@ -5,7 +5,7 @@
 	//
 	// Configurations (testing)
 	////////////////////
-	$TESTING_MODE=FALSE; // set to TRUE to use non-minified css and js files
+	$TESTING_MODE=TRUE; // set to TRUE to use non-minified css and js files
 	$MOBILE_MODE=FALSE;
 	$MOBILE_LOADING=FALSE;
 	
@@ -78,6 +78,13 @@ Portal: www.jbud.me
    * (mobile) Scroll to bottom on init (note we MUST scroll to 0,1 first to hide address bar on LOAD)
    * Attempts to load older messages on channels with no older messages
    * Still receives messages from channels when you're not inside them
+   * (desktop) double prints welcome message
+   * (desktop) resize window still shows userlist (bring up top?)
+   * (desktop) doesnt properly place hover over chan0
+   * (desktop) chanhover shows all autojoin's as green
+   * fix ping display (<0ms?)
+   * message too long
+   * /help
    
    ### TODO
    *** Messages Waiting
@@ -96,6 +103,13 @@ Portal: www.jbud.me
    * W3c Validity
    * Manually cache PHP files?
    * JS "use strict"
+   * Cache Longpolling.php & requests.php
+   * Autocomplete
+   * CREATE fragment, and set to RETURN fragment pieces in each buildMessage routine (in longpoll), hence no body.display=none needed
+   * MOBILE: show header, swipe between channels, double tap for channel info + users + options, channel list
+   * brighten up colours (no maroon or black background); arial font?
+   * circle-gesture on mobile to convert all letters to symbols (elven? dwarven? different alphabet based off theme?)
+   * battery status API for mobile -- adapt to battery.level && !battery.charing
    
    
    ### Bugs - Unable to Reproduce
@@ -175,7 +189,7 @@ Portal: www.jbud.me
    * Garbage collector to automatically call the next garbage collector instance (in ~30 seconds, through terminal); use CRON as a regular checker that things are still going
    * Improve IE Sucks page (show clippy!)
    * Anti-porn scanner (for sending picture-messages)
-   * Link to chattywith.me/#lolchan to auto connect (as random nick) and join #lolchan
+   * Link to chattywith.me/#lolchan to auto connect (as random nick) and join #lolchan 
    * Submit code to be compiled by LLVM/Clang, run in a Sandbox (given certain permissions for safety reasons), and its output displayed in a little box
    
    

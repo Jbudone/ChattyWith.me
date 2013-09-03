@@ -9,3 +9,6 @@ system/secret/
 *.sw[op]
 *.wav
 *.mp3
+tags
+logo-datasrc
+?

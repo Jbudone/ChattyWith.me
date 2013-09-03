@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(0);
     $JSON=array();
     $timeReceived=microtime(TRUE); // Time since UNIX EPOCH (Jan 1 1970 0:00:00:00 GMT)
 	$JSON['timeReceived']=$timeReceived;

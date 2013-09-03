@@ -34,7 +34,7 @@
 	///  ENVIRONMENTS
 	////////////////////
 	
-	$localEnv = array('LOCAL' => array('jb'));
+	$localEnv = array('LOCAL' => array('jb','jb-pc'));
 	$onlineEnv = array('ONLINE' => array('lunenburg',));
 	$environments = array($localEnv, $onlineEnv);
 	$defaultEnvironment = 'LOCAL';
