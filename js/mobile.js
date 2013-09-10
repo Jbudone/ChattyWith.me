@@ -54,7 +54,9 @@ var _body=null,
 			else if (type.match(/event/)) { details.container=['ui-link']; details.time=['hidden']; }
 			else { }
 			
-			if (type.match(/self/)) { details.container=details.user=['message-self','bold']; }
+			if (type.match(/self/)) { details.container=details.user=['mob-message-self','bold']; }
+			else if (type.match(/message/)) { details.container=details.user=['mob-message-friend']; }
+
 			if (type.match(/old/)) { details.container=['message-old']; }
 			return details;
 		});
