@@ -663,6 +663,9 @@ window['console'].log('auto_ping_cb:: error without data.error');
 		Terminal.print_whisper(evt.arguments,false);
 		Terminal.scrollToBottom();
 	},
+	hevt_friend:function(evt,data){
+		Terminal.stealthMode(false);
+	},
 	hsrv_join:function(){
 		this.call_hook(client.hk_user_joined_pre,this.arguments);
 		var chanid=this.arguments.chanid;
@@ -903,6 +906,11 @@ var Event=(function(){
 						this.call_hook(hk_event_parsed_bad_format,{string:string,command:command,event:this.evtref});
 						return false;
 					}
+				} else {
+					// Execute Command?
+					if (this.evtref.flags&EFLG_EXECUTE)
+						this.execute();	
+					return false;
 				}
 			} else {
 				// Could not find matching Command
@@ -1086,9 +1094,12 @@ var Terminal=(function(){
 		// CSS Hacks
 		hideBody:null, // For efficiency, hide the body BEFORE making changes to page
 		showBody:null,
+
+		stealthMode:null, // Switch Elven text on/off to hide
 	};
 	
 	(function(){
+		var busy_loading = false;
 		interface.print=(function(chanid,message,type,time,user,prepend,suspendEffects){
 			var msg=new Message(chanid,message,type,time,user,suspendEffects);
 			if (prepend) msg.prependTo('#console');
@@ -1137,6 +1148,7 @@ var Terminal=(function(){
 		
 		
 		interface.swapChannel=(function(chanid,leftTransition) {
+			busy_loading = true;
 			client._prevChanid=client.activeChanRef.chanid;
 			if (typeof interface.hk_swapChannel_pre=='function') interface.hk_swapChannel_pre.apply(this,[chanid,leftTransition]);
 			client.activeChanRef=client.channels[chanid];
@@ -1160,7 +1172,7 @@ var Terminal=(function(){
 			} catch(e) { }
 			setTimeout((function(){	interface.resizePage(); interface.scrollToBottom(true); }), 200);
 			if (typeof interface.hk_swapChannel_post=='function') interface.hk_swapChannel_post.apply(this,[chanid,leftTransition]);
-			
+			busy_loading = false;
 		});
 		
 		interface.removeChannel=(function(chanid) {
@@ -1175,7 +1187,13 @@ var Terminal=(function(){
 		interface.closeChannelWin=(function(){});
 		interface.scrollToBottom=(function(){});
 		interface.resizePage=(function(){});
-		
+
+
+		interface.stealthMode=(function(enable){
+			if (enable) $('#console').addClass('stealth');
+			else $('#console').removeClass('stealth');
+		});
+
 		
 		// CSS Hack to hide/show the console before and after making changes
 		(function(){
@@ -1213,6 +1231,7 @@ var Terminal=(function(){
 			_client=client;
 			
 			details.load=(function(callback){
+				if (busy_loading) return;
 				if (_client.activeChanRef.chanid==0) return;
 				(new Event()).fromObject({ eventid:'ECMD_RETRIEVEOLD', maxmsgid:(_client.activeChanRef.minmsgid), chanid:(_client.activeChanRef.chanid) }).request(callback);
 			});

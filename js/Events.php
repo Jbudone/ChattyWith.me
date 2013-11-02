@@ -38,6 +38,7 @@ echo <<<EOF
 		ECMD_WHOIS=0x13,
 		ECMD_PINGCHAN=0x14,
 		ECMD_WHISPER=0x15,
+		ECMD_FRIEND=0x16,
 		_x;	
 		
 		
@@ -339,6 +340,13 @@ echo <<<EOF
 									hSuccess:client.hevt_whisper,
 									hooks:new evt_hooks(),
 									flags:0x00 },
+				  ECMD_FRIEND:{		_eventid:ECMD_FRIEND,
+				  					name:['friend'],
+									request:'friend',
+									help:'/friend -- Remove stealth mode on console',
+									hSuccess:client.hevt_friend,
+									hooks:new evt_hooks(),
+									flags:EFLG_EXECUTE },
 		},
 		
 		

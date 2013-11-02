@@ -1,4 +1,8 @@
 /* CSS Document */
+@font-face {
+  font-family: 'Elven';
+  src: url('fonts/elven/tngani.ttf');
+}
 
 body {
 	margin:0;
@@ -23,6 +27,14 @@ body {
 	white-space:pre-wrap;
 	word-wrap:break-word;
 
+}
+
+#console.stealth {
+	font-family:Elven;
+}
+
+#console.stealth img {
+	display:none;
 }
 
 /* (mobile)  swipe-to-slide channels */
@@ -140,7 +152,7 @@ body {
 
 /* */
 .ui-content {
-	padding:0px 15px 0px 15px !important;	
+	padding:0px 15px 10px 15px !important;	
 }
 
 #fPrompt {
@@ -184,8 +196,16 @@ body {
 
 
 #header {
-	position:absolute;
+	position:static;
+	top:0px;
+	left:0px;
 	width:100%;	
+	display:none;
+}
+
+.ui-footer {
+	background: #200009 !important;
+	border: #260009;
 }
 
 
@@ -245,15 +265,15 @@ body {
 :not(.message-old).mob-message-self:not(.msg-user) {
 	/* TODO: whatsapp style mesages */
 	background: #F6FFF2;
-	width: 300px;
+	width: 50%;
 	font-size: 13px;
 	border: thin solid #B4DBA2;
 	padding: 2px 8px;
-	margin-left: 70%;
+	margin-left: 45%;
 	margin-top: 6px;
 	font-weight: normal !important;
 	font-family: Arial;
-	font-size: 12px;
+	font-size: 16px;
 	border-radius: 3px;
 	color:#000;
 }
@@ -288,7 +308,7 @@ body {
 	margin-top: 6px;
 	font-weight: normal !important;
 	font-family: Arial;
-	font-size: 12px;
+	font-size: 16px;
 	border-radius: 3px;
 	color:#000;
 }

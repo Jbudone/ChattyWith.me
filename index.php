@@ -5,7 +5,7 @@
 	//
 	// Configurations (testing)
 	////////////////////
-	$TESTING_MODE=TRUE; // set to TRUE to use non-minified css and js files
+	$TESTING_MODE=FALSE; // set to TRUE to use non-minified css and js files
 	$MOBILE_MODE=FALSE;
 	$MOBILE_LOADING=FALSE;
 	

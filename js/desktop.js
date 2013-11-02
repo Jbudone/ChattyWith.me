@@ -1264,6 +1264,79 @@ var setupPage=(function(){
 		// TODO
 		
 	});
+
+	/* Stealth Mode
+	 *
+	 * Shaking the window violently enables stealth mode (change font)
+	 **/
+	var stealthMode=(function(){
+		// (x,y) - (x',y') must switch between positive and negative 
+		// 	within a certain time (for each sign) to meet the shake
+		// 	requirements
+		var configs = {
+			minThresholdOffset:50, // minimum x/y offset before considering it a new point
+			maxDelayBeforeResult:600, // maximum wait before resetting the shake count
+			checkShakeTimerWhileInactive:500,
+			checkShakeTimer:100,
+			minCountToShake:6, // minimum number of times to switch between +/- offset before shake
+		}, interface = {
+
+		}, x, y, onPositive, resetShakeCount, shakeCount, resetTimeout,
+		shake = function(){
+			Terminal.stealthMode(true);
+			Terminal.scrollToBottom(true);
+		}, resetShake = function(){
+			// if the previous shake count is the same as now, then reset
+			// NOTE: shakeCount could have been reset elsewhere (already succeeded)
+			if (shakeCount<=resetShakeCount) {
+				shakeCount=0;
+				resetShakeCount=0;
+				return;
+			}
+			resetShakeCount=shakeCount;
+			resetTimeout = setTimeout(resetShake, configs.maxDelayBeforeResult);
+		}, checkShake = function(){
+			if (shakeCount == 0) {
+				// start onPositive or not.. no biggie
+				if ((Math.abs(window.screenX-x)>configs.minThresholdOffset && (onPositive = (window.screenX-x>0) || true)) ||
+					(Math.abs(window.screenY-y)>configs.minThresholdOffset && (onPositive = (window.screenY-y>0) || true))) {
+					x = window.screenX;
+					y = window.screenY;
+					++shakeCount;
+					resetTimeout = setTimeout(resetShake, configs.maxDelayBeforeResult);
+				}
+			} else {
+				if ( ((onPositive?1:-1) * (x-window.screenX) > configs.minThresholdOffset) ||
+					 ((onPositive?1:-1) * (y-window.screenY) > configs.minThresholdOffset) ) {
+						// switch between positive/negative offset
+						clearTimeout(resetTimeout);
+						onPositive=!onPositive;
+						x = window.screenX;
+						y = window.screenY;
+						++shakeCount;
+						resetTimeout = setTimeout(resetShake, configs.maxDelayBeforeResult);
+				 }
+
+				if (shakeCount >= configs.minCountToShake) {
+					clearTimeout(resetTimeout);
+					shakeCount=0;
+					resetShakeCount=0;
+					shake();
+				}
+			}
+
+			if (shakeCount > 0) setTimeout(checkShake, configs.checkShakeTimer);
+			else setTimeout(checkShake, configs.checkShakeTimerWhileInactive);
+		};
+
+		x = window.screenX;
+		y = window.screenY;
+		shakeCount = 0;
+
+		setTimeout(checkShake, configs.checkShakeTimerWhileInactive);
+
+		return interface;
+	}());
 	
 	var tranformPage=(function(){
 		// Transformations and Mutations of the Page here

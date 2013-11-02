@@ -21,9 +21,9 @@ var _body=null,
 			
 			var use_unstable_jquery=true,
 				kJQUERY_STABLE_SOURCE='http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.js',
-				kJQUERY_UNSTABLE_SOURCE='http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.js',
+				kJQUERY_UNSTABLE_SOURCE='http://code.jquery.com/mobile/1.4.0-beta.1/jquery.mobile-1.4.0-beta.1.min.js',
 				kJQUERY_STABLE_CSS='http://code.jquery.com/mobile/1.1.0/jquery.mobile-1.1.0.min.css',
-				kJQUERY_UNSTABLE_CSS='http://code.jquery.com/mobile/1.2.0/jquery.mobile-1.2.0.min.css';
+				kJQUERY_UNSTABLE_CSS='http://code.jquery.com/mobile/1.4.0-beta.1/jquery.mobile-1.4.0-beta.1.min.css';
 				
 			
 			configs.use_unstable_jquery=use_unstable_jquery;
@@ -31,7 +31,7 @@ var _body=null,
 			configs.jquery_mob_css=(use_unstable_jquery==true?kJQUERY_UNSTABLE_CSS:kJQUERY_STABLE_CSS);
 			
 			// TESTING AUTOCORRECT ERROR IN JQUERY MOBILE JS
-			configs.jquery_mob_src="js/jquery.mobile-1.2.0.js";
+			// configs.jquery_mob_src="js/jquery.mobile-1.2.0.js";
 		}(settings));
 		
 		
@@ -64,7 +64,7 @@ var _body=null,
 		
 		Terminal.scrollToBottom=(function(){
 			var kTHRESHOLD_TO_AUTOSCROLL=250, // Don't forget to add predicted size of appended content
-				kTIMEOUT_AUTOSCROLL=0, // Slight lag in reflow; 150 appears safe, 100 is too fast for the reflow (tries to scroll before page is reflowed)
+				kTIMEOUT_AUTOSCROLL=150, // Slight lag in reflow; 150 appears safe, 100 is too fast for the reflow (tries to scroll before page is reflowed)
 				kAUTOSCROLL_SAFEGUARD=0, // To safely reach the bottom, scroll this extra amount (document.body.scrollHeight is always off slightly)
 				fScroll=function(forceToBottom){
 					// Check to Scroll
@@ -72,7 +72,6 @@ var _body=null,
 						setTimeout(function(){
 							window.scrollTo(0,(document.body.scrollHeight+kAUTOSCROLL_SAFEGUARD));
 							//try { JQueryMobWrap.showToolbars(); } catch(e) { }
-
 						},kTIMEOUT_AUTOSCROLL);
 					}
 					//else
@@ -227,7 +226,7 @@ var setupPage=(function(){
 		hk_server_event_prepend_message=(function(){ Terminal.print_message(this.arguments.chanid,this.arguments,true,false); });
 		hk_server_event_append_whisper=(function(){ Terminal.print_message(null,this.arguments,false,false); });
 		hk_server_event_append_log=(function(evt,args){ Terminal.print(client.activeChanRef.chanid,args['message'],args['type']); Terminal.scrollToBottom(true); });
-		hk_server_event_add_messages_completed=(function(){ Terminal.scrollToBottom(); });
+		hk_server_event_add_messages_completed=(function(){ Terminal.scrollToBottom(); setTimeout(Terminal.scrollToBottom, 800); });
 		
 		hk_server_event_from_undefined_event=(function(){ }); // Received unknown event from server
 		hk_event_request_from_undefined_event=(function(){ Terminal.print(client.activeChanRef.chanid,"We're not exactly sure what you're trying to do.. ^o)",'error'); Terminal.scrollToBottom(); }); // Unknown Request made
@@ -253,7 +252,6 @@ var setupPage=(function(){
 	});
 	
 	var setupLayout=(function(){
-		return;
 		var header=$('<div/>').attr({'id':'header','data-theme':'a','data-role':'header','data-position':'fixed','data-fullscreen':'true'}).addClass('ui-header-fixed');
 		var ctrlGroupLeft=$('<div/>').attr({id:'header_button_group_left','data-role':'controlgroup','data-type':'horizontal','data-inline':'true'}).addClass('ui-btn-left');
 		var ctrlGroupRight=$('<div/>').attr({id:'header_button_group_right','data-role':'controlgroup','data-type':'horizontal','data-inline':'true'}).addClass('ui-btn-right');
@@ -746,8 +744,9 @@ var chanSlider = (function(){
 		chanNameTimeToComeIn:600,
 		chanNameFadeTime:400,
         
-        animateSlider:true,
+        animateSlider:false,
 		testMode:false, // pauses after cloning (used for manual animation)
+		swipeThreshold:200,
 	}, chanSliding=false, // Do NOT allow sliding when this is true
 	   chanBubbles=null;  // The bubbles which represent the channels
 		
@@ -868,7 +867,6 @@ var chanSlider = (function(){
         } else {
             $('[chanid="'+chanid+'"]',chanBubbles).addClass('selected');
 
-
             chanBubbles.removeClass('hidden');
             chanBubbles.animate({
                 'opacity':0
@@ -900,6 +898,8 @@ var chanSlider = (function(){
 	
 	$(document).bind('pageinit',function(){
 			
+		$.event.special.swipe.scrollSupressionThreshold = 50;
+		$.event.special.swipe.horizontalDistanceThreshold = configs.swipeThreshold;
 		$('#console').bind('swipeleft',function(e) {
 			Terminal.swapChannel(getChanIDFromOffset(1),true);
 		});
@@ -912,6 +912,7 @@ var chanSlider = (function(){
 		// NOTE: issue with swapping channel while page isn't fully initialized
 		setTimeout(function(){
 			Terminal.hk_swapChannel_pre =(function(chanid,slideLeft){
+				$('#console').hide();
 				chanid=client._prevChanid;
 				console.log('switching from channel: '+chanid);
 				// setTimeout(function(){
@@ -923,11 +924,121 @@ var chanSlider = (function(){
 					} catch(e){ }
 				// },0); 
 			});
+			Terminal.hk_swapChannel_post = (function(chanid,slideLeft){
+
+				Terminal.scrollToBottom();
+				$('#console').show();
+				Terminal.scrollToBottom();
+			});
 		},2500);
 	});
 
 	return interface;
 }());
 
+/**
+ * Stealth Mode
+ * 
+ * Turn console into stealth mode (change font)
+ * code stolen from: http://stackoverflow.com/questions/4475219/detect-a-shake-in-ios-safari-with-javascript
+ ****/
+var stealthMode = (function(){
+	if (typeof window.DeviceMotionEvent != 'undefined') {
+
+		var configs = {
+			minThresholdOffset:12, // minimum x/y offset before considering it a new point
+			maxDelayBeforeResult:150, // maximum wait before resetting the shake count
+			checkShakeTimerWhileInactive:500,
+			checkShakeTimer:60,
+			minCountToShake:5, // minimum number of times to switch between +/- offset before shake
+		}, interface = {
+
+		}, x, y, z, x1, y1, z1, px, py, pz, cx, cy, cz,
+		resetShakeCount, shakeCount, resetTimeout,
+		shake = function() {
+			Terminal.stealthMode(true);
+			Terminal.scrollToBottom(true);
+		}, resetShake = function() {
+			// if the previous shake count is the same as now, then reset
+			// NOTE: shakeCount could have been reset elsewhere (already succeeded)
+			if (shakeCount<=resetShakeCount) {
+				shakeCount=0;
+				resetShakeCount=0;
+				return;
+			}
+			resetShakeCount=shakeCount;
+			resetTimeout = setTimeout(resetShake, configs.maxDelayBeforeResult);
+		}, checkShake = function() {
+			if ((Math.abs(x1-x)>configs.minThresholdOffset &&
+					(shakeCount==0||px!=(x1>x)) &&
+					(px=(x1>x)||true) && (x=x1||true) && ++cx) ||
+				(Math.abs(y1-y)>configs.minThresholdOffset &&
+					(shakeCount==0||py!=(y1>y)) &&
+					(py=(y1>y)||true) && (y=y1||true) && ++cy) ||
+				(Math.abs(z1-z)>configs.minThresholdOffset &&
+					(shakeCount==0||pz!=(z1>z)) &&
+					(pz=(z1>z)||true) && (z=z1||true) && ++cz)) {
+				// switched between positive/negative offset for one of the axis
+				clearTimeout(resetTimeout);
+				shakeCount = Math.max(shakeCount, cx, cy, cz);
+						console.log("switching positive/negative: "+shakeCount);
+				resetTimeout = setTimeout(resetShake, configs.maxDelayBeforeResult);
+
+				if (shakeCount >= configs.minCountToShake) {
+					clearTimeout(resetTimeout);
+					shakeCount=0;
+					resetShakeCount=0;
+					shake();
+					setTimeout(checkShake, configs.checkShakeTimerWhileInactive);
+
+				}
+			}
+
+
+			if (shakeCount > 0) setTimeout(checkShake, configs.checkShakeTimer);
+			else setTimeout(checkShake, configs.checkShakeTimerWhileInactive);
+		};
+
+		window.addEventListener('devicemotion', function (e) {
+			x1 = e.accelerationIncludingGravity.x;
+			y1 = e.accelerationIncludingGravity.y;
+			z1 = e.accelerationIncludingGravity.z;
+		}, false);
+
+		x = 0; y = 0; z = 0;
+		x1 = 0; y1 = 0; z1 = 0;
+		cx = 0; cy = 0; cz = 0;
+		shakeCount = 0;
+
+		setTimeout(checkShake, configs.checkShakeTimerWhileInactive);
+		return interface;
+
+
+
+
+		// Shake sensitivity (a lower number is more)
+		var sensitivity = 50;
+
+		// Position variables
+		var x1 = 0, y1 = 0, z1 = 0, x2 = 0, y2 = 0, z2 = 0;
+
+		// Listen to motion events and update the position
+
+		// Periodically check the position and fire
+		// if the change is greater than the sensitivity
+		setInterval(function () {
+			var change = Math.abs(x1-x2+y1-y2+z1-z2);
+
+			if (change > sensitivity) {
+				Terminal.stealthMode(true);
+			}
+
+			// Update new position
+			x2 = x1;
+			y2 = y1;
+			z2 = z1;
+		}, 250);
+	}
+}());
 
 client.initialize();
