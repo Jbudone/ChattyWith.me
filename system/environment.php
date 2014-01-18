@@ -34,7 +34,7 @@
 	///  ENVIRONMENTS
 	////////////////////
 	
-	$localEnv = array('LOCAL' => array('jb','jb-pc'));
+	$localEnv = array('LOCAL' => array('jb','jb-pc','portable-jb'));
 	$onlineEnv = array('ONLINE' => array('lunenburg',));
 	$environments = array($localEnv, $onlineEnv);
 	$defaultEnvironment = 'LOCAL';
@@ -64,7 +64,8 @@
 	///  DIRECTORY STRUCTURE
 	////////////////////
 	
-	$environment['LOCAL']['DIRECTORY_ROOT']='J:\\JStuff\\Work\\Personal\\ChattyWithMe\\summit\\';
+	// $environment['LOCAL']['DIRECTORY_ROOT']='J:\\JStuff\\Work\\Personal\\ChattyWithMe\\summit\\';
+	$environment['LOCAL']['DIRECTORY_ROOT']='/home/jbud/jdrive/jstuff/work/personal/chattywithme/summit/';
 	$environment['ONLINE']['DIRECTORY_ROOT']='http://www.chattywith.me/';
 	$environment['LOCAL']['DIRECTORY_SYSTEM']=$environment['LOCAL']['DIRECTORY_ROOT'].'system';
 	$environment['ONLINE']['DIRECTORY_SYSTEM']=$environment['ONLINE']['DIRECTORY_ROOT'].'system';

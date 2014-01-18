@@ -907,10 +907,18 @@ var Event=(function(){
 						return false;
 					}
 				} else {
+
+					// Add argument chanid if necessary
+					if (this.evtref.flags&EFLG_APPENDCHANID) {
+						var chanid=client.getActiveChanID();	
+						this['chanid']=chanid;
+						this.arguments['chanid']=chanid;	
+					}
+
 					// Execute Command?
 					if (this.evtref.flags&EFLG_EXECUTE)
-						this.execute();	
-					return false;
+						this.execute(this.arguments);	
+					return this;
 				}
 			} else {
 				// Could not find matching Command
@@ -924,8 +932,8 @@ var Event=(function(){
 		
 		return this;
 	};
-	this.execute=function(){
-		this.call_hook(this.evtref.hSuccess);
+	this.execute=function(args){
+		this.call_hook(this.evtref.hSuccess,args);
 		return this;
 	};
 	this.request=function(callback){
@@ -1004,7 +1012,7 @@ var Message=(function(chanid,message,type,timestamp,user,suspendEffects){
 	replaceLinks=(function(message){
 		
 		// Replace Links
-		message=message.replace(/((https?:\/\/|(www\.))([\da-z\-\Q_.\E]+\.[a-z]+[a-z\d\-\Q_!.?=&%#*\/\E]*))/gi,"<a href='http://$3$4' target='_blank'>$1</a>");
+		message=message.replace(/((https?:\/\/|(www\.))([\da-z\-\Q_.\E]+\.[a-z]+[a-z\d\-\Q_!.?=&%#~:+*\/\E]*))/gi,"<a href='http://$3$4' target='_blank'>$1</a>");
 		return message;
 	});
 	
@@ -1190,8 +1198,17 @@ var Terminal=(function(){
 
 
 		interface.stealthMode=(function(enable){
-			if (enable) $('#console').addClass('stealth');
-			else $('#console').removeClass('stealth');
+			if (enable) {
+				$('body').addClass('stealth');
+				$('#console').addClass('stealth');
+				$('#rc-details-channame').addClass('stealth');
+				$('#rc-userlist .channel-user').addClass('stealth');
+			} else {
+				$('body').removeClass('stealth');
+				$('#console').removeClass('stealth');
+				$('#rc-details-channame').removeClass('stealth');
+				$('#rc-userlist .channel-user').removeClass('stealth');
+			}
 		});
 
 		

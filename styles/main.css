@@ -29,11 +29,15 @@ body {
 
 }
 
-#console.stealth {
-	font-family:Elven;
+.stealth {
+	font-family:Elven !important;
 }
 
-#console.stealth img {
+.stealth #channels {
+	display:none;
+}
+
+.stealth img {
 	display:none;
 }
 
@@ -263,7 +267,6 @@ body {
 
 /* SELF MESSAGES */
 :not(.message-old).mob-message-self:not(.msg-user) {
-	/* TODO: whatsapp style mesages */
 	background: #F6FFF2;
 	width: 50%;
 	font-size: 13px;
@@ -272,14 +275,13 @@ body {
 	margin-left: 45%;
 	margin-top: 6px;
 	font-weight: normal !important;
-	font-family: Arial;
+	/* font-family: Arial; */
 	font-size: 16px;
 	border-radius: 3px;
 	color:#000;
 }
 
 :not(.message-old).mob-message-self>.msg-time {
-	/* TODO: whatsapp style mesages */
 	position: absolute;
 	background: #92D2D6;
 	font-size: 10px;
@@ -291,7 +293,6 @@ body {
 }
 
 :not(.message-old).mob-message-self>.msg-user {
-	/* TODO: whatsapp style mesages */
 	display: none;
 }
 
@@ -299,7 +300,6 @@ body {
 
 /* PARTNER MESSAGES */
 :not(.message-old).mob-message-friend:not(.msg-user).chanitem {
-	/* TODO: whatsapp style mesages */
 	background: #FAFAF0;
 	width: 300px;
 	font-size: 13px;
@@ -307,14 +307,13 @@ body {
 	padding: 7px 8px 2px 8px;
 	margin-top: 6px;
 	font-weight: normal !important;
-	font-family: Arial;
+	/* font-family: Arial; */
 	font-size: 16px;
 	border-radius: 3px;
 	color:#000;
 }
 
 :not(.message-old).mob-message-friend.chanitem>.msg-time {
-	/* TODO: whatsapp style mesages */
 	background: #F3E6FC;
 	font-size: 10px;
 	font-weight: normal;
@@ -327,7 +326,6 @@ body {
 }
 
 :not(.message-old).mob-message-friend.chanitem>.msg-user {
-	/* TODO: whatsapp style mesages */
 	position: absolute;
 	margin-top: -17px;
 	background: #92D2D6;

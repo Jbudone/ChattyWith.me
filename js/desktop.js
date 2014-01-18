@@ -1144,8 +1144,14 @@ var setupPage=(function(){
 			beep.load();
 			// Load Settings from localStorage
 			if (typeof localStorage == 'object') {
-				if (localStorage.getItem('notification-sound')) settings.sounds=localStorage.getItem('notification-sound');
-				if (localStorage.getItem('notification-message')) settings.message=localStorage.getItem('notification-message');
+				if (localStorage.getItem('notification-sound')) {
+					play_sounds = localStorage.getItem('notification-sound');
+					settings.sounds = (play_sounds == "true");
+				}
+				if (localStorage.getItem('notification-message')) {
+					play_message = localStorage.getItem('notification-message');
+					settings.message = (play_message == "true");
+				}
 			}
 			
 			
@@ -1178,7 +1184,7 @@ var setupPage=(function(){
 			interface.notify=(function(){
 				// NOTE: If notifying is true, then only cause a sound/beep
 				
-				beep.play();
+				if (settings.sounds) beep.play();
 				if (notifying) return;
 				notifying=true;
 				flashStoredMessage=window.document.title;
