@@ -1,6 +1,6 @@
 # ChattyWith.me
 
-An AJAX take on IRC. 
+An AJAX approach to IRC. 
 
 How it works
 =============
@@ -23,16 +23,16 @@ Wishful TODO's
 
 index.php contains a full list of TODO's; these are only the higher priority TODO's
 
-> picture messages
-> channel settings on mobile
-> LaTex integration
-> show colour/emoticons in textbox
-> improve loading screen
-> themes
-> localization of time
-> IE page
-> newbie-friendly joins (as anonymous123)
-> link to channel: chattywith.me/#somechat
+	- picture messages
+	- channel settings on mobile
+	- LaTex integration
+	- show colour/emoticons in textbox
+	- improve loading screen
+	- themes
+	- localization of time
+	- IE page
+	- newbie-friendly joins (as anonymous123)
+	- link to channel: chattywith.me/#somechat
 
 Bugs
 ==============
